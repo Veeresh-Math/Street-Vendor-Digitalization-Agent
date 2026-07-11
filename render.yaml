@@ -1,0 +1,10 @@
+# Optional: Render service config (if you use Render's Blueprint import)
+# This file is not required for manual Render setup.
+
+services:
+  - type: web
+    name: street-vendor-digitalization-agent
+    env: docker
+    plan: free
+    autoDeploy: true
+
