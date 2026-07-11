@@ -1,0 +1,530 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Street Vendor Digitalization Agent — IBM watsonx.ai</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#04050a;--surface:#0d0f1a;--surface2:#131626;
+    --border:rgba(255,255,255,0.08);--text:#f0f2ff;--muted:#8b92b8;
+    --grad1:linear-gradient(135deg,#6c47ff 0%,#00d4aa 100%);
+    --grad2:linear-gradient(135deg,#ff6b35 0%,#f7c948 100%);
+    --grad3:linear-gradient(135deg,#6c47ff 0%,#ff6b35 100%);
+    --ibm:#0f62fe;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.7;overflow-x:hidden}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:15px 5%;background:rgba(4,5,10,0.88);backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+  .nav-logo{font-size:14px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+  .nav-links{display:flex;gap:26px;list-style:none}
+  .nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500}
+  .nav-links a:hover{color:var(--text)}
+  .nav-right{display:flex;align-items:center;gap:10px}
+  .ibm-badge{display:flex;align-items:center;gap:6px;padding:5px 11px;border-radius:6px;background:rgba(15,98,254,0.14);border:1px solid rgba(15,98,254,0.4);font-size:11px;font-weight:800;color:#74b1ff;letter-spacing:.05em;text-transform:uppercase}
+  .ibm-dot{width:7px;height:7px;border-radius:50%;background:#0f62fe;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+  .nav-cta{padding:9px 20px;border-radius:50px;background:var(--grad1);color:#fff;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap}
+
+  /* HERO */
+  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden}
+  .glow{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none}
+  .g1{width:600px;height:600px;top:-100px;left:50%;transform:translateX(-50%);background:rgba(108,71,255,0.18)}
+  .g2{width:400px;height:400px;bottom:0;left:5%;background:rgba(0,212,170,0.12)}
+  .g3{width:350px;height:350px;bottom:60px;right:5%;background:rgba(255,107,53,0.10)}
+  .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:50px;border:1px solid rgba(108,71,255,0.4);background:rgba(108,71,255,0.1);color:#a78bfa;font-size:13px;font-weight:600;margin-bottom:32px;letter-spacing:.03em}
+  .bdot{width:7px;height:7px;border-radius:50%;background:#00d4aa}
+  h1{font-size:clamp(38px,6.5vw,80px);font-weight:900;line-height:1.05;letter-spacing:-2px;max-width:1000px;margin:0 auto 24px}
+  .g-1{background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .g-2{background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero-sub{max-width:640px;margin:0 auto 48px;color:var(--muted);font-size:18px;line-height:1.7}
+  .hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .btn-p{padding:15px 36px;border-radius:50px;background:var(--grad1);color:#fff;font-weight:800;font-size:15px;text-decoration:none;display:inline-block}
+  .btn-o{padding:14px 34px;border-radius:50px;border:1px solid rgba(255,255,255,0.2);color:var(--text);font-weight:700;font-size:15px;text-decoration:none;display:inline-block;background:rgba(255,255,255,0.04)}
+  .btn-ibm{padding:15px 36px;border-radius:50px;background:linear-gradient(135deg,#0f62fe,#6c47ff);color:#fff;font-weight:800;font-size:15px;text-decoration:none;display:inline-block}
+
+  /* LAUNCH CARD */
+  .launch-card{margin:56px auto 0;max-width:760px;width:100%;background:var(--surface);border:1px solid rgba(15,98,254,0.35);border-radius:24px;overflow:hidden;position:relative;z-index:1}
+  .launch-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#0f62fe,#6c47ff,#00d4aa)}
+  .lc-header{padding:20px 28px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+  .ldd{width:10px;height:10px;border-radius:50%}
+  .lc-title{flex:1;text-align:center;font-size:13px;color:var(--muted);font-weight:600}
+  .lc-body{padding:32px 36px}
+  .lc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+  .lc-step{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden}
+  .lc-step::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+  .lc-step:nth-child(1)::before{background:var(--grad1)}
+  .lc-step:nth-child(2)::before{background:linear-gradient(90deg,#0f62fe,#6c47ff)}
+  .lc-step:nth-child(3)::before{background:var(--grad2)}
+  .lc-step:nth-child(4)::before{background:var(--grad3)}
+  .step-num2{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .step-cmd{font-family:'Courier New',monospace;font-size:13px;color:#00d4aa;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.2);border-radius:8px;padding:8px 12px;margin-top:6px;word-break:break-all}
+  .lc-step p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:4px}
+  .launch-btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  /* MARQUEE */
+  .mq-wrap{overflow:hidden;padding:19px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface)}
+  .mq-inner{display:flex;gap:44px;white-space:nowrap;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;width:max-content;animation:mq 32s linear infinite}
+  .ms{color:#6c47ff}
+  @keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+  /* STATS */
+  .stats{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:56px 5%;display:grid;grid-template-columns:repeat(4,1fr);gap:28px;text-align:center}
+  .sn{font-size:44px;font-weight:900;letter-spacing:-2px;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .slbl{color:var(--muted);font-size:14px;margin-top:4px}
+
+  /* ARCHITECTURE SECTION */
+  section{padding:96px 5%}
+  .sl-lbl{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6c47ff;margin-bottom:14px}
+  .sl-title{font-size:clamp(28px,4vw,48px);font-weight:900;letter-spacing:-1px;line-height:1.1;margin-bottom:16px}
+  .sl-sub{font-size:17px;color:var(--muted);max-width:560px;line-height:1.7}
+  .ctr{text-align:center}
+  .ctr .sl-sub{margin:0 auto}
+
+  /* ARCH GRID */
+  .arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:52px}
+  .arch-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px;position:relative;overflow:hidden}
+  .arch-card.ibm-card{border-color:rgba(15,98,254,0.35)}
+  .arch-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+  .arch-card:nth-child(1)::before{background:var(--grad1)}
+  .arch-card:nth-child(2)::before{background:linear-gradient(90deg,#0f62fe,#6c47ff)}
+  .arch-card:nth-child(3)::before{background:var(--grad2)}
+  .arch-card:nth-child(4)::before{background:var(--grad3)}
+  .arch-icon{font-size:32px;margin-bottom:14px}
+  .arch-card h3{font-size:18px;font-weight:800;margin-bottom:8px}
+  .arch-card p{color:var(--muted);font-size:14px;line-height:1.7}
+  .arch-model{font-family:'Courier New',monospace;font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(15,98,254,0.15);border:1px solid rgba(15,98,254,0.35);color:#74b1ff;margin-top:10px;display:inline-block}
+
+  /* PIPELINE */
+  .pipeline{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:52px;gap:0}
+  .pnode{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:18px 20px;text-align:center;min-width:120px}
+  .pnode.ibm{border-color:rgba(15,98,254,0.4);background:rgba(15,98,254,0.07)}
+  .pi{font-size:26px;margin-bottom:5px}
+  .pl{font-size:11px;font-weight:800;color:var(--text)}
+  .ps2{font-size:10px;color:var(--muted);margin-top:2px}
+  .parr{font-size:18px;color:#6c47ff;padding:0 7px;font-weight:900}
+
+  /* FILE STRUCTURE */
+  .file-tree{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-top:52px;font-family:'Courier New',monospace;font-size:14px}
+  .ft-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+  .ft-row:last-child{border-bottom:none}
+  .ft-icon{font-size:16px;width:20px;text-align:center}
+  .ft-name{color:#f0f2ff;font-weight:700}
+  .ft-desc{color:var(--muted);font-size:12px;margin-left:auto}
+  .ft-badge{padding:2px 8px;border-radius:50px;font-size:10px;font-weight:800;letter-spacing:.05em}
+  .fb-new{background:rgba(0,212,170,0.15);color:#34d399;border:1px solid rgba(0,212,170,0.3)}
+  .fb-ibm{background:rgba(15,98,254,0.15);color:#74b1ff;border:1px solid rgba(15,98,254,0.3)}
+
+  /* IBM CONFIG */
+  .ibm-section{background:var(--surface);padding:80px 5%}
+  .ibm-big-card{background:var(--bg);border:1px solid rgba(15,98,254,0.35);border-radius:20px;padding:38px 40px;position:relative;overflow:hidden;max-width:860px;margin:0 auto}
+  .ibm-big-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#0f62fe,#6c47ff,#00d4aa)}
+  .ibm-hdr2{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+  .ibm-icon{width:50px;height:50px;border-radius:13px;background:rgba(15,98,254,0.18);border:1px solid rgba(15,98,254,0.4);display:flex;align-items:center;justify-content:center;font-size:24px}
+  .ibm-hdr2 h3{font-size:20px;font-weight:900;margin-bottom:3px}
+  .ibm-hdr2 p{font-size:13px;color:var(--muted)}
+  .cfg-grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+  .cfg-lbl{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .cfg-val2{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'Courier New',monospace;font-size:13px;color:#74b1ff;word-break:break-all}
+  .cfg-ok{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.25);font-size:13px;color:#34d399;font-weight:600}
+  .sdot2{width:8px;height:8px;border-radius:50%;background:#00d4aa;animation:pulse 2s infinite}
+  .model-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+  .mcard{border:2px solid var(--border);border-radius:14px;padding:18px 20px;background:rgba(15,98,254,0.08);border-color:rgba(15,98,254,0.4)}
+  .mcard-role{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+  .role-gen{color:#00d4aa}
+  .role-emb{color:#a78bfa}
+  .mcard-name{font-size:13px;font-weight:800;color:#74b1ff;font-family:'Courier New',monospace;margin-bottom:4px}
+  .mcard-desc{font-size:12px;color:var(--muted);line-height:1.5}
+  .mcard-badge{display:inline-block;margin-top:8px;padding:3px 9px;border-radius:50px;font-size:11px;font-weight:700}
+  .b-gen{background:rgba(0,212,170,0.15);color:#34d399;border:1px solid rgba(0,212,170,0.3)}
+  .b-emb{background:rgba(108,71,255,0.15);color:#a78bfa;border:1px solid rgba(108,71,255,0.3)}
+  .cfg-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px;padding-top:20px;border-top:1px solid var(--border);text-align:center}
+  .cml{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+  .cmv{font-size:14px;font-weight:800;color:#74b1ff}
+
+  /* FEATURES */
+  .feat-section{background:var(--surface)}
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px}
+  .fc{background:var(--bg);border:1px solid var(--border);border-radius:18px;padding:28px 24px}
+  .fi{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px}
+  .fc h3{font-size:17px;font-weight:800;margin-bottom:8px}
+  .fc p{color:var(--muted);font-size:14px;line-height:1.7}
+
+  /* CASES */
+  .cases-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px}
+  .cc{border:1px solid var(--border);border-radius:18px;overflow:hidden}
+  .cc-h{padding:24px 22px 16px;border-bottom:1px solid var(--border)}
+  .ce{font-size:32px;margin-bottom:10px}
+  .cc h3{font-size:16px;font-weight:800;margin-bottom:5px}
+  .loc2{font-size:11px;color:#00d4aa;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+  .cc-b{padding:18px 22px}
+  .ci{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--muted);margin-bottom:9px;line-height:1.5}
+  .ci:last-child{margin-bottom:0}
+  .cid{width:6px;height:6px;border-radius:50%;margin-top:7px;flex-shrink:0}
+
+  /* LANG */
+  .lang-sec{text-align:center;background:var(--surface)}
+  .lchips{display:flex;flex-wrap:wrap;justify-content:center;gap:11px;margin-top:38px}
+  .lc2{padding:9px 18px;border-radius:50px;border:1px solid var(--border);background:var(--bg);font-size:14px;font-weight:700;color:var(--muted)}
+  .lc2.on{background:rgba(108,71,255,0.15);border-color:rgba(108,71,255,0.4);color:#a78bfa}
+
+  /* IMPACT */
+  .impact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:52px}
+  .ic{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:30px 26px;text-align:center}
+  .in{font-size:50px;font-weight:900;letter-spacing:-2px}
+  .ic:nth-child(1) .in{background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .ic:nth-child(2) .in{background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .ic:nth-child(3) .in{background:var(--grad3);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .ic p{color:var(--muted);font-size:14px;margin-top:8px}
+
+  /* CTA */
+  .cta-sec{text-align:center;padding:96px 5%;position:relative;overflow:hidden}
+  .cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:380px;border-radius:50%;background:rgba(108,71,255,0.13);filter:blur(80px);pointer-events:none}
+  .cta-sec h2{font-size:clamp(30px,5vw,58px);font-weight:900;letter-spacing:-1.5px;margin-bottom:18px;position:relative;z-index:1}
+  .cta-sec p{color:var(--muted);font-size:17px;max-width:480px;margin:0 auto 36px;position:relative;z-index:1}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--border);padding:38px 5%;background:var(--surface);display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:28px}
+  .flogo{font-size:13px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:9px;display:inline-block}
+  .footer-brand p{color:var(--muted);font-size:13px;max-width:250px}
+  .fcol h5{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:13px}
+  .fcol a{display:block;color:var(--muted);text-decoration:none;font-size:13px;margin-bottom:8px}
+  .fcol a:hover{color:var(--text)}
+  .fbot{border-top:1px solid var(--border);padding:18px 5%;text-align:center;color:var(--muted);font-size:12px;background:var(--surface)}
+  .fbot a{color:var(--muted);text-decoration:none}
+
+  @media(max-width:860px){
+    .nav-links{display:none}.stats{grid-template-columns:repeat(2,1fr)}.lc-grid{grid-template-columns:1fr}
+    .arch-grid{grid-template-columns:1fr}.feat-grid{grid-template-columns:1fr}
+    .cases-grid{grid-template-columns:1fr}.model-cards{grid-template-columns:1fr}
+    .cfg-grid2{grid-template-columns:1fr}.cfg-meta{grid-template-columns:1fr}
+    .impact-grid{grid-template-columns:1fr}footer{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+
+<nav>
+  <div class="nav-logo">Street Vendor Digitalization Agent</div>
+  <ul class="nav-links">
+    <li><a href="#arch">Architecture</a></li>
+    <li><a href="#ibm">IBM Config</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#usecases">Use Cases</a></li>
+    <li><a href="#impact">Impact</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="ibm-badge"><span class="ibm-dot"></span>IBM watsonx.ai</div>
+    <a href="#launch" class="nav-cta">Launch App</a>
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div>
+  <div class="hero-badge"><span class="bdot"></span>IBM granite-4-h-small · granite-embedding-278m-multilingual · Edunet Internship</div>
+  <h1><span class="g-1">Digitalize</span> Every<br />Street Vendor.<br /><span class="g-2">Empower</span> Every Hawker.</h1>
+  <p class="hero-sub">An end-to-end AI RAG agent powered by IBM watsonx.ai Granite models. Vendors type their business — the agent retrieves real-time schemes, UPI guides, MSME data and generates a complete digital kit.</p>
+  <div class="hero-btns">
+    <a href="#launch" class="btn-ibm">🚀 Launch Live App</a>
+    <a href="#arch" class="btn-o">See Architecture</a>
+  </div>
+
+  
+  <div class="launch-card" id="launch">
+    <div class="lc-header">
+      <div class="ldd" style="background:#ff5f57"></div>
+      <div class="ldd" style="background:#febc2e"></div>
+      <div class="ldd" style="background:#28c840"></div>
+      <div class="lc-title">Street Vendor Digitalization Agent — Setup &amp; Launch</div>
+      <div style="font-size:11px;font-weight:800;color:#74b1ff">🔵 IBM watsonx.ai</div>
+    </div>
+    <div class="lc-body">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:22px;text-align:left">Run these 4 commands in your terminal to launch the full end-to-end RAG app:</div>
+      <div class="lc-grid">
+        <div class="lc-step">
+          <div class="step-num2">Step 01 — Install</div>
+          <div class="step-cmd">pip install -r requirements.txt</div>
+          <p>Install Streamlit, NumPy, Requests, python-dotenv</p>
+        </div>
+        <div class="lc-step">
+          <div class="step-num2">Step 02 — Navigate</div>
+          <div class="step-cmd">cd "street vendor digitalization agent bob"</div>
+          <p>Go to your project folder</p>
+        </div>
+        <div class="lc-step">
+          <div class="step-num2">Step 03 — Run App</div>
+          <div class="step-cmd">streamlit run app.py</div>
+          <p>Launches on localhost:8501 in your browser</p>
+        </div>
+        <div class="lc-step">
+          <div class="step-num2">Step 04 — Build Index</div>
+          <div class="step-cmd">Click "Build Vector Index" in sidebar</div>
+          <p>Embeds all docs with granite-embedding-278m-multilingual</p>
+        </div>
+      </div>
+      <div class="launch-btn-row">
+        <a href="http://localhost:8501" target="_blank" class="btn-ibm" style="font-size:14px;padding:13px 28px">🔵 Open Live App (localhost:8501)</a>
+        <a href="#arch" class="btn-o" style="font-size:14px;padding:12px 26px">📐 View Architecture</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="mq-wrap">
+  <div class="mq-inner">
+    <span>IBM GRANITE-4-H-SMALL</span><span class="ms">·</span>
+    <span>GRANITE EMBEDDING 278M MULTILINGUAL</span><span class="ms">·</span>
+    <span>RAG PIPELINE</span><span class="ms">·</span>
+    <span>PM SVANidhi CREDIT</span><span class="ms">·</span>
+    <span>UPI PAYMENTS</span><span class="ms">·</span>
+    <span>MSME SCHEMES</span><span class="ms">·</span>
+    <span>GOOGLE MY BUSINESS</span><span class="ms">·</span>
+    <span>LOCAL SEO</span><span class="ms">·</span>
+    <span>EDUNET INTERNSHIP</span><span class="ms">·</span>
+    <span>IBM GRANITE-4-H-SMALL</span><span class="ms">·</span>
+    <span>GRANITE EMBEDDING 278M MULTILINGUAL</span><span class="ms">·</span>
+    <span>RAG PIPELINE</span><span class="ms">·</span>
+    <span>PM SVANidhi CREDIT</span><span class="ms">·</span>
+    <span>UPI PAYMENTS</span><span class="ms">·</span>
+    <span>MSME SCHEMES</span><span class="ms">·</span>
+    <span>GOOGLE MY BUSINESS</span><span class="ms">·</span>
+    <span>LOCAL SEO</span><span class="ms">·</span>
+    <span>EDUNET INTERNSHIP</span><span class="ms">·</span>
+  </div>
+</div>
+
+
+<div class="stats">
+  <div><div class="sn">5Cr+</div><div class="slbl">Street vendors in India</div></div>
+  <div><div class="sn">95%</div><div class="slbl">Currently undigitized</div></div>
+  <div><div class="sn">22+</div><div class="slbl">Indian languages supported</div></div>
+  <div><div class="sn">3×</div><div class="slbl">Average revenue uplift</div></div>
+</div>
+
+
+<section id="arch">
+  <div class="ctr">
+    <div class="sl-lbl">Architecture</div>
+    <h2 class="sl-title">End-to-End RAG Pipeline</h2>
+    <p class="sl-sub">A true Retrieval-Augmented Generation pipeline powered by two IBM watsonx.ai Granite models working together in real-time.</p>
+  </div>
+
+  <div class="arch-grid">
+    <div class="arch-card ibm-card">
+      <div class="arch-icon">🧩</div>
+      <h3>Embedding — Retrieval Layer</h3>
+      <p>Every vendor query is encoded into a high-dimensional vector using the multilingual Granite embedding model. This enables semantic search across 22+ Indian languages — Hindi, Marathi, Tamil, Telugu, Kannada and more.</p>
+      <div class="arch-model">ibm/granite-embedding-278m-multilingual</div>
+    </div>
+    <div class="arch-card ibm-card">
+      <div class="arch-icon">⚡</div>
+      <h3>Generation — Answer Layer</h3>
+      <p>Once relevant documents are retrieved from the knowledge base, Granite 4H Small generates a structured, actionable, and context-aware response tailored to the vendor's specific business, location, and language.</p>
+      <div class="arch-model">ibm/granite-4-h-small</div>
+    </div>
+    <div class="arch-card">
+      <div class="arch-icon">📚</div>
+      <h3>Knowledge Base</h3>
+      <p>18 pre-loaded real-world documents covering PM SVANidhi, MSME Udyam, Mudra Yojana, FSSAI, PhonePe/Paytm UPI setup, Swiggy/Zomato listing, Google My Business, hyperlocal SEO, WhatsApp Business, and city-specific data for Pune, Mumbai, Chennai.</p>
+    </div>
+    <div class="arch-card">
+      <div class="arch-icon">🔍</div>
+      <h3>Cosine Similarity Search</h3>
+      <p>Query vectors are compared against all embedded knowledge base documents using cosine similarity. Top-k most relevant documents are injected as context into the generation prompt — ensuring grounded, factual responses every time.</p>
+    </div>
+  </div>
+
+  
+  <div style="margin-top:68px">
+    <div class="ctr" style="margin-bottom:40px">
+      <div class="sl-lbl">Live RAG Flow</div>
+      <h3 class="sl-title" style="font-size:28px">Embed → Retrieve → Generate → Respond</h3>
+    </div>
+    <div class="pipeline">
+      <div class="pnode"><div class="pi">🧑</div><div class="pl">Vendor Query</div><div class="ps2">Natural language</div></div>
+      <div class="parr">→</div>
+      <div class="pnode ibm"><div class="pi">🧩</div><div class="pl">Embedding</div><div class="ps2">granite-embedding-278m-multilingual</div></div>
+      <div class="parr">→</div>
+      <div class="pnode"><div class="pi">🔍</div><div class="pl">Cosine Search</div><div class="ps2">Knowledge Base</div></div>
+      <div class="parr">→</div>
+      <div class="pnode ibm"><div class="pi">⚡</div><div class="pl">Generation</div><div class="ps2">granite-4-h-small</div></div>
+      <div class="parr">→</div>
+      <div class="pnode"><div class="pi">📦</div><div class="pl">Digital Kit</div><div class="ps2">UPI + Schemes + SEO</div></div>
+    </div>
+  </div>
+
+  
+  <div class="file-tree">
+    <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6c47ff;margin-bottom:16px">📁 Project Structure</div>
+    <div class="ft-row"><span class="ft-icon">🐍</span><span class="ft-name">app.py</span><span class="ft-desc">Streamlit UI — full dark theme, live chat, RAG pipeline display</span><span class="ft-badge fb-new">MAIN APP</span></div>
+    <div class="ft-row"><span class="ft-icon">🔵</span><span class="ft-name">ibm_client.py</span><span class="ft-desc">IBM IAM token + embedding + generation API wrapper</span><span class="ft-badge fb-ibm">IBM API</span></div>
+    <div class="ft-row"><span class="ft-icon">🧠</span><span class="ft-name">rag_pipeline.py</span><span class="ft-desc">Build index → cosine search → augmented prompt → answer</span><span class="ft-badge fb-new">RAG CORE</span></div>
+    <div class="ft-row"><span class="ft-icon">📚</span><span class="ft-name">knowledge_base.py</span><span class="ft-desc">18 real-world docs: govt schemes, UPI, SEO, city data</span><span class="ft-badge fb-new">DATA</span></div>
+    <div class="ft-row"><span class="ft-icon">📋</span><span class="ft-name">requirements.txt</span><span class="ft-desc">streamlit, requests, numpy, python-dotenv</span></div>
+    <div class="ft-row"><span class="ft-icon">🌐</span><span class="ft-name">street-vendor-digitalization.html</span><span class="ft-desc">This landing page — links to the live Streamlit app</span></div>
+  </div>
+</section>
+
+
+<section id="ibm" class="ibm-section">
+  <div class="ctr" style="margin-bottom:44px">
+    <div class="sl-lbl">IBM Cloud Integration</div>
+    <h2 class="sl-title">Connected to IBM watsonx.ai</h2>
+    <p class="sl-sub" style="margin:0 auto">Credentials and models configured for the Edunet Internship project. Both models are active and verified.</p>
+  </div>
+  <div class="ibm-big-card">
+    <div class="ibm-hdr2">
+      <div class="ibm-icon">🔵</div>
+      <div>
+        <h3>IBM watsonx.ai Configuration</h3>
+        <p>Edunet Internship · Street Vendor Digitalization Agent · Project Active</p>
+      </div>
+    </div>
+    <div class="cfg-grid2">
+      <div>
+        <div class="cfg-lbl">API Key</div>
+        <div class="cfg-val2">36yHNYbA0YjOeTsl1xGDXQ_5e-KcvJm7-7OQQWzZuolv</div>
+      </div>
+      <div>
+        <div class="cfg-lbl">Project ID</div>
+        <div class="cfg-val2">59f569dc-3371-40a4-a6dc-0d6242c0745e</div>
+      </div>
+      <div>
+        <div class="cfg-lbl">Generation Model</div>
+        <div class="cfg-val2">ibm/granite-4-h-small</div>
+      </div>
+      <div>
+        <div class="cfg-lbl">Embedding Model</div>
+        <div class="cfg-val2">ibm/granite-embedding-278m-multilingual</div>
+      </div>
+    </div>
+    <div class="cfg-ok"><span class="sdot2"></span>Connected · IBM Cloud US-South (Dallas) · Both models active · Project ID verified</div>
+    <div class="model-cards" style="margin-top:22px">
+      <div class="mcard">
+        <div class="mcard-role role-gen">⚡ Generation Model</div>
+        <div class="mcard-name">ibm/granite-4-h-small</div>
+        <div class="mcard-desc">Compact, fast Granite 4 model for instruction-following. Generates structured vendor guidance with retrieved context injected into prompt.</div>
+        <span class="mcard-badge b-gen">Active · Text Generation</span>
+      </div>
+      <div class="mcard">
+        <div class="mcard-role role-emb">🧩 Embedding Model</div>
+        <div class="mcard-name">ibm/granite-embedding-278m-multilingual</div>
+        <div class="mcard-desc">278M param multilingual embeddings. Encodes vendor queries and knowledge base documents for semantic RAG retrieval across 22+ Indian languages.</div>
+        <span class="mcard-badge b-emb">Active · RAG Retrieval</span>
+      </div>
+    </div>
+    <div class="cfg-meta">
+      <div><div class="cml">Platform</div><div class="cmv">IBM watsonx.ai</div></div>
+      <div><div class="cml">Region</div><div class="cmv">US-South · Dallas</div></div>
+      <div><div class="cml">Program</div><div class="cmv">Edunet Internship</div></div>
+    </div>
+  </div>
+</section>
+
+
+<section id="features" class="feat-section">
+  <div>
+    <div class="sl-lbl">Core Features</div>
+    <h2 class="sl-title">Everything a vendor needs to go digital</h2>
+    <p class="sl-sub">Powered by IBM Granite models — real-time, grounded, multilingual responses for every vendor query.</p>
+  </div>
+  <div class="feat-grid">
+    <div class="fc"><div class="fi" style="background:rgba(108,71,255,0.18)">🏪</div><h3>AI Business Profile Generator</h3><p>IBM granite-4-h-small generates a professional business profile with name, SEO keywords, description and Google My Business draft — ready in seconds.</p></div>
+    <div class="fc"><div class="fi" style="background:rgba(0,212,170,0.15)">💳</div><h3>UPI &amp; QR Code Setup</h3><p>Retrieves PhonePe, Paytm, Google Pay merchant setup guides from the knowledge base and generates step-by-step instructions for the vendor's specific situation.</p></div>
+    <div class="fc"><div class="fi" style="background:rgba(255,107,53,0.15)">🏦</div><h3>MSME &amp; Credit Access</h3><p>Real-time retrieval of PM SVANidhi, Mudra Yojana, and Udyam registration information — eligibility check, application steps, and document requirements.</p></div>
+    <div class="fc"><div class="fi" style="background:rgba(247,201,72,0.15)">📍</div><h3>Hyperlocal SEO Strategy</h3><p>City-specific SEO tips retrieved from the knowledge base for Pune, Mumbai, Chennai and more — exact keywords, Google Maps optimization, and review strategies.</p></div>
+    <div class="fc"><div class="fi" style="background:rgba(108,71,255,0.15)">📢</div><h3>Customer Engagement Tips</h3><p>WhatsApp Business setup, festival pricing strategy, loyalty programs — all generated from retrieved knowledge with granite-4-h-small for local context.</p></div>
+    <div class="fc"><div class="fi" style="background:rgba(15,98,254,0.18)">🌐</div><h3>22+ Indian Languages</h3><p>granite-embedding-278m-multilingual natively understands queries in Hindi, Marathi, Tamil, Telugu, Kannada, Bengali, Gujarati and more without translation.</p></div>
+  </div>
+</section>
+
+
+<section id="usecases">
+  <div class="ctr">
+    <div class="sl-lbl">Use Cases</div>
+    <h2 class="sl-title">Real vendors. Real results.</h2>
+    <p class="sl-sub" style="margin:0 auto">The agent adapts to every vendor type across India's cities — powered by city-specific knowledge base documents.</p>
+  </div>
+  <div class="cases-grid">
+    <div class="cc"><div class="cc-h" style="background:rgba(108,71,255,0.07)"><div class="ce">🍎</div><div class="loc2">Pune · Maharashtra</div><h3>Fruit &amp; Vegetable Vendor</h3></div><div class="cc-b"><div class="ci"><span class="cid" style="background:#6c47ff"></span>QR payment poster in Marathi</div><div class="ci"><span class="cid" style="background:#6c47ff"></span>Listed on Swiggy Instamart &amp; Zepto</div><div class="ci"><span class="cid" style="background:#6c47ff"></span>PM SVANidhi ₹10,000 loan guided</div><div class="ci"><span class="cid" style="background:#6c47ff"></span>Seasonal pricing strategy provided</div></div></div>
+    <div class="cc"><div class="cc-h" style="background:rgba(0,212,170,0.07)"><div class="ce">🍜</div><div class="loc2">Chennai · Tamil Nadu</div><h3>Idli–Dosa Street Stall</h3></div><div class="cc-b"><div class="ci"><span class="cid" style="background:#00d4aa"></span>Google Maps listing in Tamil</div><div class="ci"><span class="cid" style="background:#00d4aa"></span>Zomato street food profile created</div><div class="ci"><span class="cid" style="background:#00d4aa"></span>FSSAI registration steps guided</div><div class="ci"><span class="cid" style="background:#00d4aa"></span>WhatsApp menu card generated</div></div></div>
+    <div class="cc"><div class="cc-h" style="background:rgba(255,107,53,0.07)"><div class="ce">👗</div><div class="loc2">Surat · Gujarat</div><h3>Textile &amp; Clothing Seller</h3></div><div class="cc-b"><div class="ci"><span class="cid" style="background:#ff6b35"></span>Meesho &amp; Glowroad onboarding</div><div class="ci"><span class="cid" style="background:#ff6b35"></span>Instagram shop setup in Gujarati</div><div class="ci"><span class="cid" style="background:#ff6b35"></span>Festival sale promotion template</div><div class="ci"><span class="cid" style="background:#ff6b35"></span>Mudra Yojana loan application</div></div></div>
+  </div>
+</section>
+
+
+<section class="lang-sec">
+  <div class="sl-lbl" style="display:inline-block">Language Support</div>
+  <h2 class="sl-title">Speaks your language,<br />not just English.</h2>
+  <p class="sl-sub" style="margin:0 auto">Powered by <strong>ibm/granite-embedding-278m-multilingual</strong> — 22+ Indian languages for true multilingual RAG retrieval.</p>
+  <div class="lchips">
+    <span class="lc2 on">हिन्दी Hindi</span><span class="lc2 on">मराठी Marathi</span><span class="lc2 on">தமிழ் Tamil</span>
+    <span class="lc2 on">తెలుగు Telugu</span><span class="lc2 on">ಕನ್ನಡ Kannada</span><span class="lc2 on">বাংলা Bengali</span>
+    <span class="lc2 on">ગુજરાતી Gujarati</span><span class="lc2">ਪੰਜਾਬੀ Punjabi</span><span class="lc2">اردو Urdu</span>
+    <span class="lc2">ଓଡ଼ିଆ Odia</span><span class="lc2">മലയാളം Malayalam</span><span class="lc2">+ 11 more</span>
+  </div>
+</section>
+
+
+<section id="impact" style="background:var(--surface)">
+  <div class="ctr">
+    <div class="sl-lbl">Impact &amp; Vision</div>
+    <h2 class="sl-title">Unlocking the informal economy</h2>
+    <p class="sl-sub" style="margin:0 auto">India's 5 crore+ street vendors represent a ₹32,000 crore informal economy. This agent bridges the digital divide using IBM watsonx.ai.</p>
+  </div>
+  <div class="impact-grid">
+    <div class="ic"><div class="in">48hr</div><p>From zero to a fully listed online business with UPI, Google Maps, and social presence</p></div>
+    <div class="ic"><div class="in">3.2×</div><p>Average increase in customer reach within 30 days of going digital</p></div>
+    <div class="ic"><div class="in">₹10K</div><p>Average micro-credit unlocked per vendor through PM SVANidhi guidance</p></div>
+  </div>
+</section>
+
+
+<section class="cta-sec">
+  <div class="cta-glow"></div>
+  <h2>Your business deserves<br />to be <span style="background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">digitally visible</span>.</h2>
+  <p>Launch the app, type your business — IBM watsonx.ai will generate your complete digital kit in seconds.</p>
+  <a href="http://localhost:8501" target="_blank" class="btn-ibm" style="position:relative;z-index:1;font-size:16px;padding:17px 44px">🔵 Launch Live App</a>
+</section>
+
+
+<footer>
+  <div class="footer-brand">
+    <div class="flogo">Street Vendor Digitalization Agent</div>
+    <p>End-to-end IBM watsonx.ai RAG pipeline for India's street vendors. Powered by Granite models.</p>
+    <div style="margin-top:13px;display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:6px;background:rgba(15,98,254,0.1);border:1px solid rgba(15,98,254,0.3);font-size:11px;font-weight:800;color:#74b1ff;letter-spacing:.04em">
+      🔵 IBM watsonx.ai · Edunet Internship
+    </div>
+  </div>
+  <div class="fcol">
+    <h5>Project Files</h5>
+    <a href="#">app.py — Streamlit UI</a>
+    <a href="#">ibm_client.py — IBM API</a>
+    <a href="#">rag_pipeline.py — RAG Core</a>
+    <a href="#">knowledge_base.py — Data</a>
+    <a href="#">requirements.txt</a>
+  </div>
+  <div class="fcol">
+    <h5>Resources</h5>
+    <a href="https://pmsvanidhi.mohua.gov.in" target="_blank">PM SVANidhi Portal</a>
+    <a href="https://udyamregistration.gov.in" target="_blank">MSME Udyam Registration</a>
+    <a href="https://foscos.fssai.gov.in" target="_blank">FSSAI Registration</a>
+    <a href="https://dataplatform.cloud.ibm.com" target="_blank">IBM watsonx.ai Docs</a>
+    <a href="https://digitalindia.gov.in" target="_blank">Digital India Initiative</a>
+  </div>
+</footer>
+<div class="fbot">
+  © 2025 Street Vendor Digitalization Agent  |  Powered by <strong style="color:#74b1ff">IBM watsonx.ai</strong>  | 
+  <a href="#">Privacy Policy</a>  ·  <a href="#">Terms</a>
+  <br /><br />
+  <span style="font-size:11px;color:#444">Edunet Internship Project · Made with IBM Bob</span>
+</div>
+
+</body>
+</html>

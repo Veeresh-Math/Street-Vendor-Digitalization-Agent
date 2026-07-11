@@ -1,0 +1,180 @@
+/* ═══════════════════════════════════════════════════════════
+   theme.css — Indian Street-Market Design System
+   Palette:
+     Turmeric Yellow  #F5A623
+     Rickshaw Green   #2D6A4F
+     Indigo           #1B2A6B
+     Kraft Paper      #C8A96E  (bg accent)
+     Cream            #FDF6E3  (main bg)
+     Vermilion        #D7263D  (alert / highlight)
+═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&family=Noto+Sans+Devanagari:wght@400;700;900&display=swap');
+
+/* ── Variables ──────────────────────────────────────────── */
+:root {
+  --turmeric:    #F5A623;
+  --turmeric-dk: #D4880A;
+  --green:       #2D6A4F;
+  --green-lt:    #40916C;
+  --green-bg:    rgba(45,106,79,0.08);
+  --indigo:      #1B2A6B;
+  --indigo-lt:   #2E45A3;
+  --indigo-bg:   rgba(27,42,107,0.07);
+  --kraft:       #C8A96E;
+  --kraft-lt:    #DFC498;
+  --cream:       #FDF6E3;
+  --cream-dk:    #F5EDD0;
+  --vermilion:   #D7263D;
+  --text:        #1A1A1A;
+  --text-muted:  #5C5040;
+  --text-light:  #8B7355;
+  --border:      rgba(200,169,110,0.45);
+  --border-dk:   rgba(200,169,110,0.7);
+  --white:       #FFFFFF;
+
+  /* Gradients */
+  --grad-saffron:  linear-gradient(135deg, #F5A623 0%, #D7263D 100%);
+  --grad-indigo:   linear-gradient(135deg, #1B2A6B 0%, #2E45A3 100%);
+  --grad-green:    linear-gradient(135deg, #2D6A4F 0%, #40916C 100%);
+  --grad-tricolor: linear-gradient(135deg, #FF9933 0%, #FFFFFF 50%, #138808 100%);
+
+  /* Typography */
+  --font-main: 'Noto Sans', 'Noto Sans Devanagari', system-ui, sans-serif;
+
+  /* Shadows */
+  --shadow-sm:  0 2px 8px rgba(27,42,107,0.10);
+  --shadow-md:  0 4px 20px rgba(27,42,107,0.14);
+  --shadow-lg:  0 8px 40px rgba(27,42,107,0.18);
+  --shadow-card:0 2px 12px rgba(200,169,110,0.25);
+}
+
+/* ── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-main);
+  background: var(--cream);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── Kraft-paper background texture ────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgba(200,169,110,0.12) 28px,
+      rgba(200,169,110,0.12) 29px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 28px,
+      rgba(200,169,110,0.07) 28px,
+      rgba(200,169,110,0.07) 29px
+    );
+}
+
+/* ── Typography ─────────────────────────────────────────── */
+h1,h2,h3,h4,h5,h6 {
+  font-family: var(--font-main);
+  color: var(--indigo);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; }
+h2 { font-size: clamp(1.5rem, 3.5vw, 2.4rem); font-weight: 800; }
+h3 { font-size: 1.25rem; font-weight: 700; }
+p  { color: var(--text-muted); }
+
+a { color: var(--indigo); text-decoration: none; }
+a:hover { color: var(--green); }
+
+/* ── Utility classes ────────────────────────────────────── */
+.text-turmeric  { color: var(--turmeric-dk); }
+.text-green     { color: var(--green); }
+.text-indigo    { color: var(--indigo); }
+.text-muted     { color: var(--text-muted); }
+.text-center    { text-align: center; }
+
+.bg-indigo   { background: var(--indigo); }
+.bg-green    { background: var(--green); }
+.bg-turmeric { background: var(--turmeric); }
+.bg-cream    { background: var(--cream); }
+
+.fw-900 { font-weight: 900; }
+.fw-700 { font-weight: 700; }
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px; border-radius: 6px; border: none;
+  font-family: var(--font-main); font-size: 15px; font-weight: 700;
+  cursor: pointer; text-decoration: none; transition: all .2s;
+  letter-spacing: 0.01em;
+}
+.btn-primary {
+  background: var(--grad-indigo);
+  color: var(--white);
+  box-shadow: 0 4px 14px rgba(27,42,107,0.35);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(27,42,107,0.45);
+  color: var(--white);
+}
+.btn-saffron {
+  background: var(--grad-saffron);
+  color: var(--white);
+  box-shadow: 0 4px 14px rgba(245,166,35,0.4);
+}
+.btn-saffron:hover {
+  transform: translateY(-2px);
+  color: var(--white);
+}
+.btn-green {
+  background: var(--grad-green);
+  color: var(--white);
+  box-shadow: 0 4px 14px rgba(45,106,79,0.35);
+}
+.btn-green:hover { transform: translateY(-2px); color: var(--white); }
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--indigo);
+  color: var(--indigo);
+}
+.btn-outline:hover {
+  background: var(--indigo-bg);
+  color: var(--indigo);
+}
+.btn-lg { padding: 16px 36px; font-size: 17px; }
+.btn-sm { padding: 8px 18px; font-size: 13px; }
+
+/* ── Tag / Badge ─────────────────────────────────────────── */
+.tag {
+  display: inline-block; padding: 4px 12px; border-radius: 4px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.tag-turmeric { background: rgba(245,166,35,0.18); color: var(--turmeric-dk); border: 1px solid rgba(245,166,35,0.4); }
+.tag-green    { background: rgba(45,106,79,0.12);  color: var(--green);        border: 1px solid rgba(45,106,79,0.3); }
+.tag-indigo   { background: rgba(27,42,107,0.10);  color: var(--indigo);       border: 1px solid rgba(27,42,107,0.25); }
+.tag-red      { background: rgba(215,38,61,0.10);  color: var(--vermilion);    border: 1px solid rgba(215,38,61,0.3); }
+
+/* ── Section label ───────────────────────────────────────── */
+.section-label {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--green);
+  margin-bottom: 10px;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream-dk); }
+::-webkit-scrollbar-thumb { background: var(--kraft); border-radius: 3px; }

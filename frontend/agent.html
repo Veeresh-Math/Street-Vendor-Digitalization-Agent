@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Agent — Street Vendor Digitalization Agent</title>
+<link rel="stylesheet" href="/frontend/css/theme.css"/>
+<link rel="stylesheet" href="/frontend/css/layout.css"/>
+<link rel="stylesheet" href="/frontend/css/components.css"/>
+<style>
+  body { background: var(--cream-dk); }
+
+  /* ── Agent page layout ────────────────────────────────── */
+  .agent-layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    grid-template-rows: 1fr;
+    gap: 20px;
+    height: calc(100vh - 64px - 52px); /* nav + ibm bar */
+    padding: 16px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ── Left: Chat panel ─────────────────────────────────── */
+  .chat-panel { display: flex; flex-direction: column; }
+
+  /* ── Right: Kit panel ─────────────────────────────────── */
+  .kit-panel {
+    display: flex; flex-direction: column; gap: 14px;
+    overflow-y: auto;
+  }
+
+  /* ── IBM bar ──────────────────────────────────────────── */
+  .ibm-bar {
+    background: var(--indigo);
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 3px solid var(--turmeric);
+    height: 52px;
+  }
+  .ibm-bar-title {
+    font-size: 12px; font-weight: 800; color: rgba(255,255,255,.75);
+    letter-spacing: .04em; flex-shrink: 0;
+  }
+
+  /* ── Vendor form ──────────────────────────────────────── */
+  .vendor-form {
+    background: var(--white); border: 1px solid var(--border-dk);
+    border-radius: 10px; padding: 18px 20px;
+    box-shadow: var(--shadow-card); flex-shrink: 0;
+  }
+  .vendor-form h4 {
+    font-size: 14px; color: var(--indigo); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label {
+    font-size: 11px; font-weight: 700; color: var(--text-light);
+    letter-spacing: .05em; text-transform: uppercase;
+  }
+  .form-group input, .form-group select {
+    padding: 9px 11px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--cream);
+    font-size: 13px; font-family: var(--font-main); color: var(--text);
+    outline: none;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--indigo);
+  }
+  .kit-generate-btn {
+    width: 100%; padding: 11px; border-radius: 6px; border: none;
+    background: var(--grad-saffron); color: var(--white);
+    font-weight: 700; font-size: 14px; cursor: pointer;
+    font-family: var(--font-main); margin-top: 6px;
+  }
+  .kit-generate-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── Pipeline display ─────────────────────────────────── */
+  .pipeline-display {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+    flex-shrink: 0; display: none;
+  }
+  .pipeline-title {
+    font-size: 11px; font-weight: 800; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--indigo); margin-bottom: 10px;
+  }
+
+  /* ── Receipt panel title ──────────────────────────────── */
+  .kit-panel-title {
+    font-size: 12px; font-weight: 800; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text-light);
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+
+  /* ── Empty receipt placeholder ────────────────────────── */
+  .receipt-placeholder {
+    background: var(--white); border: 1px dashed var(--border-dk);
+    border-radius: 10px; padding: 32px 20px; text-align: center;
+    color: var(--text-light);
+  }
+  .receipt-placeholder .icon { font-size: 40px; margin-bottom: 10px; }
+  .receipt-placeholder p { font-size: 13px; line-height: 1.6; }
+
+  @media(max-width:900px){
+    .agent-layout{ grid-template-columns:1fr; height:auto; }
+    .kit-panel{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="/" class="nav-brand">
+    <div class="nav-brand-icon">🛒</div>
+    Street Vendor Digitalization Agent
+  </a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="#" onclick="clearChat()">Clear Chat</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-status"><span class="status-dot"></span><span id="navStatus">Connecting...</span></div>
+    <a href="/" class="btn btn-outline btn-sm">← Back</a>
+  </div>
+</nav>
+
+<!-- IBM BAR -->
+<div class="ibm-bar">
+  <div class="ibm-bar-title">🔵 IBM watsonx.ai · AICTE-IBM SkillsBuild 2026 · PS No. 29</div>
+  <span class="ibm-model-chip chip-gen">⚡ ibm/granite-4-h-small</span>
+  <span class="ibm-model-chip chip-emb">🧩 ibm/granite-embedding-278m-multilingual</span>
+  <span class="ibm-model-chip chip-live" id="indexStatus">⏳ Checking...</span>
+</div>
+
+<!-- AGENT LAYOUT -->
+<div class="agent-layout">
+
+  <!-- LEFT: CHAT -->
+  <div class="chat-panel">
+    <div class="chat-wrap">
+
+      <div class="chat-header">
+        <span style="font-size:18px;">🛒</span>
+        <div class="chat-header-title">Street Vendor Digitalization Agent — Live Chat</div>
+        <div class="chat-header-model">granite-4-h-small</div>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-empty" id="chatEmpty">
+          <div class="chat-empty-icon">🌾</div>
+          <h3>Namaste! Tell me about your business.</h3>
+          <p>Type in any language — Hindi, Marathi, Tamil, Telugu, Gujarati, or English.<br/>
+             I'll give you a complete digital kit powered by IBM watsonx.ai.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px;">
+            <span class="tag tag-turmeric" onclick="fillQuery(this)" style="cursor:pointer">I sell fruit in Pune's Camp area</span>
+            <span class="tag tag-green"    onclick="fillQuery(this)" style="cursor:pointer">Idli-dosa stall near Chennai Central</span>
+            <span class="tag tag-indigo"   onclick="fillQuery(this)" style="cursor:pointer">Vegetable vendor in Dharavi Mumbai</span>
+            <span class="tag tag-turmeric" onclick="fillQuery(this)" style="cursor:pointer">Flower vendor near MG Road Bangalore</span>
+            <span class="tag tag-green"    onclick="fillQuery(this)" style="cursor:pointer">Saree seller in Surat textile market</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-row">
+        <select id="langSelect">
+          <option value="en">🇮🇳 English</option>
+          <option value="hi">हिन्दी</option>
+          <option value="mr">मराठी</option>
+          <option value="ta">தமிழ்</option>
+          <option value="te">తెలుగు</option>
+          <option value="kn">ಕನ್ನಡ</option>
+          <option value="gu">ગુજરાતી</option>
+          <option value="bn">বাংলা</option>
+        </select>
+        <input
+          id="chatInput"
+          type="text"
+          placeholder='E.g. "I sell vegetables in T. Nagar, Chennai"'
+          autocomplete="off"
+        />
+        <button id="sendBtn" onclick="sendMessage()">Send ✦</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT: KIT PANEL -->
+  <div class="kit-panel">
+
+    <!-- Vendor Form -->
+    <div class="vendor-form">
+      <h4>📋 Generate Digital Kit</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Vendor Name</label>
+          <input id="fVendorName" type="text" placeholder="Ramesh Fruits"/>
+        </div>
+        <div class="form-group">
+          <label>Business Type</label>
+          <input id="fBizType" type="text" placeholder="Fruit & Vegetable Vendor"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Location</label>
+          <input id="fLocation" type="text" placeholder="Camp, Pune"/>
+        </div>
+        <div class="form-group">
+          <label>UPI ID</label>
+          <input id="fUpiId" type="text" placeholder="vendor@upi"/>
+        </div>
+      </div>
+      <button class="kit-generate-btn" id="generateKitBtn" onclick="generateKit()">
+        🎫 Generate Digital Kit + QR Card
+      </button>
+    </div>
+
+    <!-- Pipeline display -->
+    <div class="pipeline-display" id="pipelineDisplay">
+      <div class="pipeline-title">⚡ Live RAG Pipeline</div>
+      <div id="pipelineSteps"></div>
+    </div>
+
+    <!-- Receipt placeholder or actual receipt -->
+    <div class="kit-panel-title">🎫 Digital Kit — Torn Receipt</div>
+    <div id="receiptContainer">
+      <div class="receipt-placeholder">
+        <div class="icon">🎫</div>
+        <p>Your digital kit will appear here as a receipt card after you chat or generate a kit above.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/frontend/js/geo.js"></script>
+<script src="/frontend/js/kit.js"></script>
+<script src="/frontend/js/chat.js"></script>
+</body>
+</html>

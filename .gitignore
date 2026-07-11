@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Env / secrets
+.env
+
+# Persisted/local stores
+vector_store/
+static/generated/
+
+# Logs
+*.log
+
+# Node (if any)
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+

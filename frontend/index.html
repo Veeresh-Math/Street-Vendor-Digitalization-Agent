@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Street Vendor Digitalization Agent — IBM watsonx.ai</title>
+<meta name="description" content="AI-powered RAG agent empowering Indian street vendors to go digital — UPI, MSME credit, Google listing, QR codes in 22+ Indian languages."/>
+<style>
+/* ═══════════════════════════════════════════════════════
+   DESIGN SYSTEM
+   Indian Heritage × Apple Precision × Premium Dark
+   Palette: Saffron Gold · Turmeric · Forest Green · Marigold
+   ——————————————————————————————————————————————————————— */
+:root {
+  /* Backgrounds */
+  --bg:         #07080a;
+  --bg2:        #0d0f12;
+  --bg3:        #131619;
+  --bg4:        #191c20;
+  --bg5:        #1e2227;
+
+  /* Indian Palette */
+  --saffron:    #FF6B00;
+  --saffron-lt: #FF8C35;
+  --saffron-glow: rgba(255,107,0,0.22);
+  --turmeric:   #F5C518;
+  --turmeric-lt:#FFD740;
+  --turmeric-glow: rgba(245,197,24,0.18);
+  --green:      #1A7A4A;
+  --green-lt:   #22A862;
+  --green-bright:#2DD882;
+  --green-glow: rgba(26,122,74,0.22);
+  --marigold:   #E8860C;
+  --vermilion:  #E63312;
+  --vermilion-lt:#FF5733;
+
+  /* Text */
+  --white:      #FFFFFF;
+  --text:       rgba(255,255,255,0.91);
+  --text-muted: rgba(255,255,255,0.56);
+  --text-dim:   rgba(255,255,255,0.30);
+
+  /* Borders */
+  --bdr:        rgba(255,255,255,0.08);
+  --bdr-s:      rgba(255,107,0,0.30);
+  --bdr-g:      rgba(26,122,74,0.28);
+
+  /* Gradients */
+  --grad-fire:  linear-gradient(135deg, #FF6B00, #F5C518);
+  --grad-india: linear-gradient(135deg, #FF6B00, #F5C518, #1A7A4A);
+  --grad-saffron: linear-gradient(135deg, #FF6B00, #E8860C);
+  --grad-forest: linear-gradient(135deg, #1A7A4A, #22A862);
+  --grad-turmeric: linear-gradient(135deg, #F5C518, #FF6B00);
+
+  /* Type */
+  --font: -apple-system, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --mono: "SF Mono", "Fira Code", ui-monospace, monospace;
+
+  /* Radius */
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 26px; --r-pill: 999px;
+}
+
+/* ── RESET ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.65;
+}
+::selection { background: rgba(255,107,0,0.38); color: #fff; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--saffron); border-radius: 3px; }
+
+/* ── TYPE ───────────────────────────────────────────── */
+h1,h2,h3,h4 { font-weight: 800; letter-spacing: -0.025em; line-height: 1.12; }
+h1 { font-size: clamp(2.5rem, 5.8vw, 5.2rem); }
+h2 { font-size: clamp(1.9rem, 3.8vw, 3.2rem); }
+h3 { font-size: clamp(1.05rem, 1.8vw, 1.3rem); font-weight: 600; }
+p  { font-size: 1rem; color: var(--text-muted); line-height: 1.72; }
+a  { color: inherit; text-decoration: none; }
+
+.container { max-width: 1140px; margin: 0 auto; padding: 0 5%; }
+section { padding: 108px 5%; }
+
+/* ── AMBIENT ORBS ───────────────────────────────────── */
+.orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(120px); opacity: 0.10;
+  animation: drift 22s ease-in-out infinite alternate;
+}
+.o1 { width:640px;height:640px; background:var(--saffron);  top:-180px; left:-160px; animation-duration:24s; }
+.o2 { width:480px;height:480px; background:var(--turmeric); top:40%;   right:-180px; animation-duration:19s; animation-delay:-8s; }
+.o3 { width:400px;height:400px; background:var(--green);    bottom:5%;  left:15%;  animation-duration:28s; animation-delay:-14s; }
+@keyframes drift {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(50px,70px) scale(1.1); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAVBAR
+   ——————————————————————————————————————————————————————— */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 5%;
+  transition: all 0.4s cubic-bezier(.4,0,.2,1);
+  border-bottom: 1px solid transparent;
+}
+#nav.scrolled {
+  background: rgba(7,8,10,0.86);
+  backdrop-filter: blur(28px) saturate(1.6);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+  border-bottom-color: var(--bdr);
+  padding: 12px 5%;
+  box-shadow: 0 1px 30px rgba(0,0,0,0.5);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 800; color: var(--white);
+  letter-spacing: -0.01em; white-space: nowrap;
+}
+.nav-mark {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--grad-saffron);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 20px rgba(255,107,0,0.55);
+}
+.nav-links { display: flex; gap: 2px; list-style: none; }
+.nav-links a {
+  padding: 8px 14px; border-radius: var(--r-pill);
+  font-size: 13.5px; font-weight: 500; color: var(--text-muted);
+  transition: all 0.2s;
+}
+.nav-links a:hover { color: var(--white); background: rgba(255,255,255,0.07); }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+.live-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 13px; border-radius: var(--r-pill);
+  background: rgba(34,168,98,0.12); border: 1px solid rgba(34,168,98,0.28);
+  font-size: 12px; font-weight: 600; color: var(--green-bright);
+}
+.pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green-bright); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.5)} }
+
+.btn-launch {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 22px; border-radius: var(--r-pill);
+  background: var(--grad-saffron); color: #fff;
+  font-size: 13.5px; font-weight: 800;
+  box-shadow: 0 0 22px rgba(255,107,0,0.45);
+  transition: all 0.25s; border: none; cursor: pointer;
+  text-decoration: none;
+}
+.btn-launch:hover { transform: translateY(-1px); box-shadow: 0 0 36px rgba(255,107,0,0.7); }
+
+/* ═══════════════════════════════════════════════════════
+   HERO  (video background)
+   ——————————————————————————————————————————————————————— */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 0 5%;
+  position: relative; overflow: hidden;
+}
+
+/* ── Video layer (hero visuals layer) ────────────────── */
+.hero-video-wrap {
+  position: absolute; inset: 0;
+  z-index: 1; overflow: hidden;
+  background: transparent;
+  /* allows parallax transforms without affecting layout */
+  transform: translateZ(0);
+}
+
+/* Make sure the animated layers are actually visible */
+.hero-anim-bg,
+.hero-anim-grid,
+.hero-anim-spark{
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Offline hero visuals */
+.hero-anim-bg{
+  position:absolute; inset:0;
+  z-index:0;
+  background:
+    radial-gradient(1200px 600px at 20% 10%, rgba(255,107,0,0.35) 0%, transparent 60%),
+    radial-gradient(900px 520px at 85% 25%, rgba(245,197,24,0.25) 0%, transparent 58%),
+    radial-gradient(800px 540px at 30% 80%, rgba(26,122,74,0.22) 0%, transparent 60%),
+    linear-gradient(135deg, #0a070d 0%, #07080a 55%, #0b0e12 100%);
+  animation: heroHue 10s ease-in-out infinite alternate;
+}
+@keyframes heroHue{
+  0%{ filter:hue-rotate(0deg) saturate(1); transform:scale(1.02); opacity:0.95; }
+  100%{ filter:hue-rotate(14deg) saturate(1.15); transform:scale(1.06); opacity:1; }
+}
+
+.hero-anim-grid{
+  position:absolute; inset:-20% -10%;
+  background:
+    linear-gradient(to right, rgba(255,107,0,0.10) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,107,0,0.08) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity:0.35;
+  transform: rotate(-6deg);
+  animation: heroGrid 6.5s ease-in-out infinite;
+  mask-image: radial-gradient(ellipse 60% 45% at 50% 45%, black 25%, transparent 70%);
+}
+@keyframes heroGrid{
+  0%,100%{ translate: 0 0; }
+  50%{ translate: 18px -12px; }
+}
+
+.hero-anim-spark{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,215,0,0.20) 0%, transparent 38%),
+    radial-gradient(circle at 80% 20%, rgba(255,107,0,0.18) 0%, transparent 35%),
+    radial-gradient(circle at 65% 80%, rgba(26,122,74,0.20) 0%, transparent 40%);
+  opacity:0.65;
+  animation: heroSpark 4.6s ease-in-out infinite alternate;
+}
+@keyframes heroSpark{
+  from{ transform: scale(1); filter: blur(0px); opacity:0.55; }
+  to{ transform: scale(1.08); filter: blur(1px); opacity:0.8; }
+}
+
+/* (Video styles removed; hero is now fully offline animated visuals) */
+.hero-video-wrap {
+  background: linear-gradient(135deg, #1a0800 0%, #070a08 50%, #07080a 100%);
+}
+
+/* Gradient overlay on top of video */
+.hero-video-overlay {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    linear-gradient(to bottom,
+      rgba(7,8,10,0.30) 0%,
+      rgba(7,8,10,0.05) 40%,
+      rgba(7,8,10,0.05) 60%,
+      rgba(7,8,10,0.55) 100%),
+    radial-gradient(ellipse 90% 70% at 50% -10%, rgba(255,107,0,0.18) 0%, transparent 65%);
+}
+
+/* Vignette bottom fade into page */
+.hero-video-vignette {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
+  z-index: 2; pointer-events: none;
+  background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
+}
+
+/* Dot grid (keep on top of video) */
+.hero-dots {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255,107,0,0.12) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 65% at 50% 50%, black 20%, transparent 80%);
+}
+
+.hero-content { position: relative; z-index: 4; max-width: 860px; }
+
+/* (Premium film grain + parallax removed per feedback) */
+
+/* Badge */
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 8px 18px; border-radius: var(--r-pill);
+  background: rgba(255,107,0,0.10);
+  border: 1px solid rgba(255,107,0,0.35);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--saffron-lt);
+  margin-bottom: 28px;
+  animation: slideUp 0.8s ease both;
+}
+.badge-jewel {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--saffron-lt);
+  box-shadow: 0 0 10px var(--saffron);
+}
+
+/* Headline */
+.hero h1 {
+  animation: slideUp 0.9s ease 0.08s both;
+  margin-bottom: 12px;
+}
+.hero h1 .t-saffron {
+  background: var(--grad-fire);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero h1 .t-green {
+  background: var(--grad-forest);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero h1 .t-white {
+  background: linear-gradient(160deg, #fff 0%, rgba(255,255,255,.72) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 1.8vw, 1.18rem); color: var(--text-muted);
+  max-width: 600px; margin: 0 auto 40px;
+  animation: slideUp 1s ease 0.16s both;
+}
+
+.hero-btns {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 60px;
+  animation: slideUp 1s ease 0.24s both;
+}
+.btn-hero-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 16px 34px; border-radius: var(--r-pill);
+  background: var(--grad-saffron); color: #fff;
+  font-size: 15.5px; font-weight: 800;
+  box-shadow: 0 0 45px rgba(255,107,0,0.5), 0 6px 24px rgba(0,0,0,0.4);
+  transition: all 0.3s; text-decoration: none;
+}
+.btn-hero-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 70px rgba(255,107,0,0.7), 0 10px 36px rgba(0,0,0,0.4);
+}
+.btn-hero-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 15px 32px; border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.16);
+  color: var(--white); font-size: 15.5px; font-weight: 600;
+  transition: all 0.3s; text-decoration: none;
+}
+.btn-hero-ghost:hover { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
+
+/* Hero glass demo card */
+.hero-card {
+  display: inline-block; text-align: left;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,107,0,0.22);
+  border-radius: var(--r-xl);
+  padding: 28px 32px;
+  max-width: 640px; width: 100%;
+  backdrop-filter: blur(22px);
+  box-shadow:
+    0 0 0 1px rgba(255,107,0,0.08),
+    0 24px 80px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  animation: slideUp 1.1s ease 0.32s both;
+  position: relative; overflow: hidden;
+}
+.hero-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,107,0,0.7), rgba(245,197,24,0.6), transparent);
+}
+.card-eyebrow {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--saffron); margin-bottom: 11px;
+}
+.card-eyebrow::before { content:''; width:8px; height:8px; border-radius:50%; background:var(--saffron); box-shadow:0 0 10px var(--saffron); display:block; }
+.card-query {
+  font-size: 15px; color: var(--white); font-weight: 700;
+  font-style: italic; margin-bottom: 18px; line-height: 1.5;
+  border-left: 3px solid var(--saffron); padding-left: 14px;
+}
+.card-tags { display: flex; flex-wrap: wrap; gap: 9px; }
+.ctag {
+  padding: 6px 14px; border-radius: var(--r-pill);
+  font-size: 12px; font-weight: 700; border: 1px solid;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.ct-s { background: rgba(255,107,0,0.14); border-color: rgba(255,107,0,0.38); color: var(--saffron-lt); }
+.ct-t { background: rgba(245,197,24,0.12); border-color: rgba(245,197,24,0.38); color: var(--turmeric-lt); }
+.ct-g { background: rgba(26,122,74,0.14); border-color: rgba(26,122,74,0.38); color: var(--green-bright); }
+.ct-r { background: rgba(230,51,18,0.12); border-color: rgba(230,51,18,0.32); color: #ff7b5f; }
+
+/* Scroll hint */
+.scroll-down {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 7px;
+  color: var(--text-dim); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  animation: bounceY 2.4s ease-in-out infinite;
+}
+@keyframes bounceY {
+  0%,100%{transform:translateX(-50%) translateY(0);opacity:.45}
+  50%{transform:translateX(-50%) translateY(9px);opacity:.9}
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(26px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TICKER
+   ——————————————————————————————————————————————————————— */
+.ticker {
+  border-top: 1px solid var(--bdr);
+  border-bottom: 1px solid var(--bdr);
+  background: rgba(255,255,255,0.018);
+  overflow: hidden; padding: 14px 0; position: relative;
+}
+.ticker::before,.ticker::after { content:''; position:absolute; top:0; bottom:0; width:100px; z-index:2; pointer-events:none; }
+.ticker::before { left:0; background:linear-gradient(90deg,var(--bg),transparent); }
+.ticker::after  { right:0; background:linear-gradient(-90deg,var(--bg),transparent); }
+.ticker-inner { display:flex; white-space:nowrap; animation:tick 28s linear infinite; width:max-content; }
+.ticker-inner span { font-size:12.5px; font-weight:600; color:var(--text-dim); padding:0 22px; }
+.ti-s { color:var(--saffron-lt) !important; }
+.ti-t { color:var(--turmeric) !important; }
+.ti-g { color:var(--green-bright) !important; }
+@keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ═══════════════════════════════════════════════════════
+   STATS BAND
+   ——————————————————————————————————————————————————————— */
+.stats {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 1px; background: var(--bdr);
+  border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr);
+}
+.stat {
+  background: var(--bg2); padding: 46px 30px; text-align: center;
+  transition: background 0.3s;
+}
+.stat:hover { background: var(--bg3); }
+.stat-n {
+  font-size: clamp(2.1rem,4vw,3.1rem); font-weight: 900;
+  letter-spacing: -0.035em; line-height: 1;
+  background: var(--grad-india);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 8px;
+}
+.stat-l { font-size: 12.5px; color: var(--text-dim); font-weight: 500; }
+
+/* ═══════════════════════════════════════════════════════
+   SECTION LABELS
+   ——————————————————————————————————————————————————————— */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--saffron-lt); margin-bottom: 16px;
+}
+.eyebrow::before { content:''; display:block; width:20px; height:2px; background:var(--grad-saffron); border-radius:1px; }
+.sec-title {
+  background: linear-gradient(155deg, var(--white) 0%, rgba(255,255,255,.52) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 16px;
+}
+.sec-sub { font-size:1.05rem; color:var(--text-muted); max-width:520px; line-height:1.74; }
+
+/* ═══════════════════════════════════════════════════════
+   HOW IT WORKS — BENTO CARDS
+   ——————————————————————————————————————————————————————— */
+.bento { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:60px; }
+.bc {
+  background: var(--bg3);
+  border: 1px solid var(--bdr);
+  border-radius: var(--r-xl); padding: 34px 30px;
+  position: relative; overflow: hidden;
+  transition: all 0.32s ease;
+}
+.bc:hover { border-color: rgba(255,107,0,0.32); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,107,0,0.10); }
+.bc::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 90% 70% at 50% -10%, rgba(255,107,0,0.07) 0%, transparent 70%); pointer-events:none; }
+.bc.sp3 { grid-column: span 3; }
+
+.bc-num { font-size:70px; font-weight:900; line-height:1; background:var(--grad-fire); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; opacity:.15; position:absolute; top:16px; right:24px; }
+.bc-icon { width:52px; height:52px; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; font-size:25px; margin-bottom:20px; }
+.i-s { background:rgba(255,107,0,0.15); }
+.i-t { background:rgba(245,197,24,0.12); }
+.i-g { background:rgba(26,122,74,0.15); }
+.i-b { background:rgba(56,189,248,0.12); }
+.bc h3 { color:var(--white); margin-bottom:10px; }
+.bc p  { font-size:13.5px; color:var(--text-muted); line-height:1.72; }
+
+/* Pipeline */
+.pipe { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:22px; }
+.ps {
+  display:flex; align-items:center; gap:7px;
+  background:rgba(255,255,255,0.05); border:1px solid var(--bdr);
+  border-radius:var(--r-md); padding:9px 13px;
+  font-size:11.5px; font-weight:700; color:var(--text-muted);
+  transition:all 0.2s;
+}
+.ps:hover { border-color:rgba(255,107,0,0.32); color:var(--saffron-lt); background:var(--saffron-glow); }
+.pb { padding:2px 8px; border-radius:var(--r-pill); background:rgba(255,107,0,0.2); color:var(--saffron-lt); font-size:9.5px; font-weight:800; letter-spacing:.05em; }
+.pa { color:var(--text-dim); font-size:14px; }
+
+/* ═══════════════════════════════════════════════════════
+   FEATURES
+   ——————————————————————————————————————————————————————— */
+.feat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:60px; }
+.fc {
+  background: linear-gradient(148deg, var(--bg4), var(--bg3));
+  border: 1px solid var(--bdr); border-radius: var(--r-xl);
+  padding: 30px 26px; position: relative; overflow: hidden;
+  transition: all 0.3s ease;
+}
+.fc:hover { transform:translateY(-5px); border-color:rgba(255,255,255,0.13); box-shadow:0 24px 58px rgba(0,0,0,0.5); }
+.fc::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; }
+.fc:nth-child(1)::after{background:var(--grad-saffron)}
+.fc:nth-child(2)::after{background:var(--grad-turmeric)}
+.fc:nth-child(3)::after{background:var(--grad-forest)}
+.fc:nth-child(4)::after{background:linear-gradient(90deg,#38bdf8,#818cf8)}
+.fc:nth-child(5)::after{background:linear-gradient(90deg,var(--vermilion-lt),var(--saffron))}
+.fc:nth-child(6)::after{background:linear-gradient(90deg,var(--green-bright),#38bdf8)}
+.fi { width:48px; height:48px; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:18px; }
+.fc h3 { font-size:1rem; color:var(--white); margin-bottom:9px; }
+.fc p  { font-size:13px; color:var(--text-muted); line-height:1.7; }
+.ft { display:inline-block; margin-top:14px; font-size:10.5px; font-weight:700; letter-spacing:.06em; padding:4px 10px; border-radius:var(--r-pill); }
+
+/* ═══════════════════════════════════════════════════════
+   GOVERNMENT SCHEMES
+   ——————————————————————————————————————————————————————— */
+.sch-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:60px; }
+.sc {
+  background: var(--bg3); border: 1px solid var(--bdr);
+  border-radius: var(--r-xl); padding: 32px 28px;
+  position: relative; overflow: hidden; transition: all 0.3s;
+}
+.sc:hover { transform:translateY(-4px); box-shadow:0 0 0 1px rgba(255,107,0,0.28), 0 24px 60px rgba(0,0,0,0.42); border-color:rgba(255,107,0,0.28); }
+.sc::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--grad-saffron); }
+.sc-tag { display:inline-block; padding:5px 12px; border-radius:var(--r-pill); font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; margin-bottom:18px; }
+.sc-t-s { background:rgba(255,107,0,0.14); color:var(--saffron-lt); border:1px solid rgba(255,107,0,0.3); }
+.sc-t-t { background:rgba(245,197,24,0.12); color:var(--turmeric-lt); border:1px solid rgba(245,197,24,0.3); }
+.sc-t-g { background:rgba(26,122,74,0.14); color:var(--green-bright); border:1px solid rgba(26,122,74,0.3); }
+.sc-amt { font-size:clamp(2rem,3.5vw,2.9rem); font-weight:900; letter-spacing:-0.03em; color:var(--white); margin-bottom:8px; line-height:1; }
+.sc h3 { font-size:1.05rem; color:var(--white); margin-bottom:9px; }
+.sc p  { font-size:13px; color:var(--text-muted); line-height:1.65; margin-bottom:18px; }
+.sc-link { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--saffron-lt); transition:gap .2s; text-decoration:none; }
+.sc-link:hover { gap:11px; }
+
+/* ═══════════════════════════════════════════════════════
+   CITY CARDS
+   ——————————————————————————————————————————————————————— */
+.cities-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:60px; }
+.cc {
+  border-radius:var(--r-xl); overflow:hidden;
+  border:1px solid var(--bdr); transition:all .35s;
+  background:var(--bg3);
+}
+.cc:hover { transform:translateY(-6px); box-shadow:0 28px 70px rgba(0,0,0,.6); border-color:rgba(255,255,255,.12); }
+.ci { height:196px; overflow:hidden; position:relative; }
+.ci img { width:100%; height:100%; object-fit:cover; transition:transform .6s; filter:brightness(.72) saturate(1.25); }
+.cc:hover .ci img { transform:scale(1.07); }
+.ci-ov { position:absolute; inset:0; background:linear-gradient(to top,rgba(7,8,10,.9) 0%,rgba(7,8,10,.1) 55%,transparent 100%); }
+.ci-name { position:absolute; bottom:13px; left:17px; font-size:15px; font-weight:800; color:var(--white); text-shadow:0 2px 8px rgba(0,0,0,.6); }
+.ci-badge { position:absolute; bottom:13px; right:13px; background:rgba(255,107,0,.9); color:#000; font-size:9.5px; font-weight:800; letter-spacing:.06em; padding:4px 9px; border-radius:var(--r-sm); text-transform:uppercase; }
+.cb { padding:18px 20px; }
+.ci-item { display:flex; align-items:flex-start; gap:9px; font-size:12.5px; color:var(--text-muted); margin-bottom:7px; line-height:1.5; }
+.ci-item:last-child{margin-bottom:0}
+.ci-dot { width:6px; height:6px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+
+/* ═══════════════════════════════════════════════════════
+   LANGUAGE SUPPORT
+   ——————————————————————————————————————————————————————— */
+.lang-sec {
+  background: var(--bg);
+  text-align: center; position: relative; overflow: hidden;
+}
+.lang-sec::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background: radial-gradient(ellipse 60% 55% at 50% 50%, rgba(255,107,0,0.10) 0%, transparent 68%);
+}
+.lchips { display:flex; flex-wrap:wrap; justify-content:center; gap:9px; margin-top:42px; max-width:660px; margin-left:auto; margin-right:auto; position:relative; }
+.lchip { padding:8px 18px; border-radius:var(--r-pill); font-size:13.5px; font-weight:600; border:1px solid var(--bdr); color:var(--text-muted); background:rgba(255,255,255,.04); transition:all .2s; }
+.lchip:hover { border-color:rgba(255,107,0,.3); color:var(--saffron-lt); background:var(--saffron-glow); }
+.lchip.on { background:rgba(255,107,0,.14); border-color:rgba(255,107,0,.42); color:var(--saffron-lt); }
+
+/* ═══════════════════════════════════════════════════════
+   IBM TECH
+   ——————————————————————————————————————————————————————— */
+.ibm-band {
+  background: linear-gradient(135deg, rgba(255,107,0,.09) 0%, rgba(26,122,74,.07) 100%);
+  border-top:1px solid var(--bdr); border-bottom:1px solid var(--bdr);
+  padding: 60px 5%;
+}
+.ibm-inner { max-width:1140px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:40px; flex-wrap:wrap; }
+.ibm-left h2 { color:var(--white); margin-bottom:13px; }
+.ibm-left p  { color:var(--text-muted); max-width:420px; }
+.ibm-cards { display:flex; flex-direction:column; gap:11px; }
+.ibm-card {
+  display:flex; align-items:center; gap:13px;
+  background:rgba(255,255,255,.04); border:1px solid var(--bdr);
+  border-radius:var(--r-md); padding:13px 18px; min-width:320px;
+}
+.ibm-ic { font-size:20px; }
+.ibm-nm { font-size:12.5px; font-weight:700; color:var(--white); font-family:var(--mono); }
+.ibm-rl { font-size:11.5px; color:var(--text-dim); }
+.ibm-badge { margin-left:auto; padding:3px 9px; border-radius:var(--r-pill); font-size:9.5px; font-weight:800; letter-spacing:.06em; }
+.ib-gen { background:rgba(255,107,0,.18); color:var(--saffron-lt); border:1px solid rgba(255,107,0,.35); }
+.ib-emb { background:rgba(245,197,24,.16); color:var(--turmeric-lt); border:1px solid rgba(245,197,24,.32); }
+
+/* ═══════════════════════════════════════════════════════
+   CTA
+   ——————————————————————————————————————————————————————— */
+.cta-sec { background:var(--bg); text-align:center; position:relative; overflow:hidden; }
+.cta-sec::before { content:''; position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse 65% 55% at 50% 50%, rgba(255,107,0,.16) 0%, transparent 62%); }
+.cta-sec h2 { color:var(--white); max-width:620px; margin:0 auto 16px; position:relative; }
+.cta-sec p  { max-width:450px; margin:0 auto 44px; font-size:1.05rem; position:relative; }
+.cta-note { margin-top:18px; font-size:11.5px; color:var(--text-dim); position:relative; }
+
+/* ═══════════════════════════════════════════════════════
+   FOOTER
+   ——————————————————————————————————————————————————————— */
+footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5% 32px; }
+.foot-inner { max-width:1140px; margin:0 auto; display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:46px; margin-bottom:44px; }
+.fbrand { font-size:14.5px; font-weight:800; color:var(--white); margin-bottom:11px; display:flex; align-items:center; gap:10px; }
+.fb-mark { width:28px; height:28px; border-radius:7px; background:var(--grad-saffron); display:flex; align-items:center; justify-content:center; font-size:14px; }
+.fdesc { font-size:12.5px; color:var(--text-dim); line-height:1.72; margin-bottom:18px; }
+.fchips { display:flex; gap:7px; flex-wrap:wrap; }
+.fchip { padding:3px 9px; border-radius:var(--r-pill); font-size:10.5px; font-weight:700; font-family:var(--mono); background:rgba(255,255,255,.05); border:1px solid var(--bdr); color:var(--text-dim); }
+.fcol h5 { font-size:11.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-dim); margin-bottom:14px; }
+.fcol a { display:block; font-size:13.5px; color:var(--text-muted); margin-bottom:9px; transition:color .2s; text-decoration:none; }
+.fcol a:hover { color:var(--saffron-lt); }
+.fbot { max-width:1140px; margin:0 auto; padding-top:22px; border-top:1px solid var(--bdr); display:flex; justify-content:space-between; flex-wrap:wrap; gap:9px; font-size:11.5px; color:var(--text-dim); }
+
+/* ═══════════════════════════════════════════════════════
+   SCROLL REVEAL
+   ——————————————————————————————————————————————————————— */
+.rv { opacity:0; transform:translateY(30px); transition:opacity .72s ease, transform .72s ease; }
+.rv.in { opacity:1; transform:translateY(0); }
+.d1{transition-delay:.1s} .d2{transition-delay:.2s} .d3{transition-delay:.3s}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+   ——————————————————————————————————————————————————————— */
+@media(max-width:960px){
+  .bento,.feat-grid,.sch-grid,.cities-grid{grid-template-columns:1fr}
+  .bc.sp3{grid-column:span 1}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .foot-inner{grid-template-columns:1fr 1fr}
+  .ibm-inner{flex-direction:column}
+  .ibm-card{min-width:unset}
+  #nav .nav-links{display:none}
+}
+@media(max-width:560px){
+  .stats{grid-template-columns:1fr 1fr}
+  .foot-inner{grid-template-columns:1fr}
+  section{padding:72px 5%}
+  .hero-btns{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient glow orbs -->
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="orb o3"></div>
+
+<!-- ═══ NAVBAR ═══════════════════════════════════════════ -->
+<nav id="nav">
+  <a href="/" class="nav-logo">
+    <div class="nav-mark">&#x1F6D2;</div>
+    <span>Street Vendor Digitalization Agent</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#schemes">Schemes</a></li>
+    <li><a href="#cities">Cities</a></li>
+    <li><a href="#tech">Technology</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="live-pill"><span class="pulse"></span>AI Live</div>
+    <a href="/agent" class="btn-launch">&#x1F680; Launch Agent</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO — VIDEO BACKGROUND ════════════════════════════ -->
+<section class="hero">
+
+  <!-- HERO VISUAL (offline-friendly): animated gradient/texture instead of blocked video -->
+  <div class="hero-video-wrap">
+    <div class="hero-anim-bg" aria-hidden="true"></div>
+    <div class="hero-anim-grid" aria-hidden="true"></div>
+    <div class="hero-anim-spark" aria-hidden="true"></div>
+  </div>
+  <div class="hero-video-overlay"></div>
+  <div class="hero-video-vignette"></div>
+  <div class="hero-dots"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-jewel"></span>
+      AICTE-IBM SkillsBuild 2026
+    </div>
+
+    <h1>
+      <span class="t-saffron">Digitalize</span> <span class="t-white">Every</span><br/>
+      <span class="t-white">Street Vendor.</span><br/>
+      <span class="t-green">Empower</span> <span class="t-white">Every Hawker.</span>
+    </h1>
+
+    <p class="hero-sub">
+      An AI-powered RAG agent that transforms India's 5 crore informal vendors into
+      digitally visible businesses — UPI, MSME credit, Google listing, QR codes &amp;
+      promotional materials in your local language. Powered by IBM watsonx.ai.
+    </p>
+
+    <div class="hero-btns">
+      <a href="/agent" class="btn-hero-primary">&#x1F680; Launch the Agent</a>
+      <a href="#how" class="btn-hero-ghost">See How It Works &#x2193;</a>
+    </div>
+
+    <div class="hero-card">
+      <div class="card-eyebrow">Live Sample Query</div>
+      <div class="card-query">"I sell fruit in Pune's Camp area. How do I go digital?"</div>
+      <div class="card-tags">
+        <span class="ctag ct-s">&#x1F4B3; UPI Setup — PhonePe in 5 mins</span>
+        <span class="ctag ct-t">&#x1F4B0; PM SVANidhi Rs.10,000</span>
+        <span class="ctag ct-g">&#x1F5FA; Google Maps — Camp, Pune</span>
+        <span class="ctag ct-r">&#x1F4F1; QR Poster in Marathi</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-down">
+    <span>Scroll</span>
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+      <path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</section>
+
+<!-- (Removed premium parallax script per feedback) -->
+<!-- ═══ TICKER ════════════════════════════════════════════ -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ti-s">PM SVANidhi</span><span>&#183;</span>
+    <span>Udyam MSME</span><span>&#183;</span>
+    <span class="ti-t">UPI Payments</span><span>&#183;</span>
+    <span>Google Maps Listing</span><span>&#183;</span>
+    <span class="ti-s">Swiggy Instamart</span><span>&#183;</span>
+    <span>Zomato Partner</span><span>&#183;</span>
+    <span class="ti-g">IBM watsonx.ai</span><span>&#183;</span>
+    <span>Meesho Seller</span><span>&#183;</span>
+    <span class="ti-t">WhatsApp Business</span><span>&#183;</span>
+    <span>Mudra Yojana</span><span>&#183;</span>
+    <span class="ti-s">FSSAI License</span><span>&#183;</span>
+    <span>Local SEO</span><span>&#183;</span>
+    <span class="ti-g">ChromaDB RAG</span><span>&#183;</span>
+    <span class="ti-t">granite-4-h-small</span><span>&#183;</span>
+    <!-- duplicate for seamless loop -->
+    <span class="ti-s">PM SVANidhi</span><span>&#183;</span>
+    <span>Udyam MSME</span><span>&#183;</span>
+    <span class="ti-t">UPI Payments</span><span>&#183;</span>
+    <span>Google Maps Listing</span><span>&#183;</span>
+    <span class="ti-s">Swiggy Instamart</span><span>&#183;</span>
+    <span>Zomato Partner</span><span>&#183;</span>
+    <span class="ti-g">IBM watsonx.ai</span><span>&#183;</span>
+    <span>Meesho Seller</span><span>&#183;</span>
+    <span class="ti-t">WhatsApp Business</span><span>&#183;</span>
+    <span>Mudra Yojana</span><span>&#183;</span>
+    <span class="ti-s">FSSAI License</span><span>&#183;</span>
+    <span>Local SEO</span><span>&#183;</span>
+    <span class="ti-g">ChromaDB RAG</span><span>&#183;</span>
+    <span class="ti-t">granite-4-h-small</span><span>&#183;</span>
+  </div>
+</div>
+
+<!-- ═══ STATS BAND ════════════════════════════════════════ -->
+<div class="stats">
+  <div class="stat rv"><div class="stat-n counter" data-t="5" data-s="Cr+">0</div><div class="stat-l">Street vendors in India</div></div>
+  <div class="stat rv d1"><div class="stat-n counter" data-t="95" data-s="%">0</div><div class="stat-l">Currently undigitized</div></div>
+  <div class="stat rv d2"><div class="stat-n counter" data-t="22" data-s="+">0</div><div class="stat-l">Indian languages supported</div></div>
+  <div class="stat rv d3"><div class="stat-n counter" data-t="48" data-s="hrs">0</div><div class="stat-l">Average time to go digital</div></div>
+</div>
+
+<!-- ═══ HOW IT WORKS ══════════════════════════════════════ -->
+<section id="how" style="background:var(--bg2);">
+  <div class="container">
+    <div class="rv"><div class="eyebrow">How It Works</div><h2 class="sec-title">Three steps to your<br/>complete digital presence</h2><p class="sec-sub">From a single sentence in your language to a full digital kit — powered by IBM Granite RAG.</p></div>
+    <div class="bento">
+
+      <div class="bc rv d1">
+        <div class="bc-num">01</div>
+        <div class="bc-icon i-s">&#x1F5E3;</div>
+        <h3>Tell Us About Your Business</h3>
+        <p>Type naturally in Hindi, Marathi, Tamil, or any Indian language — "I sell flowers near Dadar station." Our multilingual model understands the full context and your city's market dynamics.</p>
+      </div>
+
+      <div class="bc rv d2">
+        <div class="bc-num">02</div>
+        <div class="bc-icon i-t">&#x1F9E0;</div>
+        <h3>RAG Retrieves Real-World Data</h3>
+        <p>Government schemes, UPI guides, city-specific vendor data and fintech options — ChromaDB cosine retrieval surfaces the most relevant, factual, grounded information. Zero hallucination.</p>
+      </div>
+
+      <div class="bc rv d3">
+        <div class="bc-num">03</div>
+        <div class="bc-icon i-g">&#x1F4E6;</div>
+        <h3>Granite Generates Your Digital Kit</h3>
+        <p>IBM granite-4-h-small crafts UPI setup steps, eligible schemes, listing platform advice, local SEO keywords, and a printable Indian-aesthetic QR business card — all in your language.</p>
+      </div>
+
+      <!-- Pipeline row -->
+      <div class="bc sp3 rv">
+        <div class="bc-icon i-b">&#x26A1;</div>
+        <h3>IBM watsonx.ai RAG Pipeline</h3>
+        <p>End-to-end in under 3 seconds — embed, retrieve, generate, respond.</p>
+        <div class="pipe">
+          <div class="ps">&#x1F9D1; Vendor Query <span class="pb">Natural Language</span></div>
+          <span class="pa">&#x2192;</span>
+          <div class="ps">&#x1F9E9; Embed <span class="pb">granite-278m-multilingual</span></div>
+          <span class="pa">&#x2192;</span>
+          <div class="ps">&#x1F50D; ChromaDB <span class="pb">Cosine Search</span></div>
+          <span class="pa">&#x2192;</span>
+          <div class="ps">&#x26A1; Generate <span class="pb">granite-4-h-small</span></div>
+          <span class="pa">&#x2192;</span>
+          <div class="ps">&#x1F4C4; Digital Kit + QR Card</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ══════════════════════════════════════════ -->
+<section id="features" style="background:var(--bg2);padding-top:0;">
+  <div class="container">
+    <div class="rv"><div class="eyebrow">Core Features</div><h2 class="sec-title">Everything a vendor needs<br/>to thrive online</h2></div>
+    <div class="feat-grid">
+
+      <div class="fc rv d1">
+        <div class="fi" style="background:rgba(255,107,0,0.14);">&#x1F3EA;</div>
+        <h3>AI Business Profile</h3>
+        <p>Auto-generate business name, description, SEO keywords and a Google My Business listing draft powered by IBM granite-4-h-small in seconds.</p>
+        <span class="ft" style="background:rgba(255,107,0,0.12);color:var(--saffron-lt);border:1px solid rgba(255,107,0,0.3);">AI-Generated</span>
+      </div>
+
+      <div class="fc rv d2">
+        <div class="fi" style="background:rgba(245,197,24,0.12);">&#x1F4B3;</div>
+        <h3>UPI &amp; QR Setup</h3>
+        <p>Step-by-step PhonePe, Paytm, GPay &amp; BHIM onboarding. Generates a printable Indian-style QR business card with your name and UPI ID.</p>
+        <span class="ft" style="background:rgba(245,197,24,0.10);color:var(--turmeric-lt);border:1px solid rgba(245,197,24,0.3);">Instant QR</span>
+      </div>
+
+      <div class="fc rv d3">
+        <div class="fi" style="background:rgba(26,122,74,0.14);">&#x1F3E6;</div>
+        <h3>MSME Credit Access</h3>
+        <p>Real-time eligibility for PM SVANidhi, Mudra Yojana &amp; Udyam — with a complete step-by-step guided application including document checklist.</p>
+        <span class="ft" style="background:rgba(26,122,74,0.12);color:var(--green-bright);border:1px solid rgba(26,122,74,0.3);">Zero Collateral</span>
+      </div>
+
+      <div class="fc rv">
+        <div class="fi" style="background:rgba(56,189,248,0.12);">&#x1F4CD;</div>
+        <h3>Hyperlocal SEO</h3>
+        <p>City-specific Google Maps optimization for Pune, Mumbai, Chennai, Bangalore, Surat and Delhi — keywords, listing tips and review strategies.</p>
+        <span class="ft" style="background:rgba(56,189,248,0.10);color:#7dd3fc;border:1px solid rgba(56,189,248,0.3);">City-Specific</span>
+      </div>
+
+      <div class="fc rv d1">
+        <div class="fi" style="background:rgba(230,51,18,0.12);">&#x1F4E2;</div>
+        <h3>Customer Engagement</h3>
+        <p>WhatsApp Business setup, festival pricing strategies, loyalty programs and broadcast message templates generated in your local language.</p>
+        <span class="ft" style="background:rgba(230,51,18,0.10);color:#ff7b5f;border:1px solid rgba(230,51,18,0.3);">Multilingual</span>
+      </div>
+
+      <div class="fc rv d2">
+        <div class="fi" style="background:rgba(26,122,74,0.14);">&#x1F310;</div>
+        <h3>22+ Indian Languages</h3>
+        <p>granite-embedding-278m-multilingual delivers native semantic understanding in Hindi, Marathi, Tamil, Telugu, Kannada, Bengali, Gujarati and 15 more.</p>
+        <span class="ft" style="background:rgba(26,122,74,0.12);color:var(--green-bright);border:1px solid rgba(26,122,74,0.3);">Native NLP</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ GOVERNMENT SCHEMES ════════════════════════════════ -->
+<section id="schemes" style="background:var(--bg);">
+  <div class="container">
+    <div class="rv"><div class="eyebrow">Government Schemes</div><h2 class="sec-title">Credit &amp; benefits you are<br/>already eligible for</h2><p class="sec-sub">Our RAG agent retrieves live eligibility data and guides you through every application — in your language.</p></div>
+    <div class="sch-grid">
+
+      <div class="sc rv d1">
+        <div class="sc-tag sc-t-s">Micro Credit</div>
+        <div class="sc-amt">Rs.10,000</div>
+        <h3>PM SVANidhi</h3>
+        <p>Zero-collateral working capital loan for street vendors. UPI cashback up to Rs.1,200/year. Instant digital application through the mobile app.</p>
+        <a href="https://pmsvanidhi.mohua.gov.in" target="_blank" class="sc-link">Apply Now &#x2192;</a>
+      </div>
+
+      <div class="sc rv d2">
+        <div class="sc-tag sc-t-t">MSME Loan</div>
+        <div class="sc-amt">Rs.50,000</div>
+        <h3>Mudra — Shishu / Kishore</h3>
+        <p>Up to Rs.10 lakhs with zero collateral. Apply at any PSU bank, NBFC, or MFI. Dedicated MSME support and doorstep banking available.</p>
+        <a href="https://mudra.org.in" target="_blank" class="sc-link">Apply Now &#x2192;</a>
+      </div>
+
+      <div class="sc rv d3">
+        <div class="sc-tag sc-t-g">Free Forever</div>
+        <div class="sc-amt">Free</div>
+        <h3>MSME Udyam Certificate</h3>
+        <p>Instant Aadhaar-based certificate unlocks priority lending, government subsidies, tender access and input credit benefits immediately.</p>
+        <a href="https://udyamregistration.gov.in" target="_blank" class="sc-link">Register Free &#x2192;</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CITY SHOWCASE ════════════════════════════════════ -->
+<section id="cities" style="background:var(--bg2);">
+  <div class="container">
+    <div class="rv"><div class="eyebrow">Use Cases</div><h2 class="sec-title">Real vendors. Real cities.<br/>Real results.</h2><p class="sec-sub">City-specific hyperlocal knowledge for vendors across India's biggest markets.</p></div>
+    <div class="cities-grid">
+
+      <div class="cc rv d1">
+        <div class="ci">
+          <img src="https://images.unsplash.com/photo-1601924638867-3a6de6b7a500?w=600&q=80&fit=crop" alt="Pune fruit vendor" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#1a1a1a,#2a1a0a)'"/>
+          <div class="ci-ov"></div>
+          <div class="ci-name">Pune, Maharashtra</div>
+          <div class="ci-badge">Camp Area</div>
+        </div>
+        <div class="cb">
+          <div class="ci-item"><span class="ci-dot" style="background:var(--saffron)"></span>Fruit &amp; Vegetable Vendor — Camp, Pune</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--saffron)"></span>QR poster in Marathi + Swiggy Instamart</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--saffron)"></span>PM SVANidhi Rs.10,000 guided</div>
+        </div>
+      </div>
+
+      <div class="cc rv d2">
+        <div class="ci">
+          <img src="https://images.unsplash.com/photo-1567337710282-00832b415979?w=600&q=80&fit=crop" alt="Chennai food stall" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#0a1a0a,#0a2a0a)'"/>
+          <div class="ci-ov"></div>
+          <div class="ci-name">Chennai, Tamil Nadu</div>
+          <div class="ci-badge">T. Nagar</div>
+        </div>
+        <div class="cb">
+          <div class="ci-item"><span class="ci-dot" style="background:var(--green-bright)"></span>Idli-Dosa Stall — T. Nagar, Chennai</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--green-bright)"></span>Zomato listing in Tamil + FSSAI guided</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--green-bright)"></span>WhatsApp menu card generated</div>
+        </div>
+      </div>
+
+      <div class="cc rv d3">
+        <div class="ci">
+          <img src="https://images.unsplash.com/photo-1529154691717-3306083d869e?w=600&q=80&fit=crop" alt="Mumbai market" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#0a0a1a,#1a0a2a)'"/>
+          <div class="ci-ov"></div>
+          <div class="ci-name">Mumbai, Maharashtra</div>
+          <div class="ci-badge">Dharavi</div>
+        </div>
+        <div class="cb">
+          <div class="ci-item"><span class="ci-dot" style="background:var(--turmeric)"></span>Textile Seller — Dharavi, Mumbai</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--turmeric)"></span>Meesho + GlowRoad onboarding</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--turmeric)"></span>Mudra Yojana application guided</div>
+        </div>
+      </div>
+
+      <div class="cc rv d1">
+        <div class="ci">
+          <img src="https://images.unsplash.com/photo-1596797038530-2c107229654b?w=600&q=80&fit=crop" alt="Bangalore KR Market" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#1a0a0a,#2a0a0a)'"/>
+          <div class="ci-ov"></div>
+          <div class="ci-name">Bangalore, Karnataka</div>
+          <div class="ci-badge">KR Market</div>
+        </div>
+        <div class="cb">
+          <div class="ci-item"><span class="ci-dot" style="background:var(--vermilion-lt)"></span>Flower Vendor — KR Market, Bangalore</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--vermilion-lt)"></span>Google Maps listing in Kannada</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--vermilion-lt)"></span>BBMP vendor registration guided</div>
+        </div>
+      </div>
+
+      <div class="cc rv d2">
+        <div class="ci">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&fit=crop" alt="Surat textiles" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#1a1500,#2a1a00)'"/>
+          <div class="ci-ov"></div>
+          <div class="ci-name">Surat, Gujarat</div>
+          <div class="ci-badge">Ring Road</div>
+        </div>
+        <div class="cb">
+          <div class="ci-item"><span class="ci-dot" style="background:var(--turmeric-lt)"></span>Saree &amp; Textile — Ring Road, Surat</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--turmeric-lt)"></span>Instagram shop in Gujarati</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--turmeric-lt)"></span>Festival sale promotion template</div>
+        </div>
+      </div>
+
+      <div class="cc rv d3">
+        <div class="ci">
+          <img src="https://images.unsplash.com/photo-1587474260584-136574528ed5?w=600&q=80&fit=crop" alt="Delhi Chandni Chowk" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#1a0800,#0a0a0a)'"/>
+          <div class="ci-ov"></div>
+          <div class="ci-name">Delhi / NCR</div>
+          <div class="ci-badge">Chandni Chowk</div>
+        </div>
+        <div class="cb">
+          <div class="ci-item"><span class="ci-dot" style="background:var(--saffron-lt)"></span>Dry Fruit Vendor — Chandni Chowk, Delhi</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--saffron-lt)"></span>Swiggy + Google Maps listing</div>
+          <div class="ci-item"><span class="ci-dot" style="background:var(--saffron-lt)"></span>UPI QR poster in Hindi</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LANGUAGE SUPPORT ══════════════════════════════════ -->
+<section class="lang-sec">
+  <div class="container" style="position:relative;z-index:1;text-align:center;">
+    <div class="eyebrow" style="justify-content:center;">Language Support</div>
+    <h2 class="sec-title" style="margin-left:auto;margin-right:auto;">Speaks your language,<br/>not just English.</h2>
+    <p class="sec-sub" style="margin:0 auto;">Powered by <strong style="color:var(--saffron-lt)">granite-embedding-278m-multilingual</strong> — native semantic understanding across 22+ Indian languages.</p>
+    <div class="lchips">
+      <span class="lchip on">Hindi</span>
+      <span class="lchip on">Marathi</span>
+      <span class="lchip on">Tamil</span>
+      <span class="lchip on">Telugu</span>
+      <span class="lchip on">Kannada</span>
+      <span class="lchip on">Bengali</span>
+      <span class="lchip on">Gujarati</span>
+      <span class="lchip">Punjabi</span>
+      <span class="lchip">Urdu</span>
+      <span class="lchip">Odia</span>
+      <span class="lchip">Malayalam</span>
+      <span class="lchip">Assamese</span>
+      <span class="lchip">Maithili</span>
+      <span class="lchip">Santali</span>
+      <span class="lchip">+ 8 more</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ IBM TECH ══════════════════════════════════════════ -->
+<div id="tech" class="ibm-band">
+  <div class="ibm-inner">
+    <div class="ibm-left">
+      <div class="eyebrow">Powered by IBM</div>
+      <h2 class="sec-title">Built entirely on<br/>IBM watsonx.ai Granite</h2>
+      <p>All AI inference uses IBM's enterprise-grade Granite foundation models — no third-party AI providers. Fast, multilingual, and grounded in real facts via RAG.</p>
+    </div>
+    <div class="ibm-cards">
+      <div class="ibm-card">
+        <div class="ibm-ic">&#x26A1;</div>
+        <div>
+          <div class="ibm-nm">ibm/granite-4-h-small</div>
+          <div class="ibm-rl">Language Generation</div>
+        </div>
+        <span class="ibm-badge ib-gen">GENERATION</span>
+      </div>
+      <div class="ibm-card">
+        <div class="ibm-ic">&#x1F9E9;</div>
+        <div>
+          <div class="ibm-nm">ibm/granite-embedding-278m-multilingual</div>
+          <div class="ibm-rl">Semantic Embeddings</div>
+        </div>
+        <span class="ibm-badge ib-emb">EMBEDDING</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CTA ═══════════════════════════════════════════════ -->
+<section class="cta-sec">
+  <div class="eyebrow" style="justify-content:center;margin-bottom:22px;">Get Started Free</div>
+  <h2>Your business deserves to be<br/><span style="background:var(--grad-fire);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">digitally visible.</span></h2>
+  <p>Type your business. IBM watsonx.ai generates your complete digital kit in seconds. Free, always.</p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;">
+    <a href="/agent" class="btn-hero-primary" style="font-size:15.5px;padding:16px 38px;">&#x26A1; Launch the Agent</a>
+    <a href="#how" class="btn-hero-ghost" style="font-size:15.5px;padding:15px 36px;">Learn More</a>
+  </div>
+  <p class="cta-note">No sign-up required &nbsp;&#183;&nbsp; Free forever &nbsp;&#183;&nbsp; 22+ Indian languages</p>
+</section>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════ -->
+<footer>
+  <div class="foot-inner">
+    <div>
+      <div class="fbrand"><div class="fb-mark">&#x1F6D2;</div>Street Vendor Digitalization Agent</div>
+      <p class="fdesc">AICTE-IBM SkillsBuild Internship 2026.<br/>IBM watsonx.ai Granite models + ChromaDB RAG pipeline.</p>
+      <div class="fchips">
+        <span class="fchip">granite-4-h-small</span>
+        <span class="fchip">granite-embedding-278m</span>
+        <span class="fchip">ChromaDB</span>
+        <span class="fchip">FastAPI</span>
+      </div>
+    </div>
+    <div class="fcol">
+      <h5>Product</h5>
+      <a href="/agent">Live Agent Chat</a>
+      <a href="#features">Features</a>
+      <a href="#schemes">Govt Schemes</a>
+      <a href="#cities">Use Cases</a>
+    </div>
+    <div class="fcol">
+      <h5>Resources</h5>
+      <a href="https://pmsvanidhi.mohua.gov.in" target="_blank">PM SVANidhi Portal</a>
+      <a href="https://udyamregistration.gov.in" target="_blank">MSME Udyam</a>
+      <a href="https://foscos.fssai.gov.in" target="_blank">FSSAI Registration</a>
+      <a href="https://mudra.org.in" target="_blank">Mudra Yojana</a>
+    </div>
+    <div class="fcol">
+      <h5>Technology</h5>
+      <a href="https://dataplatform.cloud.ibm.com" target="_blank">IBM watsonx.ai</a>
+      <a href="https://digitalindia.gov.in" target="_blank">Digital India</a>
+      <a href="https://www.trychroma.com" target="_blank">ChromaDB</a>
+      <a href="https://fastapi.tiangolo.com" target="_blank">FastAPI</a>
+    </div>
+  </div>
+  <div class="fbot">
+    <span>2026 Street Vendor Digitalization Agent &middot; AICTE-IBM SkillsBuild Internship</span>
+    <span>IBM watsonx.ai &middot; granite-4-h-small &middot; ChromaDB</span>
+  </div>
+</footer>
+
+<script>
+/* Navbar scroll */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 50), {passive:true});
+
+/* Scroll reveal */
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } });
+}, {threshold: 0.1});
+document.querySelectorAll('.rv').forEach(el => ro.observe(el));
+
+/* Animated counters */
+function runCounter(el) {
+  const target = parseFloat(el.dataset.t);
+  const suffix = el.dataset.s || '';
+  const dur = 1800, step = 16, steps = dur / step;
+  let cur = 0, inc = target / steps;
+  const t = setInterval(() => {
+    cur += inc;
+    if (cur >= target) { cur = target; clearInterval(t); }
+    el.textContent = Math.floor(cur) + suffix;
+  }, step);
+}
+const co = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting && !e.target.dataset.done) {
+      e.target.dataset.done = '1';
+      runCounter(e.target);
+      co.unobserve(e.target);
+    }
+  });
+}, {threshold: 0.5});
+document.querySelectorAll('.counter').forEach(el => co.observe(el));
+
+/* Backend health check */
+fetch('/api/health').then(r => r.json()).then(d => {
+  if (d && d.status === 'ok') {
+    const pill = document.querySelector('.live-pill');
+    if (pill) pill.innerHTML = '<span class="pulse"></span>AI Live';
+  }
+}).catch(() => {});
+</script>
+</body>
+</html>
