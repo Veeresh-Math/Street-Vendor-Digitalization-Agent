@@ -8,6 +8,7 @@ Flow:
 """
 
 import os
+from typing import Optional
 import chromadb
 from chromadb.config import Settings
 from backend.ibm_client import embed, embed_query, generate
@@ -18,8 +19,8 @@ CHROMA_PATH       = os.path.join(os.path.dirname(__file__), "..", "vector_store"
 COLLECTION_NAME   = "vendor_knowledge"
 DEFAULT_TOP_K     = 3
 
-_chroma_client: chromadb.PersistentClient | None = None
-_collection: chromadb.Collection | None = None
+_chroma_client: Optional[chromadb.PersistentClient] = None
+_collection: Optional[chromadb.Collection] = None
 
 
 def _get_collection() -> chromadb.Collection:
