@@ -20,6 +20,7 @@ import os
 import sys
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
@@ -70,6 +71,14 @@ app = FastAPI(
 # ── Static files ──────────────────────────────────────────────────────────────
 app.mount("/static",   StaticFiles(directory=STATIC_DIR),   name="static")
 app.mount("/frontend", StaticFiles(directory=FRONTEND_DIR), name="frontend")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ── Frontend page routes ───────────────────────────────────────────────────────
 @app.get("/", include_in_schema=False)
