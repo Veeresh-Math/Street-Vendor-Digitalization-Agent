@@ -39,7 +39,7 @@ async function sendMessage() {
   const typingEl = appendTyping();
 
   try {
-    const res = await fetch('/api/query', {
+    const res = await fetch('https://street-vendor-digitalization-agent-isog.onrender.com/api/query', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ query, language: lang, top_k: 3 }),
@@ -138,7 +138,7 @@ function buildDocsPanel(docs) {
 // Health check
 async function checkHealth() {
   try {
-    const r = await fetch('/api/health');
+    const r = await fetch('https://street-vendor-digitalization-agent-isog.onrender.com/api/health');
     const d = await r.json();
     document.getElementById('navStatus').textContent =
       d.ibm_status === 'connected' ? 'IBM Connected' : 'Connecting...';

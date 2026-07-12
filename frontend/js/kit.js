@@ -22,7 +22,7 @@ async function generateKit() {
   showPipeline(['🔍 Embedding query…', '📄 Retrieving docs…', '⚡ Generating with granite-4-h-small…', '🎫 Rendering receipt…']);
 
   try {
-    const res = await fetch('/api/generate-kit', {
+    const res = await fetch('https://street-vendor-digitalization-agent-isog.onrender.com/api/generate-kit', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({

@@ -8,7 +8,7 @@ async function detectLocation() {
     const { latitude: lat, longitude: lon } = pos.coords;
     try {
       // Reverse geocode via Nominatim through our backend
-      const r = await fetch(`/api/geocode?q=${lat},${lon}`);
+      const r = await fetch(`https://street-vendor-digitalization-agent-isog.onrender.com/api/geocode?q=${lat},${lon}`);
       const d = await r.json();
       if (d.found) {
         userLocation = d;
@@ -25,3 +25,4 @@ async function detectLocation() {
 
 // Auto-detect on agent page load
 detectLocation();
+
