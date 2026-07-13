@@ -20,8 +20,19 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-
 # Local Netlify folder
 .netlify
-
 .vercel
+
+# Backup / temp files
+*.backup
+*.txt
+TODO.md
+GENERATION_SUMMARY.txt
+test.py
+test.txt
+generate_reports.py
+generate_submission.py
+yourproblemstatement.pdf
+frontend/agent_from_remote.html
+.github/workflows/test-*.yml
