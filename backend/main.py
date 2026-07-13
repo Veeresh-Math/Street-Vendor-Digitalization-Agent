@@ -147,6 +147,12 @@ async def health():
     )
 
 
+# ── API: Ping (keep-alive, no IBM call, instant response) ─────────────────────
+@app.get("/api/ping", tags=["System"])
+async def ping():
+    return {"status": "ok"}
+
+
 # ── API: Build Index ───────────────────────────────────────────────────────────
 @app.post("/api/build-index", tags=["System"])
 async def api_build_index(background_tasks: BackgroundTasks, force: bool = False):
