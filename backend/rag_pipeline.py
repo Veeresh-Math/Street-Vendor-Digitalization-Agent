@@ -174,27 +174,25 @@ def _build_prompt(user_query: str, retrieved: list[dict], language: str = "en") 
         )
     context_str = "\n\n".join(context_blocks)
 
-    prompt = f"""You are the Street Vendor Digitalization Agent, an AI assistant for the AICTE-IBM SkillsBuild Internship 2026 (Problem Statement No. 29).
-Your mission: help Indian street vendors and hawkers become digitally visible and grow their business.
+    prompt = f"""You are the Street Vendor Digitalization Agent for Indian street vendors.
 {lang_instruction}
 
-Use ONLY the information from the documents below. Do not invent schemes, links, or phone numbers.
+Use ONLY the documents below. Do not invent schemes, links, or numbers.
 
---- RETRIEVED KNOWLEDGE ---
+--- KNOWLEDGE ---
 {context_str}
---- END OF KNOWLEDGE ---
+--- END ---
 
-Vendor's query: "{user_query}"
+Query: "{user_query}"
 
-Provide a structured, friendly, actionable response with these sections (use only what is relevant):
-[1] Digital Payment Setup (UPI / QR steps)
-[2] Online Listing Platforms (specific apps for their business type)
-[3] Government Schemes (eligibility + application steps + helpline)
-[4] Local SEO Tips (specific to their city/locality)
-[5] Customer Engagement Ideas (WhatsApp, festivals, loyalty)
-[6] Next Steps (top 3 immediate actions)
+Give a practical, actionable response with:
+[1] UPI/QR Payment setup
+[2] Online listing platforms
+[3] Government schemes (eligibility + steps)
+[4] Local SEO tips
+[5] Next 3 immediate actions
 
-Keep it practical and specific. Mention exact app names, portal URLs, and helpline numbers from the documents.
+Be specific. Use exact app names, URLs, helpline numbers from documents.
 
 Response:"""
     return prompt

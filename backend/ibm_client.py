@@ -48,8 +48,8 @@ def _get_gen_model() -> ModelInference:
             api_client = _get_client(),
             params     = {
                 GenParams.DECODING_METHOD  : "greedy",
-                GenParams.MAX_NEW_TOKENS   : 600,
-                GenParams.MIN_NEW_TOKENS   : 60,
+                GenParams.MAX_NEW_TOKENS   : 400,
+                GenParams.MIN_NEW_TOKENS   : 30,
                 GenParams.REPETITION_PENALTY: 1.1,
             },
         )
