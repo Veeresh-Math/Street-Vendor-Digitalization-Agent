@@ -4,42 +4,49 @@ const chatMessages = document.getElementById('chatMessages');
 const chatEmpty    = document.getElementById('chatEmpty');
 const chatInput    = document.getElementById('chatInput');
 const sendBtn      = document.getElementById('sendBtn');
-const langSelect   = document.getElementById('langSelect');
+
+function getChatLang() {
+  const sel = document.getElementById('langSelectChat') || document.getElementById('langSelect');
+  return sel ? sel.value : 'en';
+}
 
 // Enter key sends
-chatInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !sendBtn.disabled) sendMessage();
-});
+if (chatInput) {
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !sendBtn.disabled) sendMessage();
+  });
+}
 
 function fillQuery(el) {
-  chatInput.value = el.textContent.trim();
-  chatInput.focus();
+  if (chatInput) {
+    chatInput.value = el.textContent.trim();
+    chatInput.focus();
+  }
 }
 
 function clearChat() {
-  chatMessages.innerHTML = '';
-  chatMessages.appendChild(chatEmpty);
-  chatEmpty.style.display = 'flex';
+  if (chatMessages) {
+    chatMessages.innerHTML = '';
+    chatMessages.appendChild(chatEmpty);
+    chatEmpty.style.display = 'flex';
+  }
 }
 
 async function sendMessage() {
   const query = chatInput.value.trim();
-  const lang  = langSelect.value;
+  const lang  = getChatLang();
   if (!query) return;
 
-  // Hide empty state
   chatEmpty.style.display = 'none';
-
-  // Add user bubble
   appendBubble('user', query);
   chatInput.value = '';
   sendBtn.disabled = true;
 
-  // Show typing
   const typingEl = appendTyping();
 
   try {
-    const res = await fetch('https://street-vendor-digitalization-agent-isog.onrender.com/api/query', {
+    const apiBase = window.location.origin || '';
+    const res = await fetch(`${apiBase}/api/query`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ query, language: lang, top_k: 3 }),
@@ -52,24 +59,30 @@ async function sendMessage() {
 
     const data = await res.json();
     typingEl.remove();
-
-    // Agent bubble
     appendBubble('agent', data.answer, data.retrieved_docs);
 
-    // Render receipt in right panel
-    renderReceipt({
-      vendor_name   : document.getElementById('fVendorName').value || 'Vendor',
-      business_type : document.getElementById('fBizType').value    || 'Street Vendor',
-      location      : document.getElementById('fLocation').value   || '—',
-      upi_id        : document.getElementById('fUpiId').value      || null,
-      answer        : data.answer,
-      retrieved_docs: data.retrieved_docs,
-      qr_url        : null,
-    });
+    // Save to offline cache
+    if (typeof saveConversation === 'function') {
+      saveConversation(query, data.answer);
+    }
+
+    // Render receipt in right panel if form exists
+    const fVendorName = document.getElementById('fVendorName');
+    if (fVendorName && typeof renderReceipt === 'function') {
+      renderReceipt({
+        vendor_name   : fVendorName.value || 'Vendor',
+        business_type : document.getElementById('fBizType')?.value || 'Street Vendor',
+        location      : document.getElementById('fLocation')?.value || '',
+        upi_id        : document.getElementById('fUpiId')?.value || null,
+        answer        : data.answer,
+        retrieved_docs: data.retrieved_docs,
+        qr_url        : null,
+      });
+    }
 
   } catch(e) {
     typingEl.remove();
-    appendBubble('agent', `⚠️ Error: ${e.message}\n\nPlease ensure the FastAPI server is running and the vector index is built.`);
+    appendBubble('agent', `Sorry, something went wrong. Please try again in a moment.`);
   }
 
   sendBtn.disabled = false;
@@ -138,16 +151,29 @@ function buildDocsPanel(docs) {
 // Health check
 async function checkHealth() {
   try {
-    const r = await fetch('https://street-vendor-digitalization-agent-isog.onrender.com/api/health');
+    const apiBase = window.location.origin || '';
+    const r = await fetch(`${apiBase}/api/health`);
     const d = await r.json();
-    document.getElementById('navStatus').textContent =
-      d.ibm_status === 'connected' ? 'IBM Connected' : 'Connecting...';
-    document.getElementById('indexStatus').textContent =
-      d.index_ready ? `✅ ${d.doc_count} docs` : '⚠️ Index not ready';
-    document.getElementById('indexStatus').className =
-      'ibm-model-chip ' + (d.index_ready ? 'chip-live' : 'chip-gen');
+    const navStatus = document.getElementById('navStatus');
+    const indexStatus = document.getElementById('indexStatus');
+    const chipIbm = document.getElementById('chipIbm');
+    const chipIdx = document.getElementById('chipIdx');
+    if (navStatus) navStatus.textContent = d.ibm_status === 'connected' ? 'IBM Connected' : 'Connecting...';
+    if (indexStatus) {
+      indexStatus.textContent = d.index_ready ? `${d.doc_count} docs` : 'Index building...';
+      indexStatus.className = 'ibm-model-chip ' + (d.index_ready ? 'chip-live' : 'chip-gen');
+    }
+    if (chipIbm) {
+      chipIbm.textContent = d.ibm_status === 'connected' ? 'IBM: OK' : 'IBM: Error';
+      chipIbm.className = 's-chip ' + (d.ibm_status === 'connected' ? 's-ok' : 's-warn');
+    }
+    if (chipIdx) {
+      chipIdx.textContent = d.index_ready ? `Index: ${d.doc_count} docs` : 'Index: Building';
+      chipIdx.className = 's-chip ' + (d.index_ready ? 's-ok' : 's-warn');
+    }
   } catch(e) {
-    document.getElementById('navStatus').textContent = 'Server starting...';
+    const navStatus = document.getElementById('navStatus');
+    if (navStatus) navStatus.textContent = 'Server starting...';
   }
 }
 checkHealth();

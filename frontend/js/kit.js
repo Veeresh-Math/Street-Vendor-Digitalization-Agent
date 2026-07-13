@@ -7,22 +7,25 @@ const generateKitBtn   = document.getElementById('generateKitBtn');
 
 /* ── Generate Kit (POST /api/generate-kit) ─────────────── */
 async function generateKit() {
-  const vendorName  = document.getElementById('fVendorName').value.trim();
-  const bizType     = document.getElementById('fBizType').value.trim();
-  const location    = document.getElementById('fLocation').value.trim();
-  const upiId       = document.getElementById('fUpiId').value.trim();
-  const lang        = document.getElementById('langSelect').value;
+  const vendorName  = document.getElementById('fVendorName')?.value.trim() || '';
+  const bizType     = document.getElementById('fBizType')?.value.trim() || '';
+  const location    = document.getElementById('fLocation')?.value.trim() || '';
+  const upiId       = document.getElementById('fUpiId')?.value.trim() || '';
+  const lang        = (document.getElementById('langSelectChat') || document.getElementById('langSelect'))?.value || 'en';
 
   if (!vendorName || !bizType || !location) {
     alert('Please fill in Vendor Name, Business Type, and Location.');
     return;
   }
 
-  generateKitBtn.disabled = true;
-  showPipeline(['🔍 Embedding query…', '📄 Retrieving docs…', '⚡ Generating with granite-4-h-small…', '🎫 Rendering receipt…']);
+  if (generateKitBtn) generateKitBtn.disabled = true;
+  showPipeline(['Embedding query...', 'Retrieving docs...', 'Generating with granite...', 'Rendering receipt...']);
+
+/* Local API base URL */
+  const apiBase = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
 
   try {
-    const res = await fetch('https://street-vendor-digitalization-agent-isog.onrender.com/api/generate-kit', {
+    const res = await fetch(`${apiBase}/api/generate-kit`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({
@@ -56,11 +59,12 @@ async function generateKit() {
     alert(`Error generating kit: ${e.message}`);
   }
 
-  generateKitBtn.disabled = false;
+  if (generateKitBtn) generateKitBtn.disabled = false;
 }
 
 /* ── Render Torn Receipt ────────────────────────────────── */
 function renderReceipt(data) {
+  if (!receiptContainer) return;
   hidePipeline();
 
   const qrHtml = data.qr_url
@@ -138,6 +142,7 @@ function shareWhatsApp() {
 
 /* ── Pipeline display helpers ──────────────────────────── */
 function showPipeline(steps) {
+  if (!pipelineDisplay || !pipelineSteps) return;
   pipelineDisplay.style.display = 'block';
   pipelineSteps.innerHTML = steps.map((s,i) =>
     `<div class="pipeline-step ${i===0?'ps-active':'ps-waiting'}" id="ps-${i}">${s}</div>`
@@ -151,12 +156,13 @@ function showPipeline(steps) {
   }, 900);
 }
 function updatePipelineDone() {
+  if (!pipelineSteps) return;
   document.querySelectorAll('.pipeline-step').forEach(el => {
     el.className = 'pipeline-step ps-done';
   });
 }
 function hidePipeline() {
-  pipelineDisplay.style.display = 'none';
+  if (pipelineDisplay) pipelineDisplay.style.display = 'none';
 }
 
 /* ── Utility ───────────────────────────────────────────── */
