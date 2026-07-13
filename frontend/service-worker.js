@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'street-vendor-v7';
+﻿const CACHE_NAME = 'street-vendor-v8';
 const CORE_ASSETS = [
   '/',
   '/index.html',

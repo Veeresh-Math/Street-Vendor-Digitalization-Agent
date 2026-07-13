@@ -760,6 +760,7 @@ p { color: var(--text-muted); }
 </style>
 </head>
 <body>
+<script>window.__API_BASE__ = 'https://street-vendor-digitalization-agent-isog.onrender.com';</script>
 
 <!-- ═══ SVG Liquid Glass Filter ═════════════════════════ -->
 <svg style="position:absolute;width:0;height:0;" aria-hidden="true">
@@ -1310,7 +1311,7 @@ async function sendChatMessage() {
   const typingEl = appendTyping();
 
   try {
-    const apiBase = window.location.origin || '';
+    const apiBase = window.__API_BASE__ || window.location.origin || '';
     const res = await fetch(`${apiBase}/api/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1419,7 +1420,7 @@ async function generateKit() {
   showPipeline(['Searching knowledge base...', 'Generating personalized plan...', 'Creating your digital kit...']);
 
   try {
-    const apiBase = window.location.origin || '';
+    const apiBase = window.__API_BASE__ || window.location.origin || '';
     const res = await fetch(`${apiBase}/api/generate-kit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1548,7 +1549,7 @@ function startOver() {
 /* ═══ Health Check ════════════════════════════════════ */
 async function checkHealth() {
   try {
-    const apiBase = window.location.origin || '';
+    const apiBase = window.__API_BASE__ || window.location.origin || '';
     const r = await fetch(`${apiBase}/api/health`);
     const d = await r.json();
     const ns = document.getElementById('navStatus');
