@@ -186,7 +186,7 @@ footer { background: var(--bg2); border-top: 1px solid var(--bdr); padding: 40px
   </div>
 </footer>
 <script>
-window.__API_BASE__ = '';  /* Set to your Render URL for Netlify, e.g. 'https://street-vendor-agent.onrender.com' */
+window.__API_BASE__ = 'https://street-vendor-digitalization-agent-isog.onrender.com';
 const nav = document.getElementById('nav');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 50), {passive:true});
 fetch((window.__API_BASE__ || '') + '/api/health').then(r => r.json()).then(d => { if (d && d.status === 'ok') { const pill = document.querySelector('.live-pill'); if (pill) pill.innerHTML = '<span class="pulse"></span>AI Live'; } }).catch(() => {});
