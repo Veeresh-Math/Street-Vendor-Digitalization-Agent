@@ -1,6 +1,6 @@
 /* dashboard.js — Dashboard analytics and charts */
 
-const apiBase = window.location.origin || '';
+const apiBase = window.__API_BASE__ || window.location.origin || '';
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
