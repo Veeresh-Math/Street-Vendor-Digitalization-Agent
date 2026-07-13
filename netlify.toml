@@ -1,14 +1,18 @@
 [build]
-  # Install dependencies
-  command = "pip install -r requirements.txt"
-  # Publish directory (for static files)
   publish = "frontend/"
 
-# Redirects for SPA (Single Page Application)Single Page Application - serve index.html for all non-file routes
+# Serve static files, redirect non-file paths to index.html
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/agent"
+  to = "/agent.html"
   status = 200
 
-# API routes - these would go to serverless functions
-# We'll need to create netlify functions for our API endpoints
+[[redirects]]
+  from = "/dashboard"
+  to = "/dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
