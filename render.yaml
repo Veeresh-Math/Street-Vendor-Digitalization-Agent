@@ -7,9 +7,9 @@
     dockerfilePath: ./Dockerfile
     envVars:
       - key: IBM_API_KEY
-        fromValue: 36yHNYbA0YjOeTsl1xGDXQ_5e-KcvJm7-7OQQWzZuolv
+        sync: false
       - key: IBM_PROJECT_ID
-        fromValue: 59f569dc-3371-40a4-a6dc-0d6242c0745e
+        sync: false
       - key: IBM_URL
-        fromValue: https://us-south.ml.cloud.ibm.com
+        sync: false
     autoDeploy: true

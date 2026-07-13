@@ -1,109 +1,184 @@
-# Street Vendor Digitalization Agent
-## AICTE-IBM SkillsBuild Internship 2026 — Problem Statement No. 29
+# Street Vendor Digitalization Agent (SVDA)
+
+> **AICTE-IBM SkillsBuild Internship 2026 — Problem Statement No. 29**
+>
+> An AI-powered RAG (Retrieval-Augmented Generation) agent that transforms India's 5 crore informal street vendors into digitally visible businesses — UPI, MSME credit, Google listing, QR codes & promotional materials in 22+ Indian languages. Powered by IBM watsonx.ai Granite models.
 
 ---
 
-### Tech Stack
+## Live Demo
+
+**[Launch the Agent →](/agent)** | **[View Dashboard →](/dashboard)**
+
+---
+
+## Features
+
+### Core AI Agent
+- **RAG-Powered Chat** — Ask anything about going digital in English, Hindi, Marathi, Tamil, Telugu, Kannada, Bengali, or Gujarati
+- **Digital Kit Generator** — Get a complete digital transformation plan with UPI setup, government schemes, SEO tips, and a printable QR business card
+- **Voice Input** — Speak your query in any Indian language (Web Speech API)
+- **PM SVANidhi Eligibility Checker** — Quick eligibility assessment for government loans
+
+### Interactive Tools
+- **Vendor Map** — Interactive Leaflet.js map showing registered vendors across India
+- **Analytics Dashboard** — Real-time charts: vendors by city, business type, UPI adoption
+- **Demand Forecasting** — 7-day demand prediction with seasonal/festival adjustments
+- **QR Business Card Generator** — Indian-aesthetic styled QR code and business card PNGs
+
+### Technical
+- **ChromaDB Vector Store** — Persistent cosine similarity search for 21+ knowledge documents
+- **IBM Granite Models** — granite-4-h-small (generation) + granite-embedding-278m-multilingual (embeddings)
+- **PWA Support** — Offline caching via Service Worker + IndexedDB
+- **FastAPI Backend** — Async Python with Pydantic validation
+- **Docker Ready** — Dockerfile + docker-compose.yml for one-command deployment
+
+---
+
+## Tech Stack
+
 | Layer | Technology |
-|---|---|
-| Backend | Python 3.11 · FastAPI · Uvicorn |
-| AI — Generation | `ibm/granite-4-h-small` via `ibm-watsonx-ai` SDK |
-| AI — Embeddings | `ibm/granite-embedding-278m-multilingual` via `ibm-watsonx-ai` SDK |
-| Vector Store | ChromaDB (local persistent) |
-| QR / Business Card | `qrcode` + `Pillow` (non-AI) |
-| Geocoding | OpenStreetMap Nominatim (free, no key) |
-| Frontend | Pure HTML5 + CSS3 + Vanilla JS (no React, no Streamlit) |
+|-------|-----------|
+| Backend | Python 3.11 + FastAPI |
+| AI Generation | IBM Granite 4 H Small (`ibm/granite-4-h-small`) |
+| AI Embeddings | IBM Granite Embedding 278M Multilingual |
+| Vector Store | ChromaDB (HNSW cosine index) |
+| Frontend | HTML5 + CSS3 + Vanilla JavaScript |
+| Maps | Leaflet.js + OpenStreetMap |
+| Charts | Chart.js |
+| Voice | Web Speech API |
+| Offline | Service Worker + IndexedDB |
+| Deployment | Docker + Render.com / Railway |
 
 ---
 
-### Project Structure
+## Project Structure
+
 ```
+svda/
 ├── backend/
-│   ├── main.py            FastAPI app — all routes + static file serving
-│   ├── ibm_client.py      IBM watsonx-ai SDK wrapper (token, embed, generate)
-│   ├── rag_pipeline.py    ChromaDB index + cosine retrieval + prompt builder
-│   ├── knowledge_base.py  20+ real-world documents (schemes, UPI, SEO, cities)
-│   ├── qr_generator.py    QR PNG + business card generator (Pillow)
-│   ├── geocoder.py        OpenStreetMap Nominatim geocoding
-│   └── models.py          Pydantic request/response schemas
-├── vector_store/          ChromaDB persistent storage (auto-created)
+│   ├── main.py              # FastAPI app + all routes
+│   ├── models.py             # Pydantic request/response schemas
+│   ├── ibm_client.py         # IBM watsonx.ai SDK wrapper
+│   ├── knowledge_base.py     # 21 structured documents
+│   ├── rag_pipeline.py       # ChromaDB RAG pipeline
+│   ├── rag_query_cache.py    # LRU+TTL query cache
+│   ├── qr_generator.py       # QR + business card generator
+│   ├── geocoder.py           # Nominatim geocoding
+│   ├── vendor_store.py       # Vendor registry + persistence
+│   ├── forecast.py           # Demand forecasting module
+│   └── scheme_checker.py     # PM SVANidhi eligibility
 ├── frontend/
-│   ├── index.html         Landing page (Indian street-market aesthetic)
-│   ├── agent.html         Live AI chat + torn-receipt digital kit
-│   ├── css/
-│   │   ├── theme.css      Colour vars, typography, kraft-paper texture
-│   │   ├── layout.css     Nav, grid, stats band, footer
-│   │   └── components.css Cards, chat bubbles, torn receipt, pipeline steps
-│   └── js/
-│       ├── chat.js        Chat UI → POST /api/query
-│       ├── kit.js         Digital kit → POST /api/generate-kit + receipt render
-│       └── geo.js         Browser geolocation → /api/geocode
-├── static/generated/      Generated QR PNGs and business card images
+│   ├── index.html            # Landing page (dark theme)
+│   ├── agent.html            # AI chat + digital kit UI
+│   ├── dashboard.html        # Analytics dashboard
+│   ├── css/                  # Design system + components
+│   ├── js/                   # Chat, map, voice, offline, etc.
+│   ├── manifest.json         # PWA manifest
+│   └── service-worker.js     # Offline caching
+├── tests/                    # pytest test suite
+├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-### Setup & Run
+## Quick Start
 
-#### 1. Install dependencies
-- **API Docs:**     http://localhost:8000/docs
+### 1. Clone & Install
 
----
-
-## Deploy (GitHub Container + Docker)
-This repo is a **FastAPI** server (not static-only), so GitHub Actions builds a Docker image and pushes it to **GHCR**.
-
-### 1) GitHub secret
-In your GitHub repo settings → **Secrets and variables → Actions** add:
-- `GHCR_PAT` : a GitHub token with permission to write packages (GHCR).
-
-### 2) Push to GitHub
-- Ensure your default branch is `main`.
-- Any push to `main` triggers `.github/workflows/build-and-push.yml`.
-
-### 3) Run the image (example)
-After pushing, you can run the container on any Docker-capable host:
 ```bash
-docker run -p 8000:8000 \
-  -e IBM_PROJECT_ID="..." \
-  -e IBM_REGION="..." \
-  -e IBM_API_KEY="..." \
-  ghcr.io/<your-username>/<your-repo>:<tag>
+git clone <repo-url>
+cd svda
+pip install -r requirements.txt
 ```
 
-> Note: Your backend may read credentials from environment variables (or `.env` during local runs). Do not commit secrets.
+### 2. Configure Environment
 
+```bash
+cp .env.example .env
+# Edit .env with your IBM watsonx.ai credentials
+```
+
+### 3. Run
+
+```bash
+# Development
+python run_server.py
+
+# Or directly
+uvicorn backend.main:app --reload --port 8000
+```
+
+### 4. Docker (One Command)
+
+```bash
+docker-compose up --build
+```
+
+Open **http://localhost:8000**
 
 ---
 
-### API Endpoints
-| Method | Path | Description |
-|---|---|---|
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | GET | `/` | Landing page |
-| GET | `/agent` | Live agent chat + digital kit page |
+| GET | `/agent` | AI chat interface |
+| GET | `/dashboard` | Analytics dashboard |
 | POST | `/api/query` | RAG query → answer + sources |
-| POST | `/api/generate-kit` | Full digital kit + QR business card |
-| POST | `/api/qr` | Generate UPI QR PNG |
-| GET | `/api/geocode?q=Camp+Pune` | Nominatim geocoding |
-| POST | `/api/build-index` | (Re)build ChromaDB index |
-| GET | `/api/health` | IBM connection + index status |
+| POST | `/api/generate-kit` | Full digital kit with QR card |
+| POST | `/api/qr` | Generate UPI QR code |
+| GET | `/api/geocode` | Location geocoding |
+| GET | `/api/vendors` | List all vendors |
+| POST | `/api/vendors` | Register new vendor |
+| GET | `/api/analytics` | Dashboard statistics |
+| GET | `/api/forecast` | Demand forecast |
+| POST | `/api/scheme-check` | PM SVANidhi eligibility |
+| GET | `/api/health` | System health check |
+| POST | `/api/build-index` | Rebuild vector index |
 
 ---
 
-### IBM Models Used
-- **Generation:** `ibm/granite-4-h-small`
-- **Embeddings:** `ibm/granite-embedding-278m-multilingual`
-- **Project ID:** `59f569dc-3371-40a4-a6dc-0d6242c0745e`
-- **Region:** US-South (Dallas)
+## Knowledge Base
+
+21 structured documents across 6 categories:
+- **Government Schemes** — PM SVANidhi, MSME Udyam, Mudra, FSSAI, Digital India, e-Shram
+- **UPI Setup** — PhonePe, Paytm, Google Pay, BHIM step-by-step guides
+- **Online Listings** — Google Maps, Swiggy/Zomato, Meesho/GlowRoad, WhatsApp Business
+- **Local SEO** — Hyperlocal SEO strategy for Indian vendors
+- **Customer Engagement** — Festival pricing, QR branding, loyalty programs
+- **City Data** — Pune, Mumbai, Chennai, Bangalore, Surat, Delhi/NCR
 
 ---
 
-### Knowledge Base Coverage
-20+ real-world documents:
-- PM SVANidhi, Mudra Yojana, MSME Udyam, FSSAI, e-Shram, Digital India
-- PhonePe, Paytm, Google Pay, BHIM UPI setup
-- Swiggy Instamart, Blinkit, Zomato, Meesho, GlowRoad, WhatsApp Business
-- Hyperlocal SEO strategy, seasonal pricing, QR/branding
-- City data: Pune, Mumbai, Chennai, Bangalore, Surat, Delhi
+## Running Tests
+
+```bash
+pytest tests/ -v
+```
+
+---
+
+## Impact
+
+| Metric | Value |
+|--------|-------|
+| Street vendors in India | 5 Crore+ |
+| Currently undigitized | ~95% |
+| Languages supported | 22+ |
+| Government schemes covered | 6 |
+| Cities with specific data | 6 |
+
+---
+
+## License
+
+AICTE-IBM SkillsBuild Internship 2026
+
+---
+
+*Built with IBM watsonx.ai Granite models + ChromaDB RAG pipeline*

@@ -8,11 +8,22 @@ Flow:
 """
 
 import os
+import json
 from typing import Optional
 import chromadb
+from backend.rag_query_cache import get_query_cache, make_cache_key
+
+# Import-only: caching is opt-in / default off if env disables it.
+_cache = get_query_cache()
+
+
 from chromadb.config import Settings
 from backend.ibm_client import embed, embed_query, generate
 from backend.knowledge_base import get_all_chunks, get_all_documents
+
+# NOTE: This module-level cache only stores generated strings keyed by (query, language, top_k).
+# It is purely additive and does not alter the request/response schema.
+
 
 # ── ChromaDB config ───────────────────────────────────────────────────────────
 CHROMA_PATH       = os.path.join(os.path.dirname(__file__), "..", "vector_store")
@@ -220,9 +231,26 @@ def answer(
         status_cb("[STEP 3] Generating response with granite-4-h-small...")
 
     prompt      = _build_prompt(user_query, retrieved, language)
-    answer_text = generate(prompt, max_tokens=600)
+
+    # Optional cache for generated output (additive; never changes API schema)
+    cache = _cache
+    cache_key = make_cache_key(user_query, language, top_k)
+    if cache is not None:
+        cached = cache.get(cache_key)
+        if cached is not None:
+            if status_cb:
+                status_cb("[CACHE] Query generation cache hit. Skipping generation.")
+            answer_text = cached
+        else:
+            answer_text = generate(prompt, max_tokens=600)
+            cache.set(cache_key, answer_text)
+    else:
+        answer_text = generate(prompt, max_tokens=600)
+
+
 
     return {
+
         "answer"         : answer_text,
         "retrieved_docs" : retrieved,
         "query"          : user_query,

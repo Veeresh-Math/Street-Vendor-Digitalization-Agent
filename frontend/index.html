@@ -647,9 +647,210 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
   section{padding:72px 5%}
   .hero-btns{flex-direction:column;align-items:center}
 }
+
+/* ============================================================
+   SPLASH SCREEN - Story Animation
+   Vendor speaks -> AI processes -> Digital Kit appears
+   ============================================================ */
+.splash-overlay{position:fixed;inset:0;z-index:99999;background:#07080a;display:flex;align-items:center;justify-content:center;transition:opacity .7s ease,visibility .7s ease}
+.splash-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.splash-scene{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+/* Vendor character */
+.sp-vendor{position:absolute;left:-200px;top:50%;transform:translateY(-50%);opacity:0;animation:spVendorIn 1s cubic-bezier(.22,1,.36,1) forwards,spVendorOut .5s ease 3.2s forwards;z-index:2}
+@keyframes spVendorIn{0%{left:-200px;opacity:0;transform:translateY(-50%) scale(.8)}60%{opacity:1}100%{left:calc(50% - 220px);opacity:1;transform:translateY(-50%) scale(1)}}
+@keyframes spVendorOut{to{left:-200px;opacity:0;transform:translateY(-50%) scale(.8)}}
+
+/* Chat bubble from vendor */
+.sp-chat{position:absolute;left:calc(50% - 195px);top:calc(50% - 110px);opacity:0;animation:spChatIn .5s ease 1s forwards,spChatOut .4s ease 3s forwards;z-index:3}
+.sp-chat-box{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:16px 16px 16px 4px;padding:14px 18px;max-width:260px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sp-chat-text{color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;line-height:1.5}
+.sp-chat-text em{color:#FF8C35;font-style:normal}
+.sp-chat-lang{font-size:10px;color:rgba(255,255,255,0.35);margin-top:6px;font-weight:600;letter-spacing:.05em}
+@keyframes spChatIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes spChatOut{to{opacity:0;transform:translateY(-10px)}}
+
+/* Phone */
+.sp-phone{position:absolute;right:-200px;top:50%;transform:translateY(-50%);opacity:0;animation:spPhoneIn 1s cubic-bezier(.22,1,.36,1) .15s forwards,spPhoneOut .5s ease 3.2s forwards;z-index:2}
+@keyframes spPhoneIn{0%{right:-200px;opacity:0;transform:translateY(-50%) scale(.8)}60%{opacity:1}100%{right:calc(50% - 180px);opacity:1;transform:translateY(-50%) scale(1)}}
+@keyframes spPhoneOut{to{right:-200px;opacity:0;transform:translateY(-50%) scale(.8)}}
+
+/* AI typing dots on phone */
+.sp-typing{position:absolute;right:calc(50% - 155px);top:calc(50% - 30px);opacity:0;z-index:3;animation:spTypingIn .3s ease 1.5s forwards,spTypingOut .3s ease 2.2s forwards}
+.sp-typing-box{background:rgba(255,107,0,0.12);border:1px solid rgba(255,107,0,0.25);border-radius:16px 16px 4px 16px;padding:10px 16px;display:flex;gap:5px;align-items:center}
+.sp-dot{width:8px;height:8px;border-radius:50%;background:#FF6B00;animation:spDot 1.2s ease-in-out infinite}
+.sp-dot:nth-child(2){animation-delay:.15s}
+.sp-dot:nth-child(3){animation-delay:.3s}
+.sp-typing-label{font-size:10px;color:rgba(255,255,255,0.4);margin-left:8px;font-weight:600}
+@keyframes spTypingIn{0%{opacity:0}100%{opacity:1}}
+@keyframes spTypingOut{to{opacity:0}}
+@keyframes spDot{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}}
+
+/* Center glow */
+.sp-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,0,0.4) 0%,rgba(245,197,24,0.2) 40%,transparent 70%);z-index:1;opacity:0;animation:spGlow .6s ease 2.3s forwards}
+@keyframes spGlow{0%{transform:translate(-50%,-50%) scale(0);opacity:0}40%{opacity:1}100%{transform:translate(-50%,-50%) scale(3);opacity:0}}
+
+/* Digital kit outputs - fan out */
+.sp-kit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;opacity:0;animation:spKitIn .6s cubic-bezier(.22,1,.36,1) 2.5s forwards,spKitOut .5s ease 3.5s forwards}
+.sp-kit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:320px}
+.sp-kit-card{background:rgba(13,15,18,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:16px;text-align:center;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transform:scale(0);opacity:0}
+.sp-kit-card:nth-child(1){animation:spCardPop .4s cubic-bezier(.22,1,.36,1) 2.6s forwards}
+.sp-kit-card:nth-child(2){animation:spCardPop .4s cubic-bezier(.22,1,.36,1) 2.75s forwards}
+.sp-kit-card:nth-child(3){animation:spCardPop .4s cubic-bezier(.22,1,.36,1) 2.9s forwards}
+.sp-kit-card:nth-child(4){animation:spCardPop .4s cubic-bezier(.22,1,.36,1) 3.05s forwards}
+.sp-kit-icon{font-size:28px;margin-bottom:6px}
+.sp-kit-label{font-size:11px;font-weight:700;color:rgba(255,255,255,0.8);line-height:1.3}
+.sp-kit-sub{font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px}
+@keyframes spKitIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes spCardPop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+@keyframes spKitOut{to{opacity:0;transform:translate(-50%,-50%) scale(.8)}}
+
+/* Sparkles */
+.sp-spark{position:absolute;border-radius:50%;animation:spSparkle 1.4s ease-in-out infinite;z-index:5}
+@keyframes spSparkle{0%,100%{opacity:.2;transform:scale(.5)}50%{opacity:1;transform:scale(1.3)}}
+
+/* Tagline */
+.sp-tagline{position:absolute;bottom:14%;left:50%;transform:translateX(-50%);text-align:center;opacity:0;z-index:6;animation:spTagIn .7s ease 3.3s forwards}
+.sp-tagline h2{font-size:clamp(1.1rem,2.5vw,1.6rem);font-weight:800;background:linear-gradient(135deg,#FF6B00,#F5C518);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.sp-tagline p{font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:.08em;text-transform:uppercase}
+@keyframes spTagIn{0%{opacity:0;transform:translateX(-50%) translateY(16px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* Loading bar */
+.sp-bar{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:180px;height:3px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden;opacity:0;z-index:6;animation:spTagIn .4s ease 3.5s forwards}
+.sp-bar-fill{height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,#FF6B00,#F5C518);animation:spBarLoad 1.2s ease 3.7s forwards}
+@keyframes spBarLoad{0%{width:0}100%{width:100%}}
 </style>
 </head>
 <body>
+
+
+<!-- SPLASH: Vendor speaks -> AI processes -> Digital Kit appears -->
+<div class="splash-overlay" id="splash">
+  <div class="splash-scene">
+
+    <!-- Vendor character (left) -->
+    <div class="sp-vendor">
+      <svg viewBox="0 0 160 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="80" cy="50" r="30" fill="#D4A574"/>
+        <circle cx="70" cy="44" r="3.5" fill="#1A1A1A"/>
+        <circle cx="90" cy="44" r="3.5" fill="#1A1A1A"/>
+        <path d="M74 56 Q80 63 86 56" stroke="#1A1A1A" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M50 42 Q52 14 80 10 Q108 14 110 42 Q104 28 80 24 Q56 28 50 42Z" fill="#FF6B00"/>
+        <path d="M55 34 Q80 20 105 34" stroke="#F5C518" stroke-width="2" fill="none"/>
+        <circle cx="80" cy="16" r="4.5" fill="#F5C518"/>
+        <rect x="54" y="78" width="52" height="70" rx="8" fill="#1A7A4A"/>
+        <rect x="54" y="78" width="52" height="11" rx="8" fill="#22A862"/>
+        <rect x="32" y="86" width="22" height="11" rx="5.5" fill="#D4A574"/>
+        <rect x="106" y="86" width="22" height="11" rx="5.5" fill="#D4A574"/>
+        <rect x="62" y="146" width="15" height="48" rx="6" fill="#4A3728"/>
+        <rect x="83" y="146" width="15" height="48" rx="6" fill="#4A3728"/>
+        <ellipse cx="69" cy="198" rx="11" ry="5.5" fill="#2A1A0A"/>
+        <ellipse cx="91" cy="198" rx="11" ry="5.5" fill="#2A1A0A"/>
+      </svg>
+    </div>
+
+    <!-- Chat bubble (appears after vendor) -->
+    <div class="sp-chat">
+      <div class="sp-chat-box">
+        <div class="sp-chat-text">"Main <em>phal bechta hoon</em> Pune mein. Digital kaise karoon?"</div>
+        <div class="sp-chat-lang">Hindi + English - Natural language</div>
+      </div>
+    </div>
+
+    <!-- Phone (right) -->
+    <div class="sp-phone">
+      <svg viewBox="0 0 130 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="8" width="114" height="224" rx="18" fill="#1A1A2E"/>
+        <rect x="12" y="12" width="106" height="216" rx="14" fill="#0D0F12"/>
+        <rect x="16" y="36" width="98" height="160" rx="4" fill="#131619"/>
+        <rect x="16" y="36" width="98" height="30" rx="4" fill="#FF6B00"/>
+        <text x="65" y="56" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="system-ui">Street Vendor Agent</text>
+        <rect x="46" y="14" width="38" height="5" rx="2.5" fill="#1A1A2E"/>
+        <rect x="46" y="222" width="38" height="3.5" rx="1.75" fill="#333"/>
+        <!-- Chat bubbles on screen -->
+        <rect x="22" y="74" width="70" height="28" rx="10" fill="rgba(255,255,255,0.08)"/>
+        <text x="57" y="84" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="6" font-family="system-ui">Phal bechta hoon...</text>
+        <rect x="34" y="110" width="62" height="24" rx="10" fill="rgba(255,107,0,0.15)"/>
+        <text x="65" y="120" text-anchor="middle" fill="#FF8C35" font-size="5.5" font-family="system-ui">UPI + QR Ready!</text>
+        <rect x="22" y="142" width="70" height="22" rx="10" fill="rgba(255,255,255,0.06)"/>
+        <text x="57" y="152" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="5.5" font-family="system-ui">PM SVANidhi Eligible</text>
+        <rect x="30" y="172" width="66" height="20" rx="10" fill="rgba(26,122,74,0.15)"/>
+        <text x="63" y="182" text-anchor="middle" fill="#22A862" font-size="5.5" font-family="system-ui">Google Maps Listed</text>
+      </svg>
+    </div>
+
+    <!-- AI typing indicator -->
+    <div class="sp-typing">
+      <div class="sp-typing-box">
+        <div class="sp-dot"></div>
+        <div class="sp-dot"></div>
+        <div class="sp-dot"></div>
+        <span class="sp-typing-label">AI Processing</span>
+      </div>
+    </div>
+
+    <!-- Center glow -->
+    <div class="sp-glow"></div>
+
+    <!-- Digital kit outputs fan out -->
+    <div class="sp-kit">
+      <div class="sp-kit-grid">
+        <div class="sp-kit-card">
+          <div class="sp-kit-icon">UPI</div>
+          <div class="sp-kit-label">PhonePe + Paytm</div>
+          <div class="sp-kit-sub">QR code ready</div>
+        </div>
+        <div class="sp-kit-card">
+          <div class="sp-kit-icon">Schemes</div>
+          <div class="sp-kit-label">PM SVANidhi</div>
+          <div class="sp-kit-sub">Rs.10,000 eligible</div>
+        </div>
+        <div class="sp-kit-card">
+          <div class="sp-kit-icon">Maps</div>
+          <div class="sp-kit-label">Google Listed</div>
+          <div class="sp-kit-sub">Camp, Pune</div>
+        </div>
+        <div class="sp-kit-card">
+          <div class="sp-kit-icon">WhatsApp</div>
+          <div class="sp-kit-label">Menu Card</div>
+          <div class="sp-kit-sub">Marathi + English</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sparkles -->
+    <div class="sp-spark" style="width:6px;height:6px;background:#F5C518;top:35%;left:38%;animation-delay:0s"></div>
+    <div class="sp-spark" style="width:4px;height:4px;background:#FF6B00;top:28%;right:35%;animation-delay:.4s"></div>
+    <div class="sp-spark" style="width:5px;height:5px;background:#2DD882;bottom:35%;left:42%;animation-delay:.7s"></div>
+    <div class="sp-spark" style="width:4px;height:4px;background:#F5C518;bottom:30%;right:38%;animation-delay:1s"></div>
+
+    <!-- Tagline -->
+    <div class="sp-tagline">
+      <h2>Digitalizing Every Street Vendor</h2>
+      <p>Powered by IBM watsonx.ai</p>
+    </div>
+
+    <!-- Loading bar -->
+    <div class="sp-bar">
+      <div class="sp-bar-fill"></div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var s=document.getElementById('splash');
+  if(!s)return;
+  document.body.style.overflow='hidden';
+  function killSplash(){
+    try{
+      s.remove();
+    }catch(e){}
+    document.body.style.overflow='';
+  }
+  setTimeout(killSplash,4500);
+  setTimeout(killSplash,6000);
+})();
+</script>
 
 <!-- Ambient glow orbs -->
 <div class="orb o1"></div>
@@ -668,6 +869,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
     <li><a href="#schemes">Schemes</a></li>
     <li><a href="#cities">Cities</a></li>
     <li><a href="#tech">Technology</a></li>
+    <li><a href="/dashboard">Dashboard</a></li>
   </ul>
   <div class="nav-right">
     <div class="live-pill"><span class="pulse"></span>AI Live</div>
@@ -1087,6 +1289,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
     <div class="fcol">
       <h5>Product</h5>
       <a href="/agent">Live Agent Chat</a>
+      <a href="/dashboard">Dashboard</a>
       <a href="#features">Features</a>
       <a href="#schemes">Govt Schemes</a>
       <a href="#cities">Use Cases</a>
@@ -1154,21 +1357,6 @@ fetch('/api/health').then(r => r.json()).then(d => {
   }
 }).catch(() => {});
 </script>
-  </script>
-  </script>
-  </script>
-  </script>
-  </script>
-  </script>
-  </script>
-  </script>
-  </script>
-  <script src="/js/geo.js"></script>
-  <script src="/js/kit.js"></script>
-  <script src="/js/chat.js"></script>
-  <script src="/js/geo.js"></script>
-  <script src="/js/kit.js"></script>
-  <script src="/js/chat.js"></script>
 </body>
 </html>
 

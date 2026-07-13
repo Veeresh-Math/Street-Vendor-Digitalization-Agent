@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vendor Dashboard - Analytics and Insights</title>
+<link rel="stylesheet" href="/css/theme.css"/>
+<link rel="stylesheet" href="/css/layout.css"/>
+<link rel="stylesheet" href="/css/components.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #07080a; --bg2: #0d0f12; --bg3: #131619; --bg4: #191c20; --bg5: #1e2227;
+  --saffron: #FF6B00; --saffron-lt: #FF8C35; --saffron-glow: rgba(255,107,0,0.22);
+  --turmeric: #F5C518; --turmeric-lt: #FFD740;
+  --green: #1A7A4A; --green-lt: #22A862; --green-bright: #2DD882; --green-glow: rgba(26,122,74,0.22);
+  --vermilion: #E63312; --vermilion-lt: #FF5733;
+  --white: #FFFFFF; --text: rgba(255,255,255,0.91); --text-muted: rgba(255,255,255,0.56); --text-dim: rgba(255,255,255,0.30);
+  --bdr: rgba(255,255,255,0.08); --bdr-s: rgba(255,107,0,0.30);
+  --grad-fire: linear-gradient(135deg, #FF6B00, #F5C518);
+  --grad-india: linear-gradient(135deg, #FF6B00, #F5C518, #1A7A4A);
+  --grad-saffron: linear-gradient(135deg, #FF6B00, #E8860C);
+  --grad-forest: linear-gradient(135deg, #1A7A4A, #22A862);
+  --font: -apple-system, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --mono: "SF Mono", "Fira Code", ui-monospace, monospace;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 26px; --r-pill: 999px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); overflow-x: hidden; }
+.orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+.o1 { width: 640px; height: 640px; top: -220px; left: -180px; background: rgba(255,107,0,0.13); animation: orbFloat 18s ease-in-out infinite alternate; }
+.o2 { width: 480px; height: 480px; bottom: -160px; right: -140px; background: rgba(26,122,74,0.11); animation: orbFloat 22s ease-in-out 2s infinite alternate; }
+.o3 { width: 400px; height: 400px; top: 40%; left: 55%; background: rgba(245,197,24,0.07); animation: orbFloat 16s ease-in-out 4s infinite alternate; }
+@keyframes orbFloat { 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,-40px) scale(1.08)} 100%{transform:translate(-20px,30px) scale(0.95)} }
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 5%; transition: all 0.3s;
+}
+#nav.scrolled {
+  background: rgba(7,8,10,0.88); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-bottom: 1px solid var(--bdr); padding: 12px 5%;
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--white); font-size: 14.5px; font-weight: 800; }
+.nav-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--grad-saffron); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { text-decoration: none; color: var(--text-muted); font-size: 13.5px; font-weight: 600; transition: color 0.2s; }
+.nav-links a:hover { color: var(--saffron-lt); }
+.nav-right { display: flex; align-items: center; gap: 14px; }
+.live-pill { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--r-pill); background: rgba(45,216,130,0.10); border: 1px solid rgba(45,216,130,0.25); color: var(--green-bright); font-size: 12px; font-weight: 700; }
+.pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green-bright); animation: pulse 1.8s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+.btn-launch { padding: 9px 22px; border-radius: var(--r-pill); background: var(--grad-saffron); color: #000; font-size: 13px; font-weight: 800; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+.btn-launch:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(255,107,0,0.35); }
+.dash-page { padding-top: 80px; min-height: 100vh; position: relative; z-index: 1; }
+.dash-container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+.dash-header { padding: 32px 0; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; margin-bottom: 20px; transition: color 0.2s; }
+.back-link:hover { color: var(--saffron-lt); }
+.dash-header h1 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 900; margin-bottom: 6px;
+  background: var(--grad-fire); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.dash-header p { color: var(--text-muted); font-size: 14px; }
+.dash-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r-lg);
+  padding: 28px 20px; text-align: center; position: relative; overflow: hidden;
+  transition: all 0.3s;
+}
+.stat-card:hover { border-color: rgba(255,107,0,0.25); transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+.stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+.stat-card:nth-child(1)::before { background: var(--grad-saffron); }
+.stat-card:nth-child(2)::before { background: var(--grad-forest); }
+.stat-card:nth-child(3)::before { background: var(--grad-fire); }
+.stat-card:nth-child(4)::before { background: linear-gradient(90deg,#38bdf8,#818cf8); }
+.stat-card::after { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(255,107,0,0.06) 0%, transparent 70%); pointer-events:none; }
+.stat-val { font-size: 2.2rem; font-weight: 900; line-height: 1; background: var(--grad-india); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat-label { font-size: 12px; color: var(--text-dim); margin-top: 8px; font-weight: 600; }
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+.chart-card {
+  background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r-lg);
+  padding: 28px; position: relative; overflow: hidden; transition: all 0.3s;
+}
+.chart-card:hover { border-color: rgba(255,107,0,0.20); box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+.chart-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--grad-saffron); }
+.chart-card::after { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(255,107,0,0.05) 0%, transparent 70%); pointer-events:none; }
+.chart-card h3 { font-size: 14px; font-weight: 800; color: var(--white); margin-bottom: 16px; }
+.chart-wrap { position: relative; height: 260px; }
+.forecast-section { margin-bottom: 24px; }
+.forecast-card {
+  background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r-lg);
+  padding: 28px; overflow: hidden; position: relative; transition: all 0.3s;
+}
+.forecast-card:hover { border-color: rgba(26,122,74,0.25); box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+.forecast-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: linear-gradient(90deg,var(--green),var(--saffron)); }
+.forecast-card::after { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(26,122,74,0.05) 0%, transparent 70%); pointer-events:none; }
+.forecast-card h3 { font-size: 14px; font-weight: 800; color: var(--white); margin-bottom: 6px; }
+.forecast-summary { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+.forecast-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 10px; }
+.forecast-day { text-align: center; padding: 14px 8px; border-radius: var(--r-md); border: 1px solid var(--bdr); background: var(--bg4); transition: all 0.2s; }
+.forecast-day:hover { border-color: rgba(255,107,0,0.25); transform: translateY(-2px); }
+.fd-day { font-size: 11px; font-weight: 700; color: var(--text-muted); }
+.fd-date { font-size: 10px; color: var(--text-dim); margin-bottom: 6px; }
+.fd-bar { height: 60px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 6px; }
+.fd-fill { width: 24px; border-radius: 4px 4px 0 0; transition: height .5s ease; }
+.fd-val { font-size: 13px; font-weight: 800; color: var(--white); }
+.fd-level { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.level-high { color: var(--vermilion-lt); }
+.level-medium { color: var(--turmeric); }
+.level-low { color: var(--green-bright); }
+.vendor-table { margin-bottom: 40px; }
+.table-card {
+  background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r-lg);
+  padding: 28px; overflow: hidden; position: relative; transition: all 0.3s;
+}
+.table-card:hover { border-color: rgba(26,122,74,0.25); box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+.table-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--grad-forest); }
+.table-card::after { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(26,122,74,0.04) 0%, transparent 70%); pointer-events:none; }
+.table-card h3 { font-size: 14px; font-weight: 800; color: var(--white); margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; }
+th { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--bdr); }
+td { font-size: 13px; padding: 12px; border-bottom: 1px solid var(--bdr); color: var(--text-muted); }
+tr:hover td { background: rgba(255,107,0,0.04); }
+.upi-badge { padding: 3px 10px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700; }
+.upi-yes { background: rgba(45,216,130,0.12); color: var(--green-bright); border: 1px solid rgba(45,216,130,0.25); }
+.upi-no { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 1px solid var(--bdr); }
+footer { background: var(--bg2); border-top: 1px solid var(--bdr); padding: 40px 5% 24px; margin-top: 40px; }
+.foot-inner { max-width: 1140px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.fbrand { font-size: 13px; font-weight: 800; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+.fb-mark { width: 24px; height: 24px; border-radius: 6px; background: var(--grad-saffron); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.fbot { font-size: 11px; color: var(--text-dim); }
+@media(max-width:960px) { .dash-grid{grid-template-columns:repeat(2,1fr)} .chart-row{grid-template-columns:1fr} .forecast-grid{grid-template-columns:repeat(4,1fr)} #nav .nav-links{display:none} }
+@media(max-width:600px) { .dash-grid{grid-template-columns:1fr} .forecast-grid{grid-template-columns:repeat(3,1fr)} }
+</style>
+</head>
+<body>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="orb o3"></div>
+<nav id="nav">
+  <a href="/" class="nav-logo"><div class="nav-mark">&#x1F6D2;</div><span>Street Vendor Digitalization Agent</span></a>
+  <ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/agent">Agent</a></li><li><a href="/dashboard">Dashboard</a></li></ul>
+  <div class="nav-right"><div class="live-pill"><span class="pulse"></span>AI Live</div><a href="/agent" class="btn-launch">&#x1F680; Launch Agent</a></div>
+</nav>
+<div class="dash-page">
+  <div class="dash-container">
+    <div class="dash-header">
+      <a href="/" class="back-link">&#x2190; Back to Home</a>
+      <h1>Vendor Analytics Dashboard</h1>
+      <p>Real-time insights from registered vendors across India</p>
+    </div>
+    <div class="dash-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-val" id="statTotal">--</div><div class="stat-label">Total Vendors</div></div>
+      <div class="stat-card"><div class="stat-val" id="statUpi">--</div><div class="stat-label">UPI Enabled</div></div>
+      <div class="stat-card"><div class="stat-val" id="statCities">--</div><div class="stat-label">Cities Covered</div></div>
+      <div class="stat-card"><div class="stat-val" id="statBiz">--</div><div class="stat-label">Business Types</div></div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-card"><h3>Vendors by City</h3><div class="chart-wrap"><canvas id="cityChart"></canvas></div></div>
+      <div class="chart-card"><h3>Vendors by Business Type</h3><div class="chart-wrap"><canvas id="bizChart"></canvas></div></div>
+    </div>
+    <div class="forecast-section">
+      <div class="forecast-card">
+        <h3>Demand Forecast (7-Day)</h3>
+        <div class="forecast-summary" id="forecastSummary">Loading forecast...</div>
+        <div class="forecast-grid" id="forecastGrid"></div>
+      </div>
+    </div>
+    <div class="vendor-table">
+      <div class="table-card">
+        <h3>Recent Vendor Registrations</h3>
+        <table>
+          <thead><tr><th>Name</th><th>Business</th><th>Location</th><th>UPI</th><th>Registered</th></tr></thead>
+          <tbody id="vendorTableBody"><tr><td colspan="5" style="text-align:center;color:var(--text-dim);">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <div class="foot-inner">
+    <div class="fbrand"><div class="fb-mark">&#x1F6D2;</div>Street Vendor Digitalization Agent</div>
+    <div class="fbot">2026 AICTE-IBM SkillsBuild Internship &middot; IBM watsonx.ai &middot; ChromaDB</div>
+  </div>
+</footer>
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 50), {passive:true});
+fetch('/api/health').then(r => r.json()).then(d => { if (d && d.status === 'ok') { const pill = document.querySelector('.live-pill'); if (pill) pill.innerHTML = '<span class="pulse"></span>AI Live'; } }).catch(() => {});
+</script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

@@ -90,3 +90,64 @@ class HealthResponse(BaseModel):
     gen_model    : str
     embed_model  : str
     chroma_path  : str
+
+
+# ── /api/vendors ──────────────────────────────────────────────────────────────
+
+class VendorRegisterRequest(BaseModel):
+    name          : str           = Field(..., example="Ramesh Fruits")
+    business_type : str           = Field(..., example="Fruit & Vegetable Vendor")
+    location      : str           = Field(..., example="Camp, Pune")
+    city          : Optional[str] = Field(None, example="Pune")
+    lat           : Optional[float] = Field(None)
+    lon           : Optional[float] = Field(None)
+    upi_id        : Optional[str] = Field(None)
+
+
+class VendorResponse(BaseModel):
+    id            : str
+    name          : str
+    business_type : str
+    location      : str
+    city          : Optional[str]
+    lat           : Optional[float]
+    lon           : Optional[float]
+    upi_id        : Optional[str]
+    registered_at : str
+
+
+# ── /api/analytics ────────────────────────────────────────────────────────────
+
+class AnalyticsResponse(BaseModel):
+    total_vendors    : int
+    vendors_with_upi : int
+    city_counts      : dict
+    business_counts  : dict
+    recent_vendors   : list[dict]
+
+
+# ── /api/forecast ─────────────────────────────────────────────────────────────
+
+class ForecastResponse(BaseModel):
+    category   : str
+    days       : int
+    forecast   : list[dict]
+    trend      : str
+    summary    : str
+
+
+# ── /api/scheme-check ─────────────────────────────────────────────────────────
+
+class SchemeCheckRequest(BaseModel):
+    has_cov       : bool = Field(False, description="Has Certificate of Vending")
+    has_lor       : bool = Field(False, description="Has Letter of Recommendation")
+    is_food_vendor: bool = Field(False, description="Sells food items")
+    city          : Optional[str] = Field(None)
+
+
+class SchemeCheckResponse(BaseModel):
+    eligible          : bool
+    loan_amount       : str
+    schemes           : list[dict]
+    next_steps        : list[str]
+    documents_needed  : list[str]

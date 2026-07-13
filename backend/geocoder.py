@@ -1,20 +1,25 @@
 """
 Geocoder — OpenStreetMap Nominatim (free, no API key needed)
-Resolves vendor location strings to lat/lng + locality details.
 """
 
+import time
 import requests
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 HEADERS       = {"User-Agent": "StreetVendorDigitalizationAgent/1.0"}
+_last_request_time = 0
 
 
 def geocode(query: str) -> dict:
-    """
-    Geocode a free-text location query using Nominatim.
-    Returns dict with lat, lon, display_name, city, locality, state, found.
-    """
+    """Geocode a free-text location query using Nominatim."""
+    global _last_request_time
+    # Rate limit: 1 request per second (Nominatim policy)
+    elapsed = time.time() - _last_request_time
+    if elapsed < 1.0:
+        time.sleep(1.0 - elapsed)
+
     try:
+        _last_request_time = time.time()
         resp = requests.get(
             NOMINATIM_URL,
             params={
@@ -36,7 +41,6 @@ def geocode(query: str) -> dict:
         result  = data[0]
         address = result.get("address", {})
 
-        # Extract meaningful locality name
         locality = (
             address.get("suburb")
             or address.get("neighbourhood")

@@ -7,6 +7,7 @@ Models:
 """
 
 import os
+import time
 from dotenv import load_dotenv
 from ibm_watsonx_ai import APIClient, Credentials
 from ibm_watsonx_ai.foundation_models import ModelInference
@@ -17,8 +18,8 @@ from ibm_watsonx_ai.metanames import EmbedTextParamsMetaNames as EmbedParams
 load_dotenv()
 
 # ── Credentials ───────────────────────────────────────────────────────────────
-IBM_API_KEY    = os.getenv("IBM_API_KEY",    "36yHNYbA0YjOeTsl1xGDXQ_5e-KcvJm7-7OQQWzZuolv")
-IBM_PROJECT_ID = os.getenv("IBM_PROJECT_ID", "59f569dc-3371-40a4-a6dc-0d6242c0745e")
+IBM_API_KEY    = os.getenv("IBM_API_KEY",    "")
+IBM_PROJECT_ID = os.getenv("IBM_PROJECT_ID", "")
 IBM_URL        = os.getenv("IBM_URL",        "https://us-south.ml.cloud.ibm.com")
 
 # Model IDs — mandatory per problem statement
@@ -73,31 +74,55 @@ def _get_embed_model() -> Embeddings:
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
-def generate(prompt: str, max_tokens: int = 600) -> str:
+def generate(prompt: str, max_tokens: int = 600, retries: int = 3) -> str:
     """
-    Generate text using ibm/granite-4-h-small.
+    Generate text using ibm/granite-4-h-small with retry on rate limit.
     Returns the generated string.
     """
     model = _get_gen_model()
-    # Override max tokens per call if needed
-    response = model.generate_text(
-        prompt = prompt,
-        params = {
-            GenParams.MAX_NEW_TOKENS: max_tokens,
-        },
-    )
-    return response.strip() if isinstance(response, str) else response
+    last_err = None
+    for attempt in range(retries):
+        try:
+            response = model.generate_text(
+                prompt = prompt,
+                params = {
+                    GenParams.MAX_NEW_TOKENS: max_tokens,
+                },
+            )
+            return response.strip() if isinstance(response, str) else response
+        except Exception as e:
+            last_err = e
+            err_str = str(e).lower()
+            if "429" in err_str or "rate" in err_str or "limit" in err_str or "consumption" in err_str:
+                wait = 3 * (attempt + 1)
+                print(f"[IBM] Rate limited (attempt {attempt+1}/{retries}), retrying in {wait}s...")
+                time.sleep(wait)
+            else:
+                raise
+    raise last_err
 
 
-def embed(texts: list[str]) -> list[list[float]]:
+def embed(texts: list[str], retries: int = 3) -> list[list[float]]:
     """
-    Embed a list of texts using ibm/granite-embedding-278m-multilingual.
+    Embed a list of texts using ibm/granite-embedding-278m-multilingual with retry.
     Returns list of float vectors.
     """
     model  = _get_embed_model()
-    result = model.embed_documents(texts=texts)
-    # SDK returns list of vectors directly
-    return result
+    last_err = None
+    for attempt in range(retries):
+        try:
+            result = model.embed_documents(texts=texts)
+            return result
+        except Exception as e:
+            last_err = e
+            err_str = str(e).lower()
+            if "429" in err_str or "rate" in err_str or "limit" in err_str or "consumption" in err_str:
+                wait = 3 * (attempt + 1)
+                print(f"[IBM] Embed rate limited (attempt {attempt+1}/{retries}), retrying in {wait}s...")
+                time.sleep(wait)
+            else:
+                raise
+    raise last_err
 
 
 def embed_query(text: str) -> list[float]:

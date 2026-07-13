@@ -114,13 +114,12 @@ def generate_business_card(
 
     # ── Business type + location ──────────────────────────────────────────────
     draw.text((24, 88),  business_type, font=font_med,   fill=INDIGO)
-    draw.text((24, 118), f"📍 {location}",  font=font_med,   fill=INDIGO)
 
     # ── Divider ───────────────────────────────────────────────────────────────
     draw.line([(24, 155), (490, 155)], fill=(*KRAFT, 200), width=2)
 
     # ── UPI label ────────────────────────────────────────────────────────────
-    draw.text((24, 168), "💳 Scan & Pay (UPI)",      font=font_small, fill=RICKSHAW)
+    draw.text((24, 168), "Scan & Pay (UPI)",      font=font_small, fill=RICKSHAW)
     draw.text((24, 192), upi_id,                     font=font_upi,   fill=INDIGO)
     draw.text((24, 222), "Accepts: PhonePe · Paytm · GPay · BHIM",
               font=font_small, fill=(*BLACK, 180))

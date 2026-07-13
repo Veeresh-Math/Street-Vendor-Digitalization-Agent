@@ -3,244 +3,1583 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Agent — Street Vendor Digitalization Agent</title>
-<link rel="stylesheet" href="/css/theme.css"/>
-<link rel="stylesheet" href="/css/layout.css"/>
-<link rel="stylesheet" href="/css/components.css"/>
+<title>Street Vendor Agent — AI Chat & Digital Kit</title>
+<meta name="description" content="AI-powered digital assistant for Indian street vendors. Get UPI setup, government scheme eligibility, Google Maps listing, and QR business cards in your language."/>
+<link rel="manifest" href="/manifest.json"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-  body { background: var(--cream-dk); }
+/* ═══════════════════════════════════════════════════════
+   DARK PREMIUM THEME — Same as Landing Page
+   ═══════════════════════════════════════════════════════ */
+:root {
+  --bg: #07080a; --bg2: #0d0f12; --bg3: #131619; --bg4: #191c20; --bg5: #1e2227;
+  --saffron: #FF6B00; --saffron-lt: #FF8C35; --saffron-glow: rgba(255,107,0,0.22);
+  --turmeric: #F5C518; --turmeric-lt: #FFD740; --turmeric-glow: rgba(245,197,24,0.18);
+  --green: #1A7A4A; --green-lt: #22A862; --green-bright: #2DD882; --green-glow: rgba(26,122,74,0.22);
+  --marigold: #E8860C; --vermilion: #E63312; --vermilion-lt: #FF5733;
+  --white: #FFFFFF; --text: rgba(255,255,255,0.91); --text-muted: rgba(255,255,255,0.56); --text-dim: rgba(255,255,255,0.30);
+  --bdr: rgba(255,255,255,0.08); --bdr-s: rgba(255,107,0,0.30); --bdr-g: rgba(26,122,74,0.28);
+  --grad-fire: linear-gradient(135deg, #FF6B00, #F5C518);
+  --grad-india: linear-gradient(135deg, #FF6B00, #F5C518, #1A7A4A);
+  --grad-saffron: linear-gradient(135deg, #FF6B00, #E8860C);
+  --grad-forest: linear-gradient(135deg, #1A7A4A, #22A862);
+  --grad-turmeric: linear-gradient(135deg, #F5C518, #FF6B00);
+  --font: -apple-system, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --mono: "SF Mono", "Fira Code", ui-monospace, monospace;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 26px; --r-pill: 999px;
+}
 
-  /* ── Agent page layout ────────────────────────────────── */
-  .agent-layout {
-    display: grid;
-    grid-template-columns: 1fr 420px;
-    grid-template-rows: 1fr;
-    gap: 20px;
-    height: calc(100vh - 64px - 52px); /* nav + ibm bar */
-    padding: 16px 20px;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.65; }
+::selection { background: rgba(255,107,0,0.38); color: #fff; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--saffron); border-radius: 3px; }
 
-  /* ── Left: Chat panel ─────────────────────────────────── */
-  .chat-panel { display: flex; flex-direction: column; }
+a { color: inherit; text-decoration: none; }
+h1,h2,h3,h4 { font-weight: 800; letter-spacing: -0.025em; line-height: 1.12; color: var(--white); }
+p { color: var(--text-muted); }
 
-  /* ── Right: Kit panel ─────────────────────────────────── */
-  .kit-panel {
-    display: flex; flex-direction: column; gap: 14px;
-    overflow-y: auto;
-  }
+/* ═══════════════════════════════════════════════════════
+   LIQUID GLASS SYSTEM
+   ——————————————————————————————————————————————————————— */
+.liquid-glass {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.08) 100%);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--r-xl);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.25),
+    0 1px 0 rgba(255,255,255,0.08) inset,
+    0 -1px 0 rgba(0,0,0,0.15) inset;
+  overflow: hidden;
+}
 
-  /* ── IBM bar ──────────────────────────────────────────── */
-  .ibm-bar {
-    background: var(--indigo);
-    padding: 10px 20px;
-    display: flex; align-items: center; gap: 16px;
-    flex-wrap: wrap;
-    border-bottom: 3px solid var(--turmeric);
-    height: 52px;
-  }
-  .ibm-bar-title {
-    font-size: 12px; font-weight: 800; color: rgba(255,255,255,.75);
-    letter-spacing: .04em; flex-shrink: 0;
-  }
+/* Top light edge — simulates refraction */
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.25) 20%,
+    rgba(255,255,255,0.45) 50%,
+    rgba(255,255,255,0.25) 80%,
+    transparent 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
 
-  /* ── Vendor form ──────────────────────────────────────── */
-  .vendor-form {
-    background: var(--white); border: 1px solid var(--border-dk);
-    border-radius: 10px; padding: 18px 20px;
-    box-shadow: var(--shadow-card); flex-shrink: 0;
-  }
-  .vendor-form h4 {
-    font-size: 14px; color: var(--indigo); margin-bottom: 12px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-  .form-group { display: flex; flex-direction: column; gap: 4px; }
-  .form-group label {
-    font-size: 11px; font-weight: 700; color: var(--text-light);
-    letter-spacing: .05em; text-transform: uppercase;
-  }
-  .form-group input, .form-group select {
-    padding: 9px 11px; border-radius: 6px;
-    border: 1px solid var(--border); background: var(--cream);
-    font-size: 13px; font-family: var(--font-main); color: var(--text);
-    outline: none;
-  }
-  .form-group input:focus, .form-group select:focus {
-    border-color: var(--indigo);
-  }
-  .kit-generate-btn {
-    width: 100%; padding: 11px; border-radius: 6px; border: none;
-    background: var(--grad-saffron); color: var(--white);
-    font-weight: 700; font-size: 14px; cursor: pointer;
-    font-family: var(--font-main); margin-top: 6px;
-  }
-  .kit-generate-btn:disabled { opacity: .5; cursor: not-allowed; }
+/* Inner glow / specular highlight */
+.liquid-glass::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(
+    ellipse 35% 25% at 30% 20%,
+    rgba(255,255,255,0.06) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
 
-  /* ── Pipeline display ─────────────────────────────────── */
-  .pipeline-display {
-    background: var(--white); border: 1px solid var(--border);
-    border-radius: 10px; padding: 14px 16px;
-    flex-shrink: 0; display: none;
-  }
-  .pipeline-title {
-    font-size: 11px; font-weight: 800; letter-spacing: .08em;
-    text-transform: uppercase; color: var(--indigo); margin-bottom: 10px;
-  }
+/* Liquid glass with SVG distortion (for cards that benefit from refraction) */
+.liquid-glass-distort {
+  filter: url(#liquid-glass);
+}
 
-  /* ── Receipt panel title ──────────────────────────────── */
-  .kit-panel-title {
-    font-size: 12px; font-weight: 800; letter-spacing: .08em;
-    text-transform: uppercase; color: var(--text-light);
-    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
-  }
+/* Liquid glass — light variant (less blur, more transparent) */
+.liquid-glass-light {
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.05) 100%);
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-lg);
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.2),
+    0 1px 0 rgba(255,255,255,0.06) inset;
+}
 
-  /* ── Empty receipt placeholder ────────────────────────── */
-  .receipt-placeholder {
-    background: var(--white); border: 1px dashed var(--border-dk);
-    border-radius: 10px; padding: 32px 20px; text-align: center;
-    color: var(--text-light);
-  }
-  .receipt-placeholder .icon { font-size: 40px; margin-bottom: 10px; }
-  .receipt-placeholder p { font-size: 13px; line-height: 1.6; }
+/* Liquid glass — dark variant (more opaque, deeper) */
+.liquid-glass-dark {
+  background: linear-gradient(135deg, rgba(13,15,18,0.85) 0%, rgba(7,8,10,0.90) 50%, rgba(13,15,18,0.85) 100%);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--r-xl);
+  box-shadow:
+    0 12px 40px rgba(0,0,0,0.35),
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 -1px 0 rgba(0,0,0,0.2) inset;
+}
 
-  @media(max-width:900px){
-    .agent-layout{ grid-template-columns:1fr; height:auto; }
-    .kit-panel{ display:none; }
-  }
+/* Liquid glass — accent variant (with saffron tint) */
+.liquid-glass-accent {
+  background: linear-gradient(135deg, rgba(255,107,0,0.08) 0%, rgba(255,255,255,0.04) 50%, rgba(245,197,24,0.06) 100%);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255,107,0,0.15);
+  border-radius: var(--r-lg);
+  box-shadow:
+    0 8px 28px rgba(255,107,0,0.12),
+    0 1px 0 rgba(255,255,255,0.06) inset;
+}
+
+/* Hover state — intensify the glass */
+.liquid-glass:hover,
+.liquid-glass-light:hover {
+  border-color: rgba(255,255,255,0.18);
+  box-shadow:
+    0 12px 40px rgba(0,0,0,0.3),
+    0 1px 0 rgba(255,255,255,0.12) inset,
+    0 -1px 0 rgba(0,0,0,0.15) inset;
+}
+
+/* Button glass */
+.liquid-glass-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 22px; border-radius: var(--r-pill);
+  background: linear-gradient(135deg, rgba(255,107,0,0.35) 0%, rgba(232,134,12,0.30) 100%);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff; font-size: 13.5px; font-weight: 800;
+  box-shadow:
+    0 4px 20px rgba(255,107,0,0.3),
+    0 1px 0 rgba(255,255,255,0.1) inset;
+  cursor: pointer; text-decoration: none; transition: all 0.25s;
+}
+.liquid-glass-btn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 30px rgba(255,107,0,0.45),
+    0 1px 0 rgba(255,255,255,0.15) inset;
+  border-color: rgba(255,255,255,0.25);
+}
+
+/* Input glass */
+.liquid-glass-input {
+  width: 100%; padding: 12px 14px;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-sm);
+  font-size: 15px; font-family: var(--font);
+  outline: none; color: var(--text);
+  transition: all 0.2s;
+}
+.liquid-glass-input::placeholder { color: var(--text-dim); }
+.liquid-glass-input:focus {
+  border-color: rgba(255,107,0,0.4);
+  box-shadow: 0 0 0 3px rgba(255,107,0,0.1), 0 1px 0 rgba(255,255,255,0.06) inset;
+  background: rgba(255,255,255,0.06);
+}
+.liquid-glass-input.error {
+  border-color: rgba(230,51,18,0.5);
+  box-shadow: 0 0 0 3px rgba(230,51,18,0.15);
+}
+
+/* ── Ambient Orbs ──────────────────────────────────────── */
+.orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(120px); opacity: 0.10;
+  animation: drift 22s ease-in-out infinite alternate;
+}
+.o1 { width:640px;height:640px; background:var(--saffron); top:-180px; left:-160px; animation-duration:24s; }
+.o2 { width:480px;height:480px; background:var(--turmeric); top:40%; right:-180px; animation-duration:19s; animation-delay:-8s; }
+.o3 { width:400px;height:400px; background:var(--green); bottom:5%; left:15%; animation-duration:28s; animation-delay:-14s; }
+@keyframes drift {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(50px,70px) scale(1.1); }
+}
+
+/* ── Navbar ─────────────────────────────────────────────── */
+#navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 5%;
+  transition: all 0.4s cubic-bezier(.4,0,.2,1);
+  border-bottom: 1px solid transparent;
+}
+#navbar.scrolled {
+  background: linear-gradient(135deg, rgba(13,15,18,0.82) 0%, rgba(7,8,10,0.88) 50%, rgba(13,15,18,0.82) 100%);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border-bottom-color: rgba(255,255,255,0.06);
+  padding: 12px 5%;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 8px 32px rgba(0,0,0,0.35);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 800; color: var(--white);
+  letter-spacing: -0.01em; white-space: nowrap; text-decoration: none;
+}
+.nav-mark {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--grad-saffron);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 20px rgba(255,107,0,0.55);
+}
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+.live-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 13px; border-radius: var(--r-pill);
+  background: rgba(34,168,98,0.12); border: 1px solid rgba(34,168,98,0.28);
+  font-size: 12px; font-weight: 600; color: var(--green-bright);
+}
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-bright); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.5)} }
+.nav-chip { padding: 4px 10px; border-radius: var(--r-pill); font-size: 10px; font-weight: 700; font-family: var(--mono); background: rgba(255,255,255,0.05); border: 1px solid var(--bdr); color: var(--text-dim); }
+.nav-chip.ok { background: rgba(26,122,74,0.15); border-color: rgba(26,122,74,0.3); color: var(--green-bright); }
+
+.btn-launch {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 22px; border-radius: var(--r-pill);
+  background: var(--grad-saffron); color: #fff;
+  font-size: 13.5px; font-weight: 800;
+  box-shadow: 0 0 22px rgba(255,107,0,0.45);
+  transition: all 0.25s; border: none; cursor: pointer;
+  text-decoration: none;
+}
+.btn-launch:hover { transform: translateY(-1px); box-shadow: 0 0 36px rgba(255,107,0,0.7); }
+
+/* ── Toast ──────────────────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(25,28,32,0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text); padding: 12px 24px; border-radius: var(--r-pill);
+  font-size: 13px; font-weight: 600; opacity: 0; transition: all .3s; z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.06) inset;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.ok { border-color: rgba(26,122,74,0.3); background: rgba(26,122,74,0.15); }
+
+/* ── Wizard Layout ─────────────────────────────────────── */
+.wizard-page { padding-top: 72px; min-height: 100vh; position: relative; z-index: 1; }
+.wizard-container { max-width: 880px; margin: 0 auto; padding: 40px 24px 120px; }
+
+/* ── Progress Bar ──────────────────────────────────────── */
+.wizard-progress { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 12px; }
+.wizard-step-dot {
+  width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: var(--text-dim); background: var(--bg3);
+  border: 2px solid rgba(255,255,255,0.08); position: relative; z-index: 2; transition: all .3s;
+}
+.wizard-step-dot.active { background: var(--saffron); color: #fff; border-color: var(--saffron); box-shadow: 0 0 0 4px rgba(255,107,0,0.2); }
+.wizard-step-dot.done { background: var(--green); color: #fff; border-color: var(--green); }
+.wizard-step-line { width: 50px; height: 2px; background: rgba(255,255,255,0.08); z-index: 1; transition: background .3s; }
+.wizard-step-line.done { background: var(--green); }
+
+/* ── Step Labels ───────────────────────────────────────── */
+.wizard-step-labels { display: flex; justify-content: center; gap: 0; margin-bottom: 32px; }
+.wizard-step-label { font-size: 10px; font-weight: 700; color: var(--text-dim); text-align: center; width: 110px; letter-spacing: .04em; text-transform: uppercase; transition: color .3s; }
+.wizard-step-label.active { color: var(--saffron-lt); }
+
+/* ── Step Card ─────────────────────────────────────────── */
+.wizard-card {
+  padding: 36px 32px; position: relative;
+  min-height: 380px; display: none;
+}
+.wizard-card.active { display: block; animation: fadeSlide .4s ease; }
+@keyframes fadeSlide { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+.wizard-card h2 { font-size: 22px; margin-bottom: 6px; }
+.wizard-card .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
+
+/* ── Form Groups ────────────────────────────────────────── */
+.wiz-form { max-width: 480px; }
+.wiz-group { margin-bottom: 20px; }
+.wiz-group label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+.wiz-group input, .wiz-group select {
+  width: 100%; padding: 12px 14px; border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.06);
+  font-size: 15px; font-family: var(--font); outline: none; color: var(--text);
+  transition: all .2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.03) inset;
+}
+.wiz-group input::placeholder { color: var(--text-dim); }
+.wiz-group input:focus, .wiz-group select:focus {
+  border-color: rgba(255,107,0,0.4);
+  box-shadow: 0 0 0 3px rgba(255,107,0,0.1), 0 1px 0 rgba(255,255,255,0.06) inset;
+  background: rgba(255,255,255,0.06);
+}
+.wiz-group input.error {
+  border-color: rgba(230,51,18,0.5);
+  box-shadow: 0 0 0 3px rgba(230,51,18,0.15);
+}
+.wiz-group .hint { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+.wiz-group .error-msg { font-size: 11px; color: var(--vermilion-lt); margin-top: 4px; display: none; }
+.wiz-group input.error + .error-msg { display: block; }
+
+/* ── Navigation Buttons ─────────────────────────────────── */
+.wiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+.wiz-btn {
+  padding: 12px 26px; border-radius: var(--r-sm); border: none;
+  font-size: 14px; font-weight: 700; font-family: var(--font);
+  cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 8px;
+}
+.wiz-btn-next {
+  background: linear-gradient(135deg, rgba(255,107,0,0.8) 0%, rgba(232,134,12,0.8) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(255,107,0,0.3), 0 1px 0 rgba(255,255,255,0.1) inset;
+}
+.wiz-btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,0,0.45), 0 1px 0 rgba(255,255,255,0.15) inset; }
+.wiz-btn-back {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.wiz-btn-back:hover { background: rgba(255,255,255,0.08); color: var(--text); border-color: rgba(255,255,255,0.12); }
+.wiz-btn-skip { background: transparent; color: var(--text-dim); font-size: 13px; }
+.wiz-btn-skip:hover { color: var(--text); }
+.wiz-btn-action {
+  background: linear-gradient(135deg, rgba(255,107,0,0.8) 0%, rgba(232,134,12,0.8) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(255,107,0,0.3), 0 1px 0 rgba(255,255,255,0.1) inset;
+}
+.wiz-btn-action:hover { transform: translateY(-2px); }
+
+/* ── Welcome Features ───────────────────────────────────── */
+.welcome-visual { display: flex; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }
+.welcome-feature {
+  flex: 1; min-width: 170px; padding: 18px; text-align: center;
+  transition: all .3s;
+}
+.welcome-feature:hover { transform: translateY(-2px); }
+.welcome-feature-icon {
+  width: 46px; height: 46px; border-radius: var(--r-sm); margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900;
+}
+.welcome-feature h4 { font-size: 13px; font-weight: 800; color: var(--white); margin-bottom: 4px; }
+.welcome-feature p { font-size: 11px; color: var(--text-dim); }
+
+/* ── Language Grid ──────────────────────────────────────── */
+.lang-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 480px; }
+.lang-option {
+  padding: 14px 10px; text-align: center; cursor: pointer; transition: all .2s;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--r-sm);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.04) inset;
+}
+.lang-option:hover { border-color: rgba(255,107,0,0.25); background: rgba(255,107,0,0.05); }
+.lang-option.selected {
+  border-color: rgba(255,107,0,0.5); background: rgba(255,107,0,0.10);
+  box-shadow: 0 4px 16px rgba(255,107,0,0.15), 0 1px 0 rgba(255,255,255,0.08) inset;
+}
+.lang-option .lang-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.lang-option .lang-native { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.lang-option.selected .lang-name { color: var(--saffron-lt); }
+.lang-option.selected .lang-native { color: var(--saffron); }
+
+/* ── Choice Cards ───────────────────────────────────────── */
+.choice-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 560px; }
+.choice-card {
+  padding: 28px 20px; cursor: pointer; transition: all .3s; text-align: center;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.05) inset;
+  position: relative; overflow: hidden;
+}
+.choice-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  pointer-events: none;
+}
+.choice-card:hover {
+  border-color: rgba(255,107,0,0.3); transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.1) inset;
+  background: rgba(255,107,0,0.04);
+}
+.choice-card-icon {
+  width: 54px; height: 54px; border-radius: var(--r-md); margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900;
+}
+.choice-card h3 { font-size: 16px; font-weight: 800; color: var(--white); margin-bottom: 6px; }
+.choice-card p { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+/* ── Chat Section ───────────────────────────────────────── */
+.chat-section {
+  display: flex; flex-direction: column; height: 440px;
+  border-radius: var(--r-lg); overflow: hidden;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px) saturate(170%);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.05) inset;
+}
+.chat-header {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 10px;
+}
+.chat-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--grad-saffron); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: #fff; flex-shrink: 0; }
+.chat-header-title { font-size: 13px; font-weight: 700; color: var(--white); flex: 1; }
+.chat-header-model { font-size: 10px; font-weight: 700; background: rgba(26,122,74,0.15); border: 1px solid rgba(26,122,74,0.3); color: var(--green-bright); padding: 3px 8px; border-radius: var(--r-pill); }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.chat-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-dim); gap: 12px; }
+.chat-empty h3 { color: var(--white); font-size: 16px; }
+.chat-empty p { font-size: 13px; }
+
+/* Chat bubbles */
+.bubble-wrap { display: flex; gap: 10px; max-width: 85%; }
+.bubble-wrap.user { align-self: flex-end; flex-direction: row-reverse; }
+.bubble-wrap.agent { align-self: flex-start; }
+.bubble-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #fff; flex-shrink: 0; margin-top: 2px; }
+.bubble-avatar.user-av { background: var(--grad-forest); box-shadow: 0 2px 8px rgba(26,122,74,0.3); }
+.bubble-avatar.agent-av { background: var(--grad-saffron); box-shadow: 0 2px 8px rgba(255,107,0,0.3); }
+.bubble-content { display: flex; flex-direction: column; gap: 4px; }
+.bubble-user {
+  background: linear-gradient(135deg, rgba(255,107,0,0.85) 0%, rgba(232,134,12,0.85) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff; border-radius: var(--r-lg) var(--r-lg) 4px var(--r-lg);
+  padding: 11px 16px; font-size: 14px; line-height: 1.6;
+  box-shadow: 0 4px 16px rgba(255,107,0,0.2), 0 1px 0 rgba(255,255,255,0.1) inset;
+}
+.bubble-agent-body {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px var(--r-lg) var(--r-lg) var(--r-lg);
+  padding: 14px 18px; font-size: 14px; line-height: 1.7; color: var(--text); white-space: pre-wrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.04) inset;
+}
+.bubble-meta { font-size: 10px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+.bubble-meta.user-meta { justify-content: flex-end; }
+.bubble-copy { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 10px; padding: 2px 4px; border-radius: 3px; transition: color .2s; }
+.bubble-copy:hover { color: var(--saffron-lt); }
+
+/* Typing indicator */
+.typing-indicator { display: flex; gap: 10px; align-self: flex-start; }
+.typing-dots {
+  display: flex; gap: 5px; padding: 14px 18px;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px var(--r-lg) var(--r-lg) var(--r-lg); width: fit-content;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.typing-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--saffron); animation: tdot 1.2s infinite; }
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-5px);opacity:1}}
+
+/* Chat input */
+.chat-input-row {
+  padding: 10px 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex; gap: 8px; align-items: center;
+}
+.chat-input-row select {
+  padding: 9px 8px; border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+  color: var(--saffron-lt); font-size: 12px; font-weight: 700;
+  font-family: var(--font); cursor: pointer; outline: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+#chatInput {
+  flex: 1; padding: 10px 12px; border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.06);
+  font-size: 14px; font-family: var(--font); outline: none; color: var(--text);
+  transition: all .2s;
+}
+#chatInput:focus { border-color: rgba(255,107,0,0.4); box-shadow: 0 0 0 3px rgba(255,107,0,0.1); background: rgba(255,255,255,0.06); }
+#sendBtn {
+  padding: 10px 16px; border-radius: var(--r-sm); border: none;
+  background: linear-gradient(135deg, rgba(255,107,0,0.8) 0%, rgba(232,134,12,0.8) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff; font-weight: 700; font-size: 13px;
+  cursor: pointer; white-space: nowrap; font-family: var(--font); transition: all .2s;
+  box-shadow: 0 2px 10px rgba(255,107,0,0.25), 0 1px 0 rgba(255,255,255,0.1) inset;
+}
+#sendBtn:disabled { opacity: .4; cursor: not-allowed; }
+#sendBtn:hover:not(:disabled) { box-shadow: 0 4px 16px rgba(255,107,0,0.4), 0 1px 0 rgba(255,255,255,0.15) inset; }
+.voice-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--text-muted); font-size: 12px;
+  cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font); font-weight: 700; flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.voice-btn:hover { background: rgba(255,107,0,0.1); color: var(--saffron-lt); border-color: rgba(255,107,0,0.25); }
+.voice-btn.listening { background: rgba(230,51,18,0.7); color: #fff; border-color: rgba(230,51,18,0.5); animation: voicePulse 1s ease-in-out infinite; }
+@keyframes voicePulse { 0%,100%{box-shadow:0 0 0 0 rgba(230,51,18,0.4)} 50%{box-shadow:0 0 0 8px rgba(230,51,18,0)} }
+
+/* Quick queries */
+.quick-queries { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.qq {
+  padding: 6px 12px; border-radius: var(--r-pill); font-size: 12px; font-weight: 600;
+  background: rgba(255,107,0,0.06);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: var(--saffron-lt);
+  border: 1px solid rgba(255,107,0,0.12); cursor: pointer; transition: all .2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.qq:hover { background: rgba(255,107,0,0.12); border-color: rgba(255,107,0,0.3); }
+
+/* ── Receipt Card (Liquid Glass) ────────────────────────── */
+.receipt-card {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-lg); overflow: hidden; position: relative;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.06) inset;
+}
+.receipt-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  z-index: 1; pointer-events: none;
+}
+.receipt-header {
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06); position: relative;
+}
+.receipt-header::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--grad-fire); }
+.receipt-vendor-name { font-size: 20px; font-weight: 900; color: var(--white); }
+.receipt-type { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.receipt-loc { font-size: 12px; color: var(--saffron-lt); font-weight: 600; margin-top: 4px; }
+.receipt-body { padding: 20px 22px; }
+.receipt-qr-row { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
+.receipt-qr-img { width: 110px; height: 110px; border: 2px solid var(--bdr); border-radius: var(--r-sm); object-fit: contain; background: var(--bg); }
+.receipt-upi-info h4 { font-size: 13px; font-weight: 700; color: var(--green-bright); margin-bottom: 3px; }
+.receipt-upi-id { font-family: var(--mono); font-size: 14px; color: var(--saffron-lt); font-weight: 700; }
+.receipt-upi-apps { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+.receipt-divider { border: none; height: 1px; margin: 14px 0; background: var(--bdr); }
+.receipt-section-title { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+.receipt-answer { font-size: 13px; line-height: 1.7; color: var(--text); max-height: 280px; overflow-y: auto; white-space: pre-wrap; }
+.receipt-sources {
+  margin-top: 12px; padding: 10px 12px;
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.receipt-source-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim); padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.receipt-source-item:last-child { border-bottom: none; }
+.source-score { padding: 2px 7px; border-radius: 3px; font-size: 10px; font-weight: 700; background: rgba(26,122,74,0.12); color: var(--green-bright); }
+.receipt-footer {
+  padding: 14px 22px; background: rgba(255,255,255,0.02);
+  border-top: 1px solid var(--bdr); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+}
+.receipt-footer-brand { font-size: 11px; font-weight: 700; color: var(--text-dim); letter-spacing: .04em; }
+.receipt-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.receipt-actions .btn { font-size: 12px; padding: 8px 14px; }
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: var(--r-sm); border: none; font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s; text-decoration: none; }
+.btn-sm { padding: 8px 14px; font-size: 12px; }
+.btn-outline {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.btn-outline:hover { background: rgba(255,255,255,0.08); color: var(--text); border-color: rgba(255,255,255,0.15); }
+.btn-green {
+  background: linear-gradient(135deg, rgba(26,122,74,0.8) 0%, rgba(34,168,98,0.8) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(26,122,74,0.25), 0 1px 0 rgba(255,255,255,0.1) inset;
+}
+.btn-green:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,122,74,0.4), 0 1px 0 rgba(255,255,255,0.15) inset; }
+.btn-saffron {
+  background: linear-gradient(135deg, rgba(255,107,0,0.8) 0%, rgba(232,134,12,0.8) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(255,107,0,0.25), 0 1px 0 rgba(255,255,255,0.1) inset;
+}
+.btn-saffron:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,107,0,0.4), 0 1px 0 rgba(255,255,255,0.15) inset; }
+.btn-ghost {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+/* ── Scheme Checker ─────────────────────────────────────── */
+.scheme-checker {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--r-lg); padding: 22px; margin-top: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.04) inset;
+}
+.scheme-checker h4 { font-size: 14px; font-weight: 800; color: var(--white); margin-bottom: 8px; }
+.scheme-q { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
+.scheme-opts { display: flex; gap: 8px; flex-wrap: wrap; }
+.scheme-opt {
+  padding: 9px 16px; border-radius: var(--r-sm); font-size: 13px; font-weight: 600;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.06); color: var(--text-muted);
+  cursor: pointer; transition: all .2s; font-family: var(--font);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.scheme-opt:hover { background: rgba(255,107,0,0.06); border-color: rgba(255,107,0,0.2); color: var(--text); }
+.scheme-opt.selected {
+  background: rgba(255,107,0,0.10);
+  border-color: rgba(255,107,0,0.4); color: var(--saffron-lt);
+  box-shadow: 0 4px 12px rgba(255,107,0,0.15), 0 1px 0 rgba(255,255,255,0.06) inset;
+}
+.scheme-result {
+  margin-top: 14px; padding: 16px; border-radius: var(--r-sm);
+  background: rgba(26,122,74,0.06); border: 1px solid rgba(26,122,74,0.2);
+  font-size: 13px; color: var(--text); line-height: 1.6; display: none;
+  animation: fadeSlide .3s ease;
+}
+
+/* ── Map ─────────────────────────────────────────────────── */
+#vendorMap { height: 220px; border-radius: var(--r-md); border: 1px solid rgba(255,255,255,0.06); margin-top: 12px; background: rgba(255,255,255,0.02); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.map-hint { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+
+/* ── Pipeline ────────────────────────────────────────────── */
+#pipelineDisplay { display: none; margin-bottom: 16px; padding: 14px; background: rgba(255,255,255,0.02); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-radius: var(--r-sm); border: 1px solid rgba(255,255,255,0.04); }
+.pipe-title { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--saffron-lt); margin-bottom: 8px; }
+.pipeline-step { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: var(--r-sm); font-size: 13px; margin-bottom: 6px; border: 1px solid rgba(255,255,255,0.04); background: rgba(255,255,255,0.02); }
+.ps-waiting { color: var(--text-dim); }
+.ps-active { background: rgba(255,107,0,0.06); color: var(--saffron-lt); border-color: rgba(255,107,0,0.2); }
+.ps-done { background: rgba(26,122,74,0.06); color: var(--green-bright); border-color: rgba(26,122,74,0.2); }
+
+/* ── Status Bar ─────────────────────────────────────────── */
+.status-bar { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.s-chip { padding: 4px 10px; border-radius: var(--r-pill); font-size: 10px; font-weight: 700; letter-spacing: .05em; }
+.s-ok { background: rgba(26,122,74,0.12); color: var(--green-bright); border: 1px solid rgba(26,122,74,0.3); }
+.s-warn { background: rgba(255,107,0,0.08); color: var(--saffron-lt); border: 1px solid rgba(255,107,0,0.2); }
+
+/* ── Celebration Overlay ────────────────────────────────── */
+.celebration { position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
+.confetti { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: confettiFall 3s ease-in forwards; }
+@keyframes confettiFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Mobile Bottom Nav ──────────────────────────────────── */
+.bottom-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 9000;
+  background: rgba(7,8,10,0.82);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 8px 0 env(safe-area-inset-bottom, 8px);
+  justify-content: space-around; align-items: center;
+  box-shadow: 0 -1px 0 rgba(255,255,255,0.04) inset, 0 -8px 32px rgba(0,0,0,0.3);
+}
+.bottom-nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 12px; border-radius: var(--r-sm); cursor: pointer; transition: all .2s;
+  background: none; border: none; color: var(--text-dim); font-family: var(--font);
+}
+.bottom-nav-item.active { color: var(--saffron-lt); }
+.bottom-nav-item:hover { color: var(--text); }
+.bn-icon { font-size: 18px; font-weight: 900; }
+.bn-label { font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media(max-width:700px) {
+  .wizard-container { padding: 24px 16px 140px; }
+  .wizard-card { padding: 24px 18px; min-height: auto; }
+  .choice-cards { grid-template-columns: 1fr; }
+  .lang-grid { grid-template-columns: repeat(2, 1fr); }
+  .wizard-step-labels { display: none; }
+  .wizard-step-line { width: 30px; }
+  .bottom-nav { display: flex; }
+  .welcome-visual { flex-direction: column; }
+  .receipt-qr-row { flex-direction: column; align-items: flex-start; }
+  .chat-section { height: 360px; }
+  .bubble-wrap { max-width: 92%; }
+  .receipt-footer { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── Scroll Reveal ──────────────────────────────────────── */
+.rv { opacity:0; transform:translateY(30px); transition:opacity .72s ease, transform .72s ease; }
+.rv.in { opacity:1; transform:translateY(0); }
+.d1{transition-delay:.1s} .d2{transition-delay:.2s} .d3{transition-delay:.3s}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
+<!-- ═══ SVG Liquid Glass Filter ═════════════════════════ -->
+<svg style="position:absolute;width:0;height:0;" aria-hidden="true">
+  <defs>
+    <!-- Liquid Glass: refraction distortion -->
+    <filter id="liquid-glass" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="2" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feGaussianBlur in="displaced" stdDeviation="0.5" result="blurred"/>
+      <feComposite in="blurred" in2="SourceGraphic" operator="atop"/>
+    </filter>
+    <!-- Liquid Glass: specular highlight -->
+    <filter id="liquid-glass-specular" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.008" numOctaves="2" seed="5" result="noise"/>
+      <feDiffuseLighting in="noise" lighting-color="#fff" surfaceScale="1.5" result="light">
+        <feDistantLight azimuth="135" elevation="55"/>
+      </feDiffuseLighting>
+      <feComposite in="light" in2="SourceGraphic" operator="in" result="highlight"/>
+      <feMerge>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="highlight"/>
+      </feMerge>
+    </filter>
+  </defs>
+</svg>
+
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="orb o3"></div>
+
+<!-- ═══ NAVBAR ═══════════════════════════════════════════ -->
 <nav id="navbar">
   <a href="/" class="nav-brand">
-    <div class="nav-brand-icon">🛒</div>
-    Street Vendor Digitalization Agent
+    <div class="nav-mark">SV</div>
+    <span>Street Vendor Digitalization Agent</span>
   </a>
-  <ul class="nav-links">
-    <li><a href="/">Home</a></li>
-    <li><a href="#" onclick="clearChat()">Clear Chat</a></li>
-  </ul>
   <div class="nav-right">
-    <div class="nav-status"><span class="status-dot"></span><span id="navStatus">Connecting...</span></div>
-    <a href="/" class="btn btn-outline btn-sm">← Back</a>
+    <div class="live-pill"><span class="status-dot"></span><span id="navStatus">Connecting...</span></div>
+    <span id="indexStatus" class="nav-chip">Checking...</span>
+    <a href="/" class="btn-launch">Home</a>
   </div>
 </nav>
 
-<!-- IBM BAR -->
-<div class="ibm-bar">
-  <div class="ibm-bar-title">🔵 IBM watsonx.ai · AICTE-IBM SkillsBuild 2026 · PS No. 29</div>
-  <span class="ibm-model-chip chip-gen">⚡ ibm/granite-4-h-small</span>
-  <span class="ibm-model-chip chip-emb">🧩 ibm/granite-embedding-278m-multilingual</span>
-  <span class="ibm-model-chip chip-live" id="indexStatus">⏳ Checking...</span>
+<!-- ═══ TOAST ═══════════════════════════════════════════ -->
+<div id="toast"></div>
+
+<!-- ═══ CELEBRATION CONTAINER ══════════════════════════ -->
+<div class="celebration" id="celebration"></div>
+
+<div class="wizard-page">
+<div class="wizard-container">
+
+<!-- ═══ PROGRESS BAR ═════════════════════════════════════ -->
+<div class="wizard-progress">
+  <div class="wizard-step-dot active" id="dot1">1</div>
+  <div class="wizard-step-line" id="line1"></div>
+  <div class="wizard-step-dot" id="dot2">2</div>
+  <div class="wizard-step-line" id="line2"></div>
+  <div class="wizard-step-dot" id="dot3">3</div>
+  <div class="wizard-step-line" id="line3"></div>
+  <div class="wizard-step-dot" id="dot4">4</div>
+  <div class="wizard-step-line" id="line4"></div>
+  <div class="wizard-step-dot" id="dot5">5</div>
+</div>
+<div class="wizard-step-labels">
+  <div class="wizard-step-label active">Welcome</div>
+  <div class="wizard-step-label">Your Details</div>
+  <div class="wizard-step-label">Language</div>
+  <div class="wizard-step-label">Choose Action</div>
+  <div class="wizard-step-label">Results</div>
 </div>
 
-<!-- AGENT LAYOUT -->
-<div class="agent-layout">
+<!-- ═══ STEP 1: WELCOME ══════════════════════════════════ -->
+<div class="wizard-card liquid-glass active" id="step1">
+  <h2>Welcome to the Street Vendor Digitalization Agent</h2>
+  <p class="subtitle">This AI assistant will help you set up digital payments, list your business online, apply for government loans, and create a professional QR business card — all in your local language.</p>
 
-  <!-- LEFT: CHAT -->
-  <div class="chat-panel">
-    <div class="chat-wrap">
+  <div class="welcome-visual">
+    <div class="welcome-feature">
+      <div class="welcome-feature-icon" style="background:rgba(255,107,0,0.12);color:var(--saffron-lt);">UPI</div>
+      <h4>Digital Payments</h4>
+      <p>Set up PhonePe, Paytm, or GPay QR code in minutes</p>
+    </div>
+    <div class="welcome-feature">
+      <div class="welcome-feature-icon" style="background:rgba(245,197,24,0.1);color:var(--turmeric-lt);">LOAN</div>
+      <h4>Government Loans</h4>
+      <p>Check eligibility for PM SVANidhi, Mudra Yojana, and more</p>
+    </div>
+    <div class="welcome-feature">
+      <div class="welcome-feature-icon" style="background:rgba(26,122,74,0.12);color:var(--green-bright);">MAP</div>
+      <h4>Online Visibility</h4>
+      <p>Get listed on Google Maps and food delivery apps</p>
+    </div>
+  </div>
 
+  <div class="wiz-nav">
+    <div></div>
+    <button class="wiz-btn wiz-btn-next" onclick="goStep(2)">Get Started &rarr;</button>
+  </div>
+</div>
+
+<!-- ═══ STEP 2: VENDOR DETAILS ═══════════════════════════ -->
+<div class="wizard-card liquid-glass" id="step2">
+  <h2>Tell Us About Your Business</h2>
+  <p class="subtitle">Enter your shop or stall details so the AI can give you personalized advice. Fields marked with * are required.</p>
+
+  <div class="wiz-form">
+    <div class="wiz-group">
+      <label for="fVendorName">Vendor / Shop Name *</label>
+      <input id="fVendorName" placeholder="e.g. Ramesh Fruits, Lakshmi Chat Stall"/>
+      <div class="hint">Your business name as customers know it</div>
+      <div class="error-msg">Please enter your vendor or shop name</div>
+    </div>
+    <div class="wiz-group">
+      <label for="fBizType">Business Type *</label>
+      <input id="fBizType" placeholder="e.g. Fruit & Vegetable Vendor, Tea Stall, Clothing Shop"/>
+      <div class="hint">What do you sell? Be specific for better results</div>
+      <div class="error-msg">Please enter your business type</div>
+    </div>
+    <div class="wiz-group">
+      <label for="fLocation">Location / Area *</label>
+      <input id="fLocation" placeholder="e.g. Camp, Pune or T. Nagar, Chennai"/>
+      <div class="hint">Your stall area and city — helps with local SEO and Google Maps listing</div>
+      <div class="error-msg">Please enter your location</div>
+    </div>
+    <div class="wiz-group">
+      <label for="fUpiId">UPI ID (optional)</label>
+      <input id="fUpiId" placeholder="e.g. rameshfruits@upi"/>
+      <div class="hint">If you already have a UPI ID, enter it to generate a QR code</div>
+    </div>
+  </div>
+
+  <div class="wiz-nav">
+    <button class="wiz-btn wiz-btn-back" onclick="goStep(1)">&larr; Back</button>
+    <button class="wiz-btn wiz-btn-next" onclick="validateAndNext()">Continue &rarr;</button>
+  </div>
+</div>
+
+<!-- ═══ STEP 3: LANGUAGE ══════════════════════════════════ -->
+<div class="wizard-card liquid-glass" id="step3">
+  <h2>Choose Your Language</h2>
+  <p class="subtitle">The AI will respond in your preferred language. You can also use voice input to speak in your language.</p>
+
+  <div class="lang-grid" id="langGrid">
+    <div class="lang-option selected" onclick="selectLang(this,'en')">
+      <div class="lang-name">English</div>
+      <div class="lang-native">English</div>
+    </div>
+    <div class="lang-option" onclick="selectLang(this,'hi')">
+      <div class="lang-name">Hindi</div>
+      <div class="lang-native">हिन्दी</div>
+    </div>
+    <div class="lang-option" onclick="selectLang(this,'mr')">
+      <div class="lang-name">Marathi</div>
+      <div class="lang-native">मराठी</div>
+    </div>
+    <div class="lang-option" onclick="selectLang(this,'ta')">
+      <div class="lang-name">Tamil</div>
+      <div class="lang-native">தமிழ்</div>
+    </div>
+    <div class="lang-option" onclick="selectLang(this,'te')">
+      <div class="lang-name">Telugu</div>
+      <div class="lang-native">తెలుగు</div>
+    </div>
+    <div class="lang-option" onclick="selectLang(this,'kn')">
+      <div class="lang-name">Kannada</div>
+      <div class="lang-native">ಕನ್ನಡ</div>
+    </div>
+    <div class="lang-option" onclick="selectLang(this,'gu')">
+      <div class="lang-name">Gujarati</div>
+      <div class="lang-native">ગુજરાતી</div>
+    </div>
+    <div class="lang-option" onclick="selectLang(this,'bn')">
+      <div class="lang-name">Bengali</div>
+      <div class="lang-native">বাংলা</div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,0.03);border-radius:var(--r-sm);border:1px solid var(--bdr);max-width:480px;">
+    <strong style="font-size:13px;color:var(--saffron-lt);">Voice Input Available</strong>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:4px;">On the next step, you can click the microphone button to speak your question instead of typing. Works best in Chrome or Edge browser.</p>
+  </div>
+
+  <div class="wiz-nav">
+    <button class="wiz-btn wiz-btn-back" onclick="goStep(2)">&larr; Back</button>
+    <button class="wiz-btn wiz-btn-next" onclick="goStep(4)">Continue &rarr;</button>
+  </div>
+</div>
+
+<!-- ═══ STEP 4: CHOOSE ACTION ════════════════════════════ -->
+<div class="wizard-card liquid-glass" id="step4">
+  <h2>What Would You Like to Do?</h2>
+  <p class="subtitle">Choose one option to continue. You can always come back and try the other one later.</p>
+
+  <div class="choice-cards">
+    <div class="choice-card" onclick="chooseAction('kit')">
+      <div class="choice-card-icon" style="background:rgba(255,107,0,0.12);color:var(--saffron-lt);">QR</div>
+      <h3>Generate Digital Kit</h3>
+      <p>Get a complete digital plan: UPI setup steps, government scheme eligibility, online listing guide, and a printable QR business card.</p>
+    </div>
+    <div class="choice-card" onclick="chooseAction('chat')">
+      <div class="choice-card-icon" style="background:rgba(26,122,74,0.12);color:var(--green-bright);">ASK</div>
+      <h3>Ask a Question</h3>
+      <p>Chat with the AI assistant about anything: UPI payments, Google Maps listing, FSSAI license, PM SVANidhi loan, or selling online.</p>
+    </div>
+  </div>
+
+  <div class="wiz-nav">
+    <button class="wiz-btn wiz-btn-back" onclick="goStep(3)">&larr; Back</button>
+    <div></div>
+  </div>
+</div>
+
+<!-- ═══ STEP 5: RESULTS ══════════════════════════════════ -->
+<div class="wizard-card liquid-glass" id="step5" style="min-height:auto;">
+  <h2 id="step5Title">Your Digital Kit</h2>
+  <p class="subtitle" id="step5Subtitle">Here is your personalized digital transformation plan. You can copy it, download the QR card, or share it on WhatsApp.</p>
+
+  <!-- Vendor summary bar -->
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;padding:12px 16px;background:rgba(255,255,255,0.03);border-radius:var(--r-sm);border:1px solid var(--bdr);">
+    <span style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Vendor:</span>
+    <strong id="summaryName" style="font-size:12px;color:var(--saffron-lt);">--</strong>
+    <span style="color:var(--text-dim);">|</span>
+    <span style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Business:</span>
+    <strong id="summaryBiz" style="font-size:12px;color:var(--saffron-lt);">--</strong>
+    <span style="color:var(--text-dim);">|</span>
+    <span style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Location:</span>
+    <strong id="summaryLoc" style="font-size:12px;color:var(--saffron-lt);">--</strong>
+    <span style="color:var(--text-dim);">|</span>
+    <span style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Language:</span>
+    <strong id="summaryLang" style="font-size:12px;color:var(--saffron-lt);">--</strong>
+  </div>
+
+  <!-- Pipeline display -->
+  <div id="pipelineDisplay">
+    <div class="pipe-title">Processing</div>
+    <div id="pipelineSteps"></div>
+  </div>
+
+  <!-- Chat section -->
+  <div id="chatSection" style="display:none;">
+    <div class="chat-section">
       <div class="chat-header">
-        <span style="font-size:18px;">🛒</span>
-        <div class="chat-header-title">Street Vendor Digitalization Agent — Live Chat</div>
-        <div class="chat-header-model">granite-4-h-small</div>
+        <div class="chat-avatar">AI</div>
+        <span class="chat-header-title">AI Vendor Assistant</span>
+        <span class="chat-header-model">IBM Granite</span>
       </div>
-
       <div class="chat-messages" id="chatMessages">
         <div class="chat-empty" id="chatEmpty">
-          <div class="chat-empty-icon">🌾</div>
-          <h3>Namaste! Tell me about your business.</h3>
-          <p>Type in any language — Hindi, Marathi, Tamil, Telugu, Gujarati, or English.<br/>
-             I'll give you a complete digital kit powered by IBM watsonx.ai.</p>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px;">
-            <span class="tag tag-turmeric" onclick="fillQuery(this)" style="cursor:pointer">I sell fruit in Pune's Camp area</span>
-            <span class="tag tag-green"    onclick="fillQuery(this)" style="cursor:pointer">Idli-dosa stall near Chennai Central</span>
-            <span class="tag tag-indigo"   onclick="fillQuery(this)" style="cursor:pointer">Vegetable vendor in Dharavi Mumbai</span>
-            <span class="tag tag-turmeric" onclick="fillQuery(this)" style="cursor:pointer">Flower vendor near MG Road Bangalore</span>
-            <span class="tag tag-green"    onclick="fillQuery(this)" style="cursor:pointer">Saree seller in Surat textile market</span>
-          </div>
+          <h3>Ask Anything About Going Digital</h3>
+          <p>Type or speak in your language. The AI will give you specific, actionable advice.</p>
+          <div class="quick-queries" id="quickQueries"></div>
         </div>
       </div>
-
       <div class="chat-input-row">
-        <select id="langSelect">
-          <option value="en">🇮🇳 English</option>
-          <option value="hi">हिन्दी</option>
-          <option value="mr">मराठी</option>
-          <option value="ta">தமிழ்</option>
-          <option value="te">తెలుగు</option>
-          <option value="kn">ಕನ್ನಡ</option>
-          <option value="gu">ગુજરાતી</option>
-          <option value="bn">বাংলা</option>
+        <select id="langSelectChat">
+          <option value="en">EN</option>
+          <option value="hi">HI</option>
+          <option value="mr">MR</option>
+          <option value="ta">TA</option>
+          <option value="te">TE</option>
+          <option value="kn">KN</option>
+          <option value="gu">GU</option>
+          <option value="bn">BN</option>
         </select>
-        <input
-          id="chatInput"
-          type="text"
-          placeholder='E.g. "I sell vegetables in T. Nagar, Chennai"'
-          autocomplete="off"
-        />
-        <button id="sendBtn" onclick="sendMessage()">Send ✦</button>
+        <input id="chatInput" placeholder="Type your question here..." autocomplete="off"/>
+        <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Speak your question">MIC</button>
+        <button id="sendBtn" onclick="sendChatMessage()">Send</button>
       </div>
-
     </div>
   </div>
 
-  <!-- RIGHT: KIT PANEL -->
-  <div class="kit-panel">
-
-    <!-- Vendor Form -->
-    <div class="vendor-form">
-      <h4>📋 Generate Digital Kit</h4>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Vendor Name</label>
-          <input id="fVendorName" type="text" placeholder="Ramesh Fruits"/>
-        </div>
-        <div class="form-group">
-          <label>Business Type</label>
-          <input id="fBizType" type="text" placeholder="Fruit & Vegetable Vendor"/>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Location</label>
-          <input id="fLocation" type="text" placeholder="Camp, Pune"/>
-        </div>
-        <div class="form-group">
-          <label>UPI ID</label>
-          <input id="fUpiId" type="text" placeholder="vendor@upi"/>
-        </div>
-      </div>
-      <button class="kit-generate-btn" id="generateKitBtn" onclick="generateKit()">
-        🎫 Generate Digital Kit + QR Card
-      </button>
-    </div>
-
-    <!-- Pipeline display -->
-    <div class="pipeline-display" id="pipelineDisplay">
-      <div class="pipeline-title">⚡ Live RAG Pipeline</div>
-      <div id="pipelineSteps"></div>
-    </div>
-
-    <!-- Receipt placeholder or actual receipt -->
-    <div class="kit-panel-title">🎫 Digital Kit — Torn Receipt</div>
+  <!-- Receipt section -->
+  <div id="receiptSection" style="display:none;">
     <div id="receiptContainer">
-      <div class="receipt-placeholder">
-        <div class="icon">🎫</div>
-        <p>Your digital kit will appear here as a receipt card after you chat or generate a kit above.</p>
+      <div style="text-align:center;padding:40px 20px;color:var(--text-dim);font-size:13px;">
+        Your digital kit receipt will appear here after generation.
       </div>
     </div>
+  </div>
 
+  <!-- Scheme Checker -->
+  <div class="scheme-checker" id="schemeChecker">
+    <h4>Government Loan Eligibility Check</h4>
+    <div class="scheme-q">Are you a registered street vendor with a Certificate of Vending (CoV)?</div>
+    <div class="scheme-opts">
+      <span class="scheme-opt" onclick="checkScheme(this,'yes')">Yes, I have CoV</span>
+      <span class="scheme-opt" onclick="checkScheme(this,'lor')">Have LoR only</span>
+      <span class="scheme-opt" onclick="checkScheme(this,'no')">No certificate yet</span>
+    </div>
+    <div class="scheme-result" id="schemeResult"></div>
+  </div>
+
+  <!-- Vendor Map -->
+  <div style="margin-top:24px;">
+    <h3 style="font-size:15px;font-weight:800;color:var(--white);margin-bottom:6px;">Nearby Registered Vendors</h3>
+    <p style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">See other vendors who have registered on this platform. Different colors show different business types.</p>
+    <div id="vendorMap"></div>
+    <div class="map-hint">Map data from OpenStreetMap. Auto-zooms to your location if you allow browser location access.</div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span id="chipIbm" class="s-chip s-warn">IBM: Checking</span>
+    <span id="chipIdx" class="s-chip s-warn">Index: Checking</span>
+  </div>
+
+  <div class="wiz-nav">
+    <button class="wiz-btn wiz-btn-back" onclick="goStep(4)">&larr; Change Action</button>
+    <div style="display:flex;gap:8px;">
+      <button class="wiz-btn wiz-btn-skip" onclick="startOver()">Start Over</button>
+      <a href="/" class="wiz-btn wiz-btn-back" style="text-decoration:none;">Home</a>
+    </div>
   </div>
 </div>
 
-<script src="/js/geo.js"></script>
-<script src="/js/kit.js"></script>
-<script src="/js/chat.js"></script>
+</div>
+</div>
+
+<!-- ═══ MOBILE BOTTOM NAV ═══════════════════════════════ -->
+<div class="bottom-nav" id="bottomNav">
+  <button class="bottom-nav-item active" onclick="goStep(1)">
+    <span class="bn-icon">1</span>
+    <span class="bn-label">Start</span>
+  </button>
+  <button class="bottom-nav-item" onclick="goStep(2)">
+    <span class="bn-icon">2</span>
+    <span class="bn-label">Details</span>
+  </button>
+  <button class="bottom-nav-item" onclick="goStep(3)">
+    <span class="bn-icon">3</span>
+    <span class="bn-label">Language</span>
+  </button>
+  <button class="bottom-nav-item" onclick="goStep(4)">
+    <span class="bn-icon">4</span>
+    <span class="bn-label">Action</span>
+  </button>
+  <button class="bottom-nav-item" onclick="goStep(5)">
+    <span class="bn-icon">5</span>
+    <span class="bn-label">Result</span>
+  </button>
+</div>
+
+<!-- Hidden fields -->
+<input type="hidden" id="langSelect" value="en"/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/offline.js"></script>
+<script src="/js/voice.js"></script>
+<script src="/js/vendor-map.js"></script>
+<script src="/js/scheme-checker.js"></script>
+
+<script>
+/* ═══ Config ════════════════════════════════════════════ */
+const QUICK_QUERIES = {
+  en: ['How do I set up UPI?', 'Tell me about PM SVANidhi loan', 'How to list on Google Maps?', 'FSSAI license for food stall', 'Best apps for selling online'],
+  hi: ['UPI कैसे सेट करें?', 'PM SVANidhi ऋण के बारे में बताएं', 'Google Maps पर कैसे लिस्ट करें?', 'फूड स्टॉल के लिए FSSAI लाइसेंस', 'ऑनलाइन बेचने के लिए सबसे अच्छे ऐप्स'],
+  mr: ['UPI कसे सेट करावे?', 'PM SVANidhi कर्जाबद्दल सांगा', 'Google Maps वर कसे लिस्ट करावे?', 'फूड स्टॉलसाठी FSSAI परवाना', 'ऑनलाइन विक्रीसाठी सर्वोत्तम ॲप्स'],
+  ta: ['UPI எப்படி அமைப்பது?', 'PM SVANidhi கடன் பற்றி கூறுங்கள்', 'Google Maps இல் எப்படி பட்டியலிடுவது?', 'உணவு கடைக்கான FSSAI உரிமம்', 'ஆன்லைனில் விற்க சிறந்த ஆப்கள்'],
+  te: ['UPI ఎలా సెట్ చేయాలి?', 'PM SVANidhi రుణం గురించి చెప్పండి', 'Google Maps లో ఎలా లిస్ట్ చేయాలి?', 'ఫుడ్ స్టాల్ కు FSSAI లైసెన్స్', 'ఆన్లైన్ లో అమ్మడానికి ఉత్తమ యాప్స్'],
+  kn: ['UPI ಹೇಗೆ ಸೆಟ್ ಮಾಡಬೇಕು?', 'PM SVANidhi ಸಾಲದ ಬಗ್ಗೆ ಹೇಳಿ', 'Google Maps ನಲ್ಲಿ ಹೇಗೆ ಲಿಸ್ಟ್ ಮಾಡಬೇಕು?', 'ಫುಡ್ ಸ್ಟಾಲ್ ಗೆ FSSAI ಪರವಾನಗಿ', 'ಆನ್ಲೈನ್ ನಲ್ಲಿ ಮಾರಾಟಕ್ಕೆ ಉತ್ತಮ ಆಪ್ಸ್'],
+  gu: ['UPI કેવી રીતે સેટ કરવું?', 'PM SVANidhi લોન વિશે જણાવો', 'Google Maps પર કેવી રીતે લિસ્ટ કરવું?', 'ફૂડ સ્ટોલ માટે FSSAI લાઇસન્સ', 'ઓનલાઇન વેચવા માટે શ્રેષ્ઠ એપ્સ'],
+  bn: ['UPI কিভাবে সেট করবেন?', 'PM SVANidhi ঋণ সম্পর্কে বলুন', 'Google Maps এ কিভাবে লিস্ট করবেন?', 'ফুড স্টলের জন্য FSSAI লাইসেন্স', 'অনলাইনে বিক্রির জন্য সেরা অ্যাপ']
+};
+
+/* ═══ State ════════════════════════════════════════════ */
+let currentStep = 1;
+let chosenAction = null;
+let selectedLang = 'en';
+
+/* ═══ Toast ════════════════════════════════════════════ */
+function showToast(msg, ok) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = ok ? 'show ok' : 'show';
+  setTimeout(() => t.className = '', 2800);
+}
+
+/* ═══ Save/Load Progress ═══════════════════════════════ */
+function saveProgress() {
+  const data = {
+    vendorName: document.getElementById('fVendorName')?.value || '',
+    bizType: document.getElementById('fBizType')?.value || '',
+    location: document.getElementById('fLocation')?.value || '',
+    upiId: document.getElementById('fUpiId')?.value || '',
+    lang: selectedLang,
+    step: currentStep
+  };
+  try { localStorage.setItem('sv_progress', JSON.stringify(data)); } catch(e) {}
+}
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem('sv_progress');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d.vendorName) document.getElementById('fVendorName').value = d.vendorName;
+    if (d.bizType) document.getElementById('fBizType').value = d.bizType;
+    if (d.location) document.getElementById('fLocation').value = d.location;
+    if (d.upiId) document.getElementById('fUpiId').value = d.upiId;
+    if (d.lang) { selectedLang = d.lang; document.getElementById('langSelect').value = d.lang; }
+  } catch(e) {}
+}
+
+/* ═══ Wizard Navigation ════════════════════════════════ */
+function goStep(n) {
+  if (n === 3 && currentStep === 2) {
+    if (!validateStep2()) return;
+  }
+  if (n === 5) {
+    document.getElementById('summaryName').textContent = document.getElementById('fVendorName').value.trim() || '--';
+    document.getElementById('summaryBiz').textContent = document.getElementById('fBizType').value.trim() || '--';
+    document.getElementById('summaryLoc').textContent = document.getElementById('fLocation').value.trim() || '--';
+    const langNames = {en:'English',hi:'Hindi',mr:'Marathi',ta:'Tamil',te:'Telugu',kn:'Kannada',gu:'Gujarati',bn:'Bengali'};
+    document.getElementById('summaryLang').textContent = langNames[selectedLang] || 'English';
+    document.getElementById('langSelect').value = selectedLang;
+  }
+
+  document.querySelectorAll('.wizard-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+
+  for (let i = 1; i <= 5; i++) {
+    const dot = document.getElementById('dot' + i);
+    const line = document.getElementById('line' + (i - 1));
+    dot.classList.remove('active', 'done');
+    if (i < n) dot.classList.add('done');
+    else if (i === n) dot.classList.add('active');
+    if (line) { line.classList.remove('done'); if (i < n) line.classList.add('done'); }
+  }
+
+  const labels = document.querySelectorAll('.wizard-step-label');
+  labels.forEach((l, i) => { l.classList.toggle('active', i + 1 === n); });
+
+  // Update bottom nav
+  document.querySelectorAll('.bottom-nav-item').forEach((item, i) => {
+    item.classList.toggle('active', i + 1 === n);
+  });
+
+  currentStep = n;
+  saveProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ═══ Validation ═══════════════════════════════════════ */
+function validateStep2() {
+  let valid = true;
+  const fields = [
+    { id: 'fVendorName', msg: 'Please enter your vendor or shop name' },
+    { id: 'fBizType', msg: 'Please enter your business type' },
+    { id: 'fLocation', msg: 'Please enter your location' }
+  ];
+  fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    const errEl = el.parentElement.querySelector('.error-msg');
+    if (!el.value.trim()) {
+      el.classList.add('error');
+      if (errEl) errEl.style.display = 'block';
+      valid = false;
+    } else {
+      el.classList.remove('error');
+      if (errEl) errEl.style.display = 'none';
+    }
+  });
+  if (!valid) showToast('Please fill in all required fields');
+  return valid;
+}
+
+function validateAndNext() {
+  if (validateStep2()) goStep(3);
+}
+
+/* ═══ Language ══════════════════════════════════════════ */
+function selectLang(el, code) {
+  document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedLang = code;
+  const chatLang = document.getElementById('langSelectChat');
+  if (chatLang) chatLang.value = code;
+  updateQuickQueries();
+  saveProgress();
+}
+
+function updateQuickQueries() {
+  const container = document.getElementById('quickQueries');
+  if (!container) return;
+  const queries = QUICK_QUERIES[selectedLang] || QUICK_QUERIES.en;
+  container.innerHTML = queries.map(q => `<span class="qq" onclick="fillQuery(this)">${q}</span>`).join('');
+}
+
+/* ═══ Choose Action ════════════════════════════════════ */
+function chooseAction(action) {
+  chosenAction = action;
+  const chatSection = document.getElementById('chatSection');
+  const receiptSection = document.getElementById('receiptSection');
+  const step5Title = document.getElementById('step5Title');
+  const step5Subtitle = document.getElementById('step5Subtitle');
+
+  if (action === 'chat') {
+    chatSection.style.display = 'block';
+    receiptSection.style.display = 'none';
+    step5Title.textContent = 'Ask the AI Assistant';
+    step5Subtitle.textContent = 'Type or speak your question. The AI will give you specific advice based on your business details.';
+    updateQuickQueries();
+  } else {
+    chatSection.style.display = 'none';
+    receiptSection.style.display = 'block';
+    step5Title.textContent = 'Your Digital Kit';
+    step5Subtitle.textContent = 'Here is your personalized digital transformation plan. You can copy it, download the QR card, or share it on WhatsApp.';
+    generateKit();
+  }
+  goStep(5);
+}
+
+/* ═══ Chat ═════════════════════════════════════════════ */
+const chatMessages = document.getElementById('chatMessages');
+const chatEmpty = document.getElementById('chatEmpty');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+
+function getChatLang() {
+  const sel = document.getElementById('langSelectChat');
+  return sel ? sel.value : (selectedLang || 'en');
+}
+
+if (chatInput) {
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !sendBtn.disabled) sendChatMessage();
+  });
+}
+
+function fillQuery(el) {
+  if (chatInput) { chatInput.value = el.textContent.trim(); chatInput.focus(); }
+}
+
+function getTimestamp() {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+async function sendChatMessage() {
+  const query = chatInput.value.trim();
+  const lang = getChatLang();
+  if (!query) return;
+
+  chatEmpty.style.display = 'none';
+  appendBubble('user', query);
+  chatInput.value = '';
+  sendBtn.disabled = true;
+
+  const typingEl = appendTyping();
+
+  try {
+    const apiBase = window.location.origin || '';
+    const res = await fetch(`${apiBase}/api/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, language: lang, top_k: 3 }),
+    });
+    if (!res.ok) { const err = await res.json(); throw new Error(err.detail || `HTTP ${res.status}`); }
+    const data = await res.json();
+    typingEl.remove();
+    appendBubble('agent', data.answer, data.retrieved_docs);
+    if (typeof saveConversation === 'function') saveConversation(query, data.answer);
+  } catch(e) {
+    typingEl.remove();
+    const msg = e.message || '';
+    if (msg.includes('429') || msg.toLowerCase().includes('limit') || msg.toLowerCase().includes('consumption')) {
+      appendBubble('agent', 'IBM AI is currently at capacity. Please wait 30 seconds and try your question again.');
+    } else {
+      appendBubble('agent', 'Sorry, something went wrong. Please try again in a moment.');
+    }
+  }
+  sendBtn.disabled = false;
+}
+
+function appendBubble(role, text, docs) {
+  const wrap = document.createElement('div');
+  wrap.className = `bubble-wrap ${role}`;
+
+  const av = document.createElement('div');
+  av.className = `bubble-avatar ${role === 'user' ? 'user-av' : 'agent-av'}`;
+  av.textContent = role === 'user' ? 'U' : 'AI';
+
+  const content = document.createElement('div');
+  content.className = 'bubble-content';
+
+  if (role === 'user') {
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble-user';
+    bubble.textContent = text;
+    content.appendChild(bubble);
+  } else {
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble-agent-body';
+    bubble.textContent = text;
+    content.appendChild(bubble);
+
+    if (docs && docs.length) {
+      const panel = document.createElement('div');
+      panel.className = 'receipt-sources';
+      panel.style.marginTop = '8px';
+      docs.forEach(d => {
+        const item = document.createElement('div');
+        item.className = 'receipt-source-item';
+        item.innerHTML = `<span class="source-score">${d.score.toFixed(3)}</span><span>${d.title}</span>`;
+        panel.appendChild(item);
+      });
+      content.appendChild(panel);
+    }
+  }
+
+  const meta = document.createElement('div');
+  meta.className = `bubble-meta ${role === 'user' ? 'user-meta' : ''}`;
+  meta.innerHTML = `<span>${getTimestamp()}</span>`;
+  if (role === 'agent') {
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'bubble-copy';
+    copyBtn.textContent = 'Copy';
+    copyBtn.onclick = () => { navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard', true)); };
+    meta.appendChild(copyBtn);
+  }
+  content.appendChild(meta);
+
+  wrap.appendChild(av);
+  wrap.appendChild(content);
+  chatMessages.appendChild(wrap);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function appendTyping() {
+  const wrap = document.createElement('div');
+  wrap.className = 'typing-indicator';
+  const av = document.createElement('div');
+  av.className = 'bubble-avatar agent-av';
+  av.textContent = 'AI';
+  const dots = document.createElement('div');
+  dots.className = 'typing-dots';
+  dots.innerHTML = '<span></span><span></span><span></span>';
+  wrap.appendChild(av);
+  wrap.appendChild(dots);
+  chatMessages.appendChild(wrap);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return wrap;
+}
+
+/* ═══ Kit Generation ══════════════════════════════════ */
+async function generateKit() {
+  const vendorName = document.getElementById('fVendorName')?.value.trim() || '';
+  const bizType = document.getElementById('fBizType')?.value.trim() || '';
+  const location = document.getElementById('fLocation')?.value.trim() || '';
+  const upiId = document.getElementById('fUpiId')?.value.trim() || '';
+  const lang = selectedLang || 'en';
+
+  if (!vendorName || !bizType || !location) {
+    showToast('Please go back and fill in Vendor Name, Business Type, and Location.');
+    return;
+  }
+
+  showPipeline(['Searching knowledge base...', 'Generating personalized plan...', 'Creating your digital kit...']);
+
+  try {
+    const apiBase = window.location.origin || '';
+    const res = await fetch(`${apiBase}/api/generate-kit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vendor_name: vendorName, business_type: bizType, location, upi_id: upiId || null, language: lang, top_k: 3 }),
+    });
+    if (!res.ok) { const err = await res.json(); throw new Error(err.detail || `HTTP ${res.status}`); }
+    const data = await res.json();
+    updatePipelineDone();
+    renderReceipt(data);
+    triggerCelebration();
+    if (typeof saveConversation === 'function') saveConversation(`Digital kit for ${vendorName}`, data.answer);
+  } catch(e) {
+    hidePipeline();
+    const msg = e.message || '';
+    if (msg.includes('429') || msg.toLowerCase().includes('limit') || msg.toLowerCase().includes('consumption')) {
+      showToast('IBM AI is at capacity. Please wait 30 seconds and try again.');
+    } else {
+      showToast('Error generating kit: ' + msg);
+    }
+  }
+}
+
+function renderReceipt(data) {
+  const container = document.getElementById('receiptContainer');
+  if (!container) return;
+  hidePipeline();
+  const qrHtml = data.qr_url
+    ? `<img src="${data.qr_url}" alt="UPI QR Code for ${data.vendor_name}" class="receipt-qr-img"/>`
+    : `<div style="width:110px;height:110px;border:2px dashed var(--bdr);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-dim);text-align:center;padding:8px;">Add UPI ID to generate QR code</div>`;
+  const upiHtml = data.upi_id
+    ? `<div class="receipt-upi-id">${data.upi_id}</div><div class="receipt-upi-apps">PhonePe, Paytm, GPay, BHIM</div>`
+    : `<div style="font-size:12px;color:var(--text-dim);">No UPI ID provided</div>`;
+  const sourcesHtml = (data.retrieved_docs || []).map(d => `<div class="receipt-source-item"><span class="source-score">${d.score.toFixed(3)}</span><span>${d.title}</span></div>`).join('');
+  const answerEsc = (data.answer || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  container.innerHTML = `
+    <div class="receipt-card" id="receiptCard">
+      <div class="receipt-header">
+        <div class="receipt-vendor-name">${escHtml(data.vendor_name || 'Vendor')}</div>
+        <div class="receipt-type">${escHtml(data.business_type || 'Street Vendor')}</div>
+        <div class="receipt-loc">${escHtml(data.location || '')}</div>
+      </div>
+      <div class="receipt-body">
+        <div class="receipt-qr-row">${qrHtml}<div class="receipt-upi-info"><h4>Scan and Pay (UPI)</h4>${upiHtml}</div></div>
+        <hr class="receipt-divider"/>
+        <div class="receipt-section-title">Your Personalized Digital Guide</div>
+        <div class="receipt-answer">${answerEsc}</div>
+        ${sourcesHtml ? `<hr class="receipt-divider"/><div class="receipt-section-title">Sources Used</div><div class="receipt-sources">${sourcesHtml}</div>` : ''}
+      </div>
+      <div class="receipt-footer">
+        <div class="receipt-footer-brand">Powered by IBM watsonx.ai</div>
+        <div class="receipt-actions">
+          <button class="btn btn-sm btn-outline" onclick="copyReceiptText()">Copy Text</button>
+          <button class="btn btn-sm btn-green" onclick="downloadReceipt()">Download Image</button>
+          ${data.qr_url ? `<a class="btn btn-sm btn-outline" href="${data.qr_url}" download="qr-card.png">Download QR</a>` : ''}
+          <button class="btn btn-sm btn-saffron" onclick="shareWhatsApp()">WhatsApp</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function copyReceiptText() {
+  const el = document.getElementById('receiptContainer')?.querySelector('.receipt-answer');
+  if (el) { navigator.clipboard.writeText(el.textContent).then(() => showToast('Copied to clipboard', true)); }
+}
+
+function downloadReceipt() {
+  const card = document.getElementById('receiptCard');
+  if (!card) return;
+  showToast('Generating image...');
+  html2canvas(card, { backgroundColor: '#131619', scale: 2, useCORS: true }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'digital-kit-' + (document.getElementById('fVendorName')?.value.trim() || 'vendor') + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('Image downloaded', true);
+  }).catch(() => showToast('Could not generate image'));
+}
+
+function shareWhatsApp() {
+  const el = document.getElementById('receiptContainer')?.querySelector('.receipt-answer');
+  const name = document.getElementById('receiptContainer')?.querySelector('.receipt-vendor-name');
+  const text = `*${name?.textContent || 'Digital Kit'}*\n\n${el?.textContent || ''}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+/* ═══ Celebration ══════════════════════════════════════ */
+function triggerCelebration() {
+  const container = document.getElementById('celebration');
+  const colors = ['#FF6B00', '#F5C518', '#1A7A4A', '#22A862', '#E63312', '#FF8C35'];
+  for (let i = 0; i < 60; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 1.5 + 's';
+    confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+    confetti.style.width = (4 + Math.random() * 8) + 'px';
+    confetti.style.height = (4 + Math.random() * 8) + 'px';
+    container.appendChild(confetti);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 4000);
+  showToast('Your Digital Kit is Ready!', true);
+}
+
+/* ═══ Pipeline ═════════════════════════════════════════ */
+function showPipeline(steps) {
+  const pd = document.getElementById('pipelineDisplay');
+  const ps = document.getElementById('pipelineSteps');
+  if (!pd || !ps) return;
+  pd.style.display = 'block';
+  ps.innerHTML = steps.map((s,i) => `<div class="pipeline-step ${i===0?'ps-active':'ps-waiting'}" id="ps-${i}">${s}</div>`).join('');
+  let i = 0;
+  const interval = setInterval(() => { i++; if (i >= steps.length) { clearInterval(interval); return; } document.getElementById(`ps-${i-1}`)?.classList.replace('ps-active','ps-done'); document.getElementById(`ps-${i}`)?.classList.replace('ps-waiting','ps-active'); }, 900);
+}
+function updatePipelineDone() { document.querySelectorAll('.pipeline-step').forEach(el => { el.className = 'pipeline-step ps-done'; }); }
+function hidePipeline() { const pd = document.getElementById('pipelineDisplay'); if (pd) pd.style.display = 'none'; }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ═══ Start Over ═══════════════════════════════════════ */
+function startOver() {
+  try { localStorage.removeItem('sv_progress'); } catch(e) {}
+  window.location.reload();
+}
+
+/* ═══ Health Check ════════════════════════════════════ */
+async function checkHealth() {
+  try {
+    const apiBase = window.location.origin || '';
+    const r = await fetch(`${apiBase}/api/health`);
+    const d = await r.json();
+    const ns = document.getElementById('navStatus');
+    const is = document.getElementById('indexStatus');
+    const ci = document.getElementById('chipIbm');
+    const cx = document.getElementById('chipIdx');
+    if (ns) ns.textContent = d.ibm_status === 'connected' ? 'IBM Connected' : 'Connecting...';
+    if (is) { is.textContent = d.index_ready ? `${d.doc_count} docs indexed` : 'Index building...'; is.className = 'nav-chip ' + (d.index_ready ? 'ok' : ''); }
+    if (ci) { ci.textContent = 'IBM: ' + (d.ibm_status === 'connected' ? 'Connected' : 'Error'); ci.className = 's-chip ' + (d.ibm_status === 'connected' ? 's-ok' : 's-warn'); }
+    if (cx) { cx.textContent = 'Index: ' + (d.index_ready ? d.doc_count + ' docs' : 'Building...'); cx.className = 's-chip ' + (d.index_ready ? 's-ok' : 's-warn'); }
+  } catch(e) { const ns = document.getElementById('navStatus'); if (ns) ns.textContent = 'Server starting...'; }
+}
+
+/* ═══ Init ════════════════════════════════════════════ */
+checkHealth();
+loadProgress();
+updateQuickQueries();
+
+/* Navbar scroll effect (matches landing page) */
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', scrollY > 50), {passive:true});
+
+/* Scroll reveal */
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } });
+}, {threshold: 0.1});
+document.querySelectorAll('.rv').forEach(el => ro.observe(el));
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+}
+</script>
 </body>
 </html>
-

@@ -34,11 +34,17 @@ from backend.models import (
     KitRequest, KitResponse,
     QRRequest, QRResponse,
     GeocodeResponse, HealthResponse,
+    VendorRegisterRequest, VendorResponse,
+    AnalyticsResponse, ForecastResponse,
+    SchemeCheckRequest, SchemeCheckResponse,
 )
 from backend.rag_pipeline import build_index, answer, is_index_ready, index_doc_count
 from backend.qr_generator import generate_qr, generate_business_card
 from backend.geocoder import geocode
 from backend.ibm_client import health_check
+from backend.vendor_store import register_vendor, get_all_vendors, get_vendor_stats
+from backend.forecast import get_forecast
+from backend.scheme_checker import check_eligibility
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR     = os.path.dirname(os.path.dirname(__file__))
@@ -72,9 +78,26 @@ app = FastAPI(
 app.mount("/static",   StaticFiles(directory=STATIC_DIR),   name="static")
 app.mount("/frontend", StaticFiles(directory=FRONTEND_DIR), name="frontend")
 
+# Compatibility: the frontend currently references assets from root
+# (e.g. /js/kit.js, /service-worker.js, /manifest.json).
+# Map these root paths to their corresponding files inside /frontend.
+app.mount("/css",  StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")),  name="css")
+app.mount("/js",   StaticFiles(directory=os.path.join(FRONTEND_DIR, "js")),   name="js")
+
+# Root-level web app assets referenced by the frontend (service worker + PWA manifest)
+@app.get("/service-worker.js", include_in_schema=False)
+async def service_worker_js():
+    return FileResponse(os.path.join(FRONTEND_DIR, "service-worker.js"), media_type="application/javascript")
+
+@app.get("/manifest.json", include_in_schema=False)
+async def manifest_json():
+    return FileResponse(os.path.join(FRONTEND_DIR, "manifest.json"), media_type="application/manifest+json")
+
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -85,9 +108,28 @@ app.add_middleware(
 async def landing():
     return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
 
+# Some frontend/service-worker paths may request these explicitly.
+@app.get("/index.html", include_in_schema=False)
+async def index_html():
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+
 @app.get("/agent", include_in_schema=False)
 async def agent():
-    return FileResponse(os.path.join(FRONTEND_DIR, "agent.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "agent.html"), media_type="text/html")
+
+@app.get("/agent.html", include_in_schema=False)
+async def agent_html():
+    return FileResponse(os.path.join(FRONTEND_DIR, "agent.html"), media_type="text/html")
+
+
+@app.get("/dashboard", include_in_schema=False)
+async def dashboard():
+    return FileResponse(os.path.join(FRONTEND_DIR, "dashboard.html"), media_type="text/html")
+
+@app.get("/dashboard.html", include_in_schema=False)
+async def dashboard_html():
+    return FileResponse(os.path.join(FRONTEND_DIR, "dashboard.html"), media_type="text/html")
+
 
 
 # ── API: Health ────────────────────────────────────────────────────────────────
@@ -219,3 +261,55 @@ async def api_geocode(q: str):
     """Geocode a location string using OpenStreetMap Nominatim (free, no key)."""
     result = geocode(q)
     return GeocodeResponse(**{k: v for k, v in result.items() if k != "error"})
+
+
+# ── API: Vendor Registration ──────────────────────────────────────────────────
+@app.post("/api/vendors", response_model=VendorResponse, tags=["Vendors"])
+async def api_register_vendor(req: VendorRegisterRequest):
+    """Register a new vendor in the local store."""
+    vendor = register_vendor(
+        name=req.name,
+        business_type=req.business_type,
+        location=req.location,
+        city=req.city,
+        lat=req.lat,
+        lon=req.lon,
+        upi_id=req.upi_id,
+    )
+    return VendorResponse(**vendor)
+
+
+@app.get("/api/vendors", tags=["Vendors"])
+async def api_list_vendors():
+    """List all registered vendors."""
+    return get_all_vendors()
+
+
+# ── API: Dashboard Analytics ──────────────────────────────────────────────────
+@app.get("/api/analytics", response_model=AnalyticsResponse, tags=["Analytics"])
+async def api_analytics():
+    """Get dashboard analytics data."""
+    stats = get_vendor_stats()
+    return AnalyticsResponse(**stats)
+
+
+# ── API: Demand Forecast ─────────────────────────────────────────────────────
+@app.get("/api/forecast", response_model=ForecastResponse, tags=["Analytics"])
+async def api_forecast(category: str = "all", days: int = 7):
+    """Get demand forecast for a product category."""
+    days = max(1, min(days, 30))
+    result = get_forecast(category=category, days=days)
+    return ForecastResponse(**result)
+
+
+# ── API: Scheme Eligibility Check ────────────────────────────────────────────
+@app.post("/api/scheme-check", response_model=SchemeCheckResponse, tags=["Schemes"])
+async def api_scheme_check(req: SchemeCheckRequest):
+    """Check PM SVANidhi eligibility based on vendor profile."""
+    result = check_eligibility(
+        has_cov=req.has_cov,
+        has_lor=req.has_lor,
+        is_food_vendor=req.is_food_vendor,
+        city=req.city,
+    )
+    return SchemeCheckResponse(**result)
