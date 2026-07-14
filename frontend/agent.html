@@ -1115,6 +1115,7 @@ p { color: var(--text-muted); }
 
 <script>
 /* ═══ Config ════════════════════════════════════════════ */
+const apiBase = window.__API_BASE__ || window.location.origin || '';
 const QUICK_QUERIES = {
   en: ['How do I set up UPI?', 'Tell me about PM SVANidhi loan', 'How to list on Google Maps?', 'FSSAI license for food stall', 'Best apps for selling online'],
   hi: ['UPI कैसे सेट करें?', 'PM SVANidhi ऋण के बारे में बताएं', 'Google Maps पर कैसे लिस्ट करें?', 'फूड स्टॉल के लिए FSSAI लाइसेंस', 'ऑनलाइन बेचने के लिए सबसे अच्छे ऐप्स'],
@@ -1311,7 +1312,6 @@ async function sendChatMessage() {
   const typingEl = appendTyping();
 
   try {
-    const apiBase = window.__API_BASE__ || window.location.origin || '';
     const res = await fetch(`${apiBase}/api/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1420,7 +1420,6 @@ async function generateKit() {
   showPipeline(['Searching knowledge base...', 'Generating personalized plan...', 'Creating your digital kit...']);
 
   try {
-    const apiBase = window.__API_BASE__ || window.location.origin || '';
     const res = await fetch(`${apiBase}/api/generate-kit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1550,7 +1549,6 @@ function startOver() {
 /* ═══ Health Check ════════════════════════════════════ */
 async function checkHealth() {
   try {
-    const apiBase = window.__API_BASE__ || window.location.origin || '';
     const r = await fetch(`${apiBase}/api/health`);
     const d = await r.json();
     const ns = document.getElementById('navStatus');
