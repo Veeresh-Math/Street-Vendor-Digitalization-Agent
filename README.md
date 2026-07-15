@@ -390,6 +390,8 @@ pytest tests/ -v
 
 **AICTE-IBM SkillsBuild Internship 2026**
 
+[📄 Problem Statement (PDF)](yourproblemstatement.pdf)
+
 ---
 
 <div align="center">
