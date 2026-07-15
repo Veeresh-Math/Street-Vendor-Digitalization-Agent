@@ -20,9 +20,11 @@ from ibm_watsonx_ai.foundation_models.embeddings import Embeddings
 from ibm_watsonx_ai.metanames import GenTextParamsMetaNames as GenParams
 from ibm_watsonx_ai.metanames import EmbedTextParamsMetaNames as EmbedParams
 
-# Load .env from backend/ directory
+# Load .env from backend/ directory (only for local dev, Render env vars take priority)
 _backend_dir = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(os.path.join(_backend_dir, ".env"))
+_dotenv_path = os.path.join(_backend_dir, ".env")
+if os.path.exists(_dotenv_path):
+    load_dotenv(_dotenv_path, override=False)
 
 # ── Token Daily Caps ─────────────────────────────────────────────────────────
 DAILY_EMBED_TOKEN_LIMIT = int(os.getenv("DAILY_EMBED_LIMIT", "5000"))

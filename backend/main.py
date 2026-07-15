@@ -30,9 +30,11 @@ if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-# Load .env from backend/ directory
+# Load .env from backend/ directory (local dev only)
 _backend_dir = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(os.path.join(_backend_dir, ".env"))
+_dotenv_path = os.path.join(_backend_dir, ".env")
+if os.path.exists(_dotenv_path):
+    load_dotenv(_dotenv_path, override=False)
 
 from backend.models import (
     QueryRequest, QueryResponse, RetrievedDoc,
@@ -213,7 +215,9 @@ async def health():
         ibm_status = "demo-mode"
     else:
         ibm = health_check()
-        ibm_status = ibm["status"]
+        ibm_status = ibm.get("status", "unknown")
+        if ibm_status == "error":
+            ibm_status = f"error: {ibm.get('detail', 'unknown')[:100]}"
     # In demo mode, report index as ready (we don't need it)
     index_ready = True if demo_mode else is_index_ready()
     return HealthResponse(
