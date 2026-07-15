@@ -5,6 +5,7 @@
 ### *Empowering 5 Crore Street Vendors with AI*
 
 **AICTE-IBM SkillsBuild Internship 2026 — Problem Statement No. 29**
+*In association with Edunet Foundation*
 
 An AI-powered multilingual agent that transforms India's street vendors into digitally visible businesses through intelligent consultation, government scheme navigation, and digital tool generation.
 
