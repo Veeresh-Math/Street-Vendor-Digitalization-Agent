@@ -31,6 +31,29 @@ async function saveConversation(query, answer) {
   } catch (e) { /* silent */ }
 }
 
+function showConversationHistory() {
+  const history = getRecentConversations();
+  if (!history || history.length === 0) return;
+  
+  const panel = document.getElementById('chatHistory');
+  if (!panel) return;
+  
+  panel.innerHTML = '<div style="padding:8px 12px;font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Recent Questions</div>';
+  history.slice(-5).reverse().forEach(conv => {
+    const item = document.createElement('div');
+    item.style.cssText = 'padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--bg4);font-size:12px;color:var(--text-light);transition:background 0.2s;';
+    item.textContent = conv.query.length > 60 ? conv.query.substring(0, 60) + '...' : conv.query;
+    item.onmouseover = () => item.style.background = 'var(--bg4)';
+    item.onmouseout = () => item.style.background = 'transparent';
+    item.onclick = () => {
+      const chatInput = document.getElementById('chatInput');
+      if (chatInput) { chatInput.value = conv.query; chatInput.focus(); }
+    };
+    panel.appendChild(item);
+  });
+  panel.style.display = 'block';
+}
+
 async function getRecentConversations(limit = 20) {
   try {
     const d = await openDB();

@@ -4,9 +4,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Vendor Dashboard - Analytics and Insights</title>
-<link rel="stylesheet" href="/css/theme.css"/>
-<link rel="stylesheet" href="/css/layout.css"/>
-<link rel="stylesheet" href="/css/components.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#FF6B00"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="VendorAgent"/>
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root {
@@ -133,6 +136,19 @@ footer { background: var(--bg2); border-top: 1px solid var(--bdr); padding: 40px
 .fbot { font-size: 11px; color: var(--text-dim); }
 @media(max-width:960px) { .dash-grid{grid-template-columns:repeat(2,1fr)} .chart-row{grid-template-columns:1fr} .forecast-grid{grid-template-columns:repeat(4,1fr)} #nav .nav-links{display:none} }
 @media(max-width:600px) { .dash-grid{grid-template-columns:1fr} .forecast-grid{grid-template-columns:repeat(3,1fr)} }
+.skeleton-text {
+  background: linear-gradient(90deg, var(--bg4) 25%, var(--bg5) 50%, var(--bg4) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  display: inline-block;
+  min-width: 60px;
+  min-height: 1em;
+}
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 </style>
 </head>
 <body>
@@ -152,10 +168,10 @@ footer { background: var(--bg2); border-top: 1px solid var(--bdr); padding: 40px
       <p>Real-time insights from registered vendors across India</p>
     </div>
     <div class="dash-grid" id="statsGrid">
-      <div class="stat-card"><div class="stat-val" id="statTotal">--</div><div class="stat-label">Total Vendors</div></div>
-      <div class="stat-card"><div class="stat-val" id="statUpi">--</div><div class="stat-label">UPI Enabled</div></div>
-      <div class="stat-card"><div class="stat-val" id="statCities">--</div><div class="stat-label">Cities Covered</div></div>
-      <div class="stat-card"><div class="stat-val" id="statBiz">--</div><div class="stat-label">Business Types</div></div>
+      <div class="stat-card"><div class="stat-val" id="statTotal"><span class="skeleton-text">--</span></div><div class="stat-label">Total Vendors</div></div>
+      <div class="stat-card"><div class="stat-val" id="statUpi"><span class="skeleton-text">--</span></div><div class="stat-label">UPI Enabled</div></div>
+      <div class="stat-card"><div class="stat-val" id="statCities"><span class="skeleton-text">--</span></div><div class="stat-label">Cities Covered</div></div>
+      <div class="stat-card"><div class="stat-val" id="statBiz"><span class="skeleton-text">--</span></div><div class="stat-label">Business Types</div></div>
     </div>
     <div class="chart-row">
       <div class="chart-card"><h3>Vendors by City</h3><div class="chart-wrap"><canvas id="cityChart"></canvas></div></div>
@@ -164,7 +180,7 @@ footer { background: var(--bg2); border-top: 1px solid var(--bdr); padding: 40px
     <div class="forecast-section">
       <div class="forecast-card">
         <h3>Demand Forecast (7-Day)</h3>
-        <div class="forecast-summary" id="forecastSummary">Loading forecast...</div>
+        <div class="forecast-summary" id="forecastSummary"><span class="skeleton-text">Loading forecast...</span></div>
         <div class="forecast-grid" id="forecastGrid"></div>
       </div>
     </div>
@@ -173,7 +189,7 @@ footer { background: var(--bg2); border-top: 1px solid var(--bdr); padding: 40px
         <h3>Recent Vendor Registrations</h3>
         <table>
           <thead><tr><th>Name</th><th>Business</th><th>Location</th><th>UPI</th><th>Registered</th></tr></thead>
-          <tbody id="vendorTableBody"><tr><td colspan="5" style="text-align:center;color:var(--text-dim);">Loading...</td></tr></tbody>
+          <tbody id="vendorTableBody"><tr><td colspan="5" style="text-align:center;color:var(--text-dim);"><span class="skeleton-text">Loading...</span></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -182,15 +198,16 @@ footer { background: var(--bg2); border-top: 1px solid var(--bdr); padding: 40px
 <footer>
   <div class="foot-inner">
     <div class="fbrand"><div class="fb-mark">&#x1F6D2;</div>Street Vendor Digitalization Agent</div>
-    <div class="fbot">2026 AICTE-IBM SkillsBuild Internship &middot; IBM watsonx.ai &middot; ChromaDB</div>
+    <div class="fbot"><span id="footerYear">2026</span> AICTE-IBM SkillsBuild Internship &middot; IBM watsonx.ai &middot; ChromaDB</div>
   </div>
 </footer>
 <script>
-window.__API_BASE__ = 'https://street-vendor-digitalization-agent-isog.onrender.com';
+window.__API_BASE__ = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? '' : 'https://street-vendor-digitalization-agent-isog.onrender.com';
 const nav = document.getElementById('nav');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 50), {passive:true});
 fetch((window.__API_BASE__ || '') + '/api/health').then(r => r.json()).then(d => { if (d && d.status === 'ok') { const pill = document.querySelector('.live-pill'); if (pill) pill.innerHTML = '<span class="pulse"></span>AI Live'; } }).catch(() => {});
-</script>
-<script src="/js/dashboard.js"></script>
+  </script>
+  <script>document.getElementById('footerYear').textContent=new Date().getFullYear();</script>
+  <script src="/js/dashboard.js"></script>
 </body>
 </html>

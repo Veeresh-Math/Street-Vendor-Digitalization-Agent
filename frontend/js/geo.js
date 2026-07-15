@@ -7,7 +7,7 @@ async function detectLocation() {
   navigator.geolocation.getCurrentPosition(async pos => {
     const { latitude: lat, longitude: lon } = pos.coords;
     try {
-      const apiBase = window.location.origin || '';
+      const apiBase = window.__API_BASE__ || window.location.origin || '';
       const r = await fetch(`${apiBase}/api/geocode?q=${lat},${lon}`);
       const d = await r.json();
       if (d.found) {

@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Street Vendor Digitalization Agent — IBM watsonx.ai</title>
 <meta name="description" content="AI-powered RAG agent empowering Indian street vendors to go digital — UPI, MSME credit, Google listing, QR codes in 22+ Indian languages."/>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#FF6B00"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="VendorAgent"/>
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png"/>
 <style>
 /* ═══════════════════════════════════════════════════════
    DESIGN SYSTEM
@@ -170,14 +176,7 @@ section { padding: 108px 5%; }
   position: relative; overflow: hidden;
 }
 
-/* ── Video layer (hero visuals layer) ────────────────── */
-.hero-video-wrap {
-  position: absolute; inset: 0;
-  z-index: 1; overflow: hidden;
-  background: transparent;
-  /* allows parallax transforms without affecting layout */
-  transform: translateZ(0);
-}
+/* ── Hero visual layers ─────────────────────────────── */
 
 /* Make sure the animated layers are actually visible */
 .hero-anim-bg,
@@ -236,28 +235,6 @@ section { padding: 108px 5%; }
 }
 
 /* (Video styles removed; hero is now fully offline animated visuals) */
-.hero-video-wrap {
-  background: linear-gradient(135deg, #1a0800 0%, #070a08 50%, #07080a 100%);
-}
-
-/* Gradient overlay on top of video */
-.hero-video-overlay {
-  position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  background:
-    linear-gradient(to bottom,
-      rgba(7,8,10,0.30) 0%,
-      rgba(7,8,10,0.05) 40%,
-      rgba(7,8,10,0.05) 60%,
-      rgba(7,8,10,0.55) 100%),
-    radial-gradient(ellipse 90% 70% at 50% -10%, rgba(255,107,0,0.18) 0%, transparent 65%);
-}
-
-/* Vignette bottom fade into page */
-.hero-video-vignette {
-  position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
-  z-index: 2; pointer-events: none;
-  background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
-}
 
 /* Dot grid (keep on top of video) */
 .hero-dots {
@@ -411,12 +388,13 @@ section { padding: 108px 5%; }
 .ticker::before,.ticker::after { content:''; position:absolute; top:0; bottom:0; width:100px; z-index:2; pointer-events:none; }
 .ticker::before { left:0; background:linear-gradient(90deg,var(--bg),transparent); }
 .ticker::after  { right:0; background:linear-gradient(-90deg,var(--bg),transparent); }
-.ticker-inner { display:flex; white-space:nowrap; animation:tick 28s linear infinite; width:max-content; }
-.ticker-inner span { font-size:12.5px; font-weight:600; color:var(--text-dim); padding:0 22px; }
+.ticker-inner { display:flex; white-space:nowrap; animation:tick 30s linear infinite; width:max-content; }
+.ticker-inner span { font-size:12.5px; font-weight:600; color:var(--text-dim); padding:0 22px; flex-shrink:0; }
 .ti-s { color:var(--saffron-lt) !important; }
 .ti-t { color:var(--turmeric) !important; }
 .ti-g { color:var(--green-bright) !important; }
 @keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.ticker:hover .ticker-inner { animation-play-state: paused; }
 
 /* ═══════════════════════════════════════════════════════
    STATS BAND
@@ -515,6 +493,7 @@ section { padding: 108px 5%; }
 .fc h3 { font-size:1rem; color:var(--white); margin-bottom:9px; }
 .fc p  { font-size:13px; color:var(--text-muted); line-height:1.7; }
 .ft { display:inline-block; margin-top:14px; font-size:10.5px; font-weight:700; letter-spacing:.06em; padding:4px 10px; border-radius:var(--r-pill); }
+.d4{transition-delay:.4s} .d5{transition-delay:.5s} .d6{transition-delay:.6s}
 
 /* ═══════════════════════════════════════════════════════
    GOVERNMENT SCHEMES
@@ -722,7 +701,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
 </style>
 </head>
 <body>
-<script>window.__API_BASE__ = 'https://street-vendor-digitalization-agent-isog.onrender.com';</script>
+<script>window.__API_BASE__ = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? '' : 'https://street-vendor-digitalization-agent-isog.onrender.com';</script>
 
 
 <!-- SPLASH: Vendor speaks -> AI processes -> Digital Kit appears -->
@@ -951,7 +930,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
     <span class="ti-s">FSSAI License</span><span>&#183;</span>
     <span>Local SEO</span><span>&#183;</span>
     <span class="ti-g">ChromaDB RAG</span><span>&#183;</span>
-    <span class="ti-t">granite-4-h-small</span><span>&#183;</span>
+    <span class="ti-t">llama-3-3-70b-instruct</span><span>&#183;</span>
     <!-- duplicate for seamless loop -->
     <span class="ti-s">PM SVANidhi</span><span>&#183;</span>
     <span>Udyam MSME</span><span>&#183;</span>
@@ -966,16 +945,16 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
     <span class="ti-s">FSSAI License</span><span>&#183;</span>
     <span>Local SEO</span><span>&#183;</span>
     <span class="ti-g">ChromaDB RAG</span><span>&#183;</span>
-    <span class="ti-t">granite-4-h-small</span><span>&#183;</span>
+    <span class="ti-t">llama-3-3-70b-instruct</span><span>&#183;</span>
   </div>
 </div>
 
 <!-- ═══ STATS BAND ════════════════════════════════════════ -->
 <div class="stats">
-  <div class="stat rv"><div class="stat-n counter" data-t="5" data-s="Cr+">0</div><div class="stat-l">Street vendors in India</div></div>
-  <div class="stat rv d1"><div class="stat-n counter" data-t="95" data-s="%">0</div><div class="stat-l">Currently undigitized</div></div>
-  <div class="stat rv d2"><div class="stat-n counter" data-t="22" data-s="+">0</div><div class="stat-l">Indian languages supported</div></div>
-  <div class="stat rv d3"><div class="stat-n counter" data-t="48" data-s="hrs">0</div><div class="stat-l">Average time to go digital</div></div>
+  <div class="stat rv"><div id="statVendors" class="stat-n counter" data-t="5" data-s="Cr+">0</div><div class="stat-l">Street vendors in India</div></div>
+  <div class="stat rv d1"><div id="statUndigitized" class="stat-n counter" data-t="95" data-s="%">0</div><div class="stat-l">Currently undigitized</div></div>
+  <div class="stat rv d2"><div id="statLanguages" class="stat-n counter" data-t="8" data-s="+">0</div><div class="stat-l">Indian languages supported</div></div>
+  <div class="stat rv d3"><div id="statUPI" class="stat-n counter" data-t="48" data-s="hrs">0</div><div class="stat-l">Average time to go digital</div></div>
 </div>
 
 <!-- ═══ HOW IT WORKS ══════════════════════════════════════ -->
@@ -1002,7 +981,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
         <div class="bc-num">03</div>
         <div class="bc-icon i-g">&#x1F4E6;</div>
         <h3>Granite Generates Your Digital Kit</h3>
-        <p>IBM granite-4-h-small crafts UPI setup steps, eligible schemes, listing platform advice, local SEO keywords, and a printable Indian-aesthetic QR business card — all in your language.</p>
+        <p>IBM llama-3-3-70b-instruct crafts UPI setup steps, eligible schemes, listing platform advice, local SEO keywords, and a printable Indian-aesthetic QR business card — all in your language.</p>
       </div>
 
       <!-- Pipeline row -->
@@ -1013,11 +992,11 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
         <div class="pipe">
           <div class="ps">&#x1F9D1; Vendor Query <span class="pb">Natural Language</span></div>
           <span class="pa">&#x2192;</span>
-          <div class="ps">&#x1F9E9; Embed <span class="pb">granite-278m-multilingual</span></div>
+          <div class="ps">&#x1F9E9; Embed <span class="pb">multilingual-e5-large</span></div>
           <span class="pa">&#x2192;</span>
           <div class="ps">&#x1F50D; ChromaDB <span class="pb">Cosine Search</span></div>
           <span class="pa">&#x2192;</span>
-          <div class="ps">&#x26A1; Generate <span class="pb">granite-4-h-small</span></div>
+          <div class="ps">&#x26A1; Generate <span class="pb">llama-3-3-70b-instruct</span></div>
           <span class="pa">&#x2192;</span>
           <div class="ps">&#x1F4C4; Digital Kit + QR Card</div>
         </div>
@@ -1036,7 +1015,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
       <div class="fc rv d1">
         <div class="fi" style="background:rgba(255,107,0,0.14);">&#x1F3EA;</div>
         <h3>AI Business Profile</h3>
-        <p>Auto-generate business name, description, SEO keywords and a Google My Business listing draft powered by IBM granite-4-h-small in seconds.</p>
+        <p>Auto-generate business name, description, SEO keywords and a Google My Business listing draft powered by IBM llama-3-3-70b-instruct in seconds.</p>
         <span class="ft" style="background:rgba(255,107,0,0.12);color:var(--saffron-lt);border:1px solid rgba(255,107,0,0.3);">AI-Generated</span>
       </div>
 
@@ -1054,24 +1033,24 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
         <span class="ft" style="background:rgba(26,122,74,0.12);color:var(--green-bright);border:1px solid rgba(26,122,74,0.3);">Zero Collateral</span>
       </div>
 
-      <div class="fc rv">
+      <div class="fc rv d4">
         <div class="fi" style="background:rgba(56,189,248,0.12);">&#x1F4CD;</div>
         <h3>Hyperlocal SEO</h3>
         <p>City-specific Google Maps optimization for Pune, Mumbai, Chennai, Bangalore, Surat and Delhi — keywords, listing tips and review strategies.</p>
         <span class="ft" style="background:rgba(56,189,248,0.10);color:#7dd3fc;border:1px solid rgba(56,189,248,0.3);">City-Specific</span>
       </div>
 
-      <div class="fc rv d1">
+      <div class="fc rv d5">
         <div class="fi" style="background:rgba(230,51,18,0.12);">&#x1F4E2;</div>
         <h3>Customer Engagement</h3>
         <p>WhatsApp Business setup, festival pricing strategies, loyalty programs and broadcast message templates generated in your local language.</p>
         <span class="ft" style="background:rgba(230,51,18,0.10);color:#ff7b5f;border:1px solid rgba(230,51,18,0.3);">Multilingual</span>
       </div>
 
-      <div class="fc rv d2">
+      <div class="fc rv d6">
         <div class="fi" style="background:rgba(26,122,74,0.14);">&#x1F310;</div>
-        <h3>22+ Indian Languages</h3>
-        <p>granite-embedding-278m-multilingual delivers native semantic understanding in Hindi, Marathi, Tamil, Telugu, Kannada, Bengali, Gujarati and 15 more.</p>
+        <h3>8 Indian Languages</h3>
+        <p>multilingual-e5-large delivers native semantic understanding in Hindi, Marathi, Tamil, Telugu, Kannada, Bengali, Gujarati and English.</p>
         <span class="ft" style="background:rgba(26,122,74,0.12);color:var(--green-bright);border:1px solid rgba(26,122,74,0.3);">Native NLP</span>
       </div>
 
@@ -1119,7 +1098,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
     <div class="rv"><div class="eyebrow">Use Cases</div><h2 class="sec-title">Real vendors. Real cities.<br/>Real results.</h2><p class="sec-sub">City-specific hyperlocal knowledge for vendors across India's biggest markets.</p></div>
     <div class="cities-grid">
 
-      <div class="cc rv d1">
+      <a href="/agent?city=Pune" class="cc rv d1" style="text-decoration:none;color:inherit;cursor:pointer;">
         <div class="ci">
           <img src="https://images.unsplash.com/photo-1601924638867-3a6de6b7a500?w=600&q=80&fit=crop" alt="Pune fruit vendor" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#1a1a1a,#2a1a0a)'"/>
           <div class="ci-ov"></div>
@@ -1131,9 +1110,9 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
           <div class="ci-item"><span class="ci-dot" style="background:var(--saffron)"></span>QR poster in Marathi + Swiggy Instamart</div>
           <div class="ci-item"><span class="ci-dot" style="background:var(--saffron)"></span>PM SVANidhi Rs.10,000 guided</div>
         </div>
-      </div>
+      </a>
 
-      <div class="cc rv d2">
+      <a href="/agent?city=Chennai" class="cc rv d2" style="text-decoration:none;color:inherit;cursor:pointer;">
         <div class="ci">
           <img src="https://images.unsplash.com/photo-1567337710282-00832b415979?w=600&q=80&fit=crop" alt="Chennai food stall" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#0a1a0a,#0a2a0a)'"/>
           <div class="ci-ov"></div>
@@ -1145,9 +1124,9 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
           <div class="ci-item"><span class="ci-dot" style="background:var(--green-bright)"></span>Zomato listing in Tamil + FSSAI guided</div>
           <div class="ci-item"><span class="ci-dot" style="background:var(--green-bright)"></span>WhatsApp menu card generated</div>
         </div>
-      </div>
+      </a>
 
-      <div class="cc rv d3">
+      <a href="/agent?city=Mumbai" class="cc rv d3" style="text-decoration:none;color:inherit;cursor:pointer;">
         <div class="ci">
           <img src="https://images.unsplash.com/photo-1529154691717-3306083d869e?w=600&q=80&fit=crop" alt="Mumbai market" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#0a0a1a,#1a0a2a)'"/>
           <div class="ci-ov"></div>
@@ -1159,9 +1138,9 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
           <div class="ci-item"><span class="ci-dot" style="background:var(--turmeric)"></span>Meesho + GlowRoad onboarding</div>
           <div class="ci-item"><span class="ci-dot" style="background:var(--turmeric)"></span>Mudra Yojana application guided</div>
         </div>
-      </div>
+      </a>
 
-      <div class="cc rv d1">
+      <a href="/agent?city=Bangalore" class="cc rv d1" style="text-decoration:none;color:inherit;cursor:pointer;">
         <div class="ci">
           <img src="https://images.unsplash.com/photo-1596797038530-2c107229654b?w=600&q=80&fit=crop" alt="Bangalore KR Market" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#1a0a0a,#2a0a0a)'"/>
           <div class="ci-ov"></div>
@@ -1173,9 +1152,9 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
           <div class="ci-item"><span class="ci-dot" style="background:var(--vermilion-lt)"></span>Google Maps listing in Kannada</div>
           <div class="ci-item"><span class="ci-dot" style="background:var(--vermilion-lt)"></span>BBMP vendor registration guided</div>
         </div>
-      </div>
+      </a>
 
-      <div class="cc rv d2">
+      <a href="/agent?city=Surat" class="cc rv d2" style="text-decoration:none;color:inherit;cursor:pointer;">
         <div class="ci">
           <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&fit=crop" alt="Surat textiles" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#1a1500,#2a1a00)'"/>
           <div class="ci-ov"></div>
@@ -1187,9 +1166,9 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
           <div class="ci-item"><span class="ci-dot" style="background:var(--turmeric-lt)"></span>Instagram shop in Gujarati</div>
           <div class="ci-item"><span class="ci-dot" style="background:var(--turmeric-lt)"></span>Festival sale promotion template</div>
         </div>
-      </div>
+      </a>
 
-      <div class="cc rv d3">
+      <a href="/agent?city=Delhi" class="cc rv d3" style="text-decoration:none;color:inherit;cursor:pointer;">
         <div class="ci">
           <img src="https://images.unsplash.com/photo-1587474260584-136574528ed5?w=600&q=80&fit=crop" alt="Delhi Chandni Chowk" loading="lazy" onerror="this.closest('.ci').style.background='linear-gradient(135deg,#1a0800,#0a0a0a)'"/>
           <div class="ci-ov"></div>
@@ -1201,7 +1180,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
           <div class="ci-item"><span class="ci-dot" style="background:var(--saffron-lt)"></span>Swiggy + Google Maps listing</div>
           <div class="ci-item"><span class="ci-dot" style="background:var(--saffron-lt)"></span>UPI QR poster in Hindi</div>
         </div>
-      </div>
+      </a>
 
     </div>
   </div>
@@ -1212,23 +1191,17 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
   <div class="container" style="position:relative;z-index:1;text-align:center;">
     <div class="eyebrow" style="justify-content:center;">Language Support</div>
     <h2 class="sec-title" style="margin-left:auto;margin-right:auto;">Speaks your language,<br/>not just English.</h2>
-    <p class="sec-sub" style="margin:0 auto;">Powered by <strong style="color:var(--saffron-lt)">granite-embedding-278m-multilingual</strong> — native semantic understanding across 22+ Indian languages.</p>
+    <p class="sec-sub" style="margin:0 auto;">Powered by <strong style="color:var(--saffron-lt)">multilingual-e5-large</strong> — native semantic understanding across 8 Indian languages.</p>
     <div class="lchips">
-      <span class="lchip on">Hindi</span>
-      <span class="lchip on">Marathi</span>
-      <span class="lchip on">Tamil</span>
-      <span class="lchip on">Telugu</span>
-      <span class="lchip on">Kannada</span>
-      <span class="lchip on">Bengali</span>
-      <span class="lchip on">Gujarati</span>
-      <span class="lchip">Punjabi</span>
-      <span class="lchip">Urdu</span>
-      <span class="lchip">Odia</span>
-      <span class="lchip">Malayalam</span>
-      <span class="lchip">Assamese</span>
-      <span class="lchip">Maithili</span>
-      <span class="lchip">Santali</span>
-      <span class="lchip">+ 8 more</span>
+      <a href="/agent?lang=hi" class="lchip on" style="text-decoration:none;">Hindi</a>
+      <a href="/agent?lang=mr" class="lchip on" style="text-decoration:none;">Marathi</a>
+      <a href="/agent?lang=ta" class="lchip on" style="text-decoration:none;">Tamil</a>
+      <a href="/agent?lang=te" class="lchip on" style="text-decoration:none;">Telugu</a>
+      <a href="/agent?lang=kn" class="lchip on" style="text-decoration:none;">Kannada</a>
+      <a href="/agent?lang=bn" class="lchip on" style="text-decoration:none;">Bengali</a>
+      <a href="/agent?lang=gu" class="lchip on" style="text-decoration:none;">Gujarati</a>
+      <a href="/agent?lang=en" class="lchip on" style="text-decoration:none;">English</a>
+      <span class="lchip">+ 7 more</span>
     </div>
   </div>
 </section>
@@ -1245,7 +1218,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
       <div class="ibm-card">
         <div class="ibm-ic">&#x26A1;</div>
         <div>
-          <div class="ibm-nm">ibm/granite-4-h-small</div>
+          <div class="ibm-nm">ibm/llama-3-3-70b-instruct</div>
           <div class="ibm-rl">Language Generation</div>
         </div>
         <span class="ibm-badge ib-gen">GENERATION</span>
@@ -1253,7 +1226,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
       <div class="ibm-card">
         <div class="ibm-ic">&#x1F9E9;</div>
         <div>
-          <div class="ibm-nm">ibm/granite-embedding-278m-multilingual</div>
+          <div class="ibm-nm">ibm/multilingual-e5-large</div>
           <div class="ibm-rl">Semantic Embeddings</div>
         </div>
         <span class="ibm-badge ib-emb">EMBEDDING</span>
@@ -1271,7 +1244,7 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
     <a href="/agent" class="btn-hero-primary" style="font-size:15.5px;padding:16px 38px;">&#x26A1; Launch the Agent</a>
     <a href="#how" class="btn-hero-ghost" style="font-size:15.5px;padding:15px 36px;">Learn More</a>
   </div>
-  <p class="cta-note">No sign-up required &nbsp;&#183;&nbsp; Free forever &nbsp;&#183;&nbsp; 22+ Indian languages</p>
+  <p class="cta-note">No sign-up required &nbsp;&#183;&nbsp; Free forever &nbsp;&#183;&nbsp; 8 Indian languages</p>
 </section>
 
 <!-- ═══ FOOTER ════════════════════════════════════════════ -->
@@ -1279,10 +1252,10 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
   <div class="foot-inner">
     <div>
       <div class="fbrand"><div class="fb-mark">&#x1F6D2;</div>Street Vendor Digitalization Agent</div>
-      <p class="fdesc">AICTE-IBM SkillsBuild Internship 2026.<br/>IBM watsonx.ai Granite models + ChromaDB RAG pipeline.</p>
+      <p class="fdesc">AICTE-IBM SkillsBuild Internship <span id="footerYearDesc">2026</span>.<br/>IBM watsonx.ai Granite models + ChromaDB RAG pipeline.</p>
       <div class="fchips">
-        <span class="fchip">granite-4-h-small</span>
-        <span class="fchip">granite-embedding-278m</span>
+        <span class="fchip">llama-3-3-70b-instruct</span>
+        <span class="fchip">multilingual-e5-large</span>
         <span class="fchip">ChromaDB</span>
         <span class="fchip">FastAPI</span>
       </div>
@@ -1311,8 +1284,8 @@ footer { background:var(--bg2); border-top:1px solid var(--bdr); padding:62px 5%
     </div>
   </div>
   <div class="fbot">
-    <span>2026 Street Vendor Digitalization Agent &middot; AICTE-IBM SkillsBuild Internship</span>
-    <span>IBM watsonx.ai &middot; granite-4-h-small &middot; ChromaDB</span>
+    <span><span id="footerYear">2026</span> Street Vendor Digitalization Agent &middot; AICTE-IBM SkillsBuild Internship</span>
+    <span>IBM watsonx.ai &middot; llama-3-3-70b-instruct &middot; ChromaDB</span>
   </div>
 </footer>
 
@@ -1358,6 +1331,23 @@ fetch((window.__API_BASE__ || '') + '/api/health').then(r => r.json()).then(d =>
   }
 }).catch(() => {});
 </script>
+<script>
+async function loadLiveStats() {
+  try {
+    const apiBase = window.__API_BASE__ || window.location.origin || '';
+    const r = await fetch(apiBase + '/api/analytics');
+    const d = await r.json();
+    const el = document.getElementById('statVendors');
+    if (el && d.total_vendors !== undefined) el.textContent = d.total_vendors + '+';
+    const el2 = document.getElementById('statUPI');
+    if (el2 && d.vendors_with_upi !== undefined) el2.textContent = Math.round((d.vendors_with_upi / Math.max(d.total_vendors, 1)) * 100) + '%';
+    const el3 = document.getElementById('statLanguages');
+    if (el3 && d.languages_supported !== undefined) el3.textContent = d.languages_supported + '+';
+  } catch(e) {}
+}
+loadLiveStats();
+</script>
+<script>document.getElementById('footerYear').textContent=new Date().getFullYear();document.getElementById('footerYearDesc').textContent=new Date().getFullYear();</script>
 </body>
 </html>
 

@@ -1,29 +1,62 @@
 {
   "name": "Street Vendor Digitalization Agent",
   "short_name": "VendorAgent",
-  "description": "AI-powered RAG agent for street vendors to go digital with UPI, MSME credit, Google listing, QR codes in 22+ Indian languages.",
+  "description": "AI-powered RAG agent for street vendors to go digital with UPI, MSME credit, Google listing, QR codes in 8+ Indian languages.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#07080a",
   "theme_color": "#FF6B00",
+  "orientation": "any",
+  "lang": "en",
+  "categories": ["business", "finance", "utilities"],
   "icons": [
     {
-      "src": "/static/generated/icon-192.png",
-      "sizes": "192x192",
+      "src": "/static/icons/icon-72.png",
+      "sizes": "72x72",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/static/generated/icon-512.png",
+      "src": "/static/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/static/generated/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }

@@ -19,10 +19,10 @@ async function generateKit() {
   }
 
   if (generateKitBtn) generateKitBtn.disabled = true;
-  showPipeline(['Embedding query...', 'Retrieving docs...', 'Generating with granite...', 'Rendering receipt...']);
+  showPipeline(['Embedding query...', 'Retrieving docs...', 'Generating with llama...', 'Rendering receipt...']);
 
 /* Local API base URL */
-  const apiBase = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+  const apiBase = window.__API_BASE__ || window.location.origin || '';
 
   try {
     const res = await fetch(`${apiBase}/api/generate-kit`, {
@@ -112,7 +112,7 @@ function renderReceipt(data) {
           ` : ''}
         </div>
         <div class="receipt-footer">
-          <div class="receipt-footer-brand">🔵 IBM watsonx.ai · granite-4-h-small</div>
+          <div class="receipt-footer-brand">🔵 IBM watsonx.ai · llama-3-3-70b-instruct</div>
           <div class="receipt-actions">
             <button class="btn btn-sm btn-outline" onclick="copyReceipt()" title="Copy text">📋</button>
             ${data.qr_url ? `<a class="btn btn-sm btn-green" href="${data.qr_url}" download="qr-card.png" title="Download QR card">⬇ QR</a>` : ''}

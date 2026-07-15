@@ -6,6 +6,11 @@
 <title>Street Vendor Agent — AI Chat & Digital Kit</title>
 <meta name="description" content="AI-powered digital assistant for Indian street vendors. Get UPI setup, government scheme eligibility, Google Maps listing, and QR business cards in your language."/>
 <link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#FF6B00"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="VendorAgent"/>
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════
@@ -691,8 +696,11 @@ p { color: var(--text-muted); }
 }
 
 /* ── Map ─────────────────────────────────────────────────── */
-#vendorMap { height: 220px; border-radius: var(--r-md); border: 1px solid rgba(255,255,255,0.06); margin-top: 12px; background: rgba(255,255,255,0.02); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.map-wrapper { position: relative; border-radius: var(--r-md); border: 1px solid rgba(255,255,255,0.06); margin-top: 12px; background: rgba(255,255,255,0.02); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); overflow: hidden; }
+#vendorMap { height: 280px; width: 100%; border-radius: var(--r-md); z-index: 1; }
 .map-hint { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+#mapFilterBar { padding: 8px 10px; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.06); }
+.leaflet-container { border-radius: var(--r-md); }
 
 /* ── Pipeline ────────────────────────────────────────────── */
 #pipelineDisplay { display: none; margin-bottom: 16px; padding: 14px; background: rgba(255,255,255,0.02); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-radius: var(--r-sm); border: 1px solid rgba(255,255,255,0.04); }
@@ -760,7 +768,7 @@ p { color: var(--text-muted); }
 </style>
 </head>
 <body>
-<script>window.__API_BASE__ = 'https://street-vendor-digitalization-agent-isog.onrender.com';</script>
+<script>window.__API_BASE__ = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? '' : 'https://street-vendor-digitalization-agent-isog.onrender.com';</script>
 
 <!-- ═══ SVG Liquid Glass Filter ═════════════════════════ -->
 <svg style="position:absolute;width:0;height:0;" aria-hidden="true">
@@ -1008,6 +1016,7 @@ p { color: var(--text-muted); }
         <span class="chat-header-title">AI Vendor Assistant</span>
         <span class="chat-header-model">IBM Granite</span>
       </div>
+      <div id="chatHistory" style="display:none;border-bottom:1px solid var(--bg4);max-height:150px;overflow-y:auto;background:var(--bg2);border-radius:8px;margin-bottom:8px;"></div>
       <div class="chat-messages" id="chatMessages">
         <div class="chat-empty" id="chatEmpty">
           <h3>Ask Anything About Going Digital</h3>
@@ -1051,6 +1060,11 @@ p { color: var(--text-muted); }
       <span class="scheme-opt" onclick="checkScheme(this,'lor')">Have LoR only</span>
       <span class="scheme-opt" onclick="checkScheme(this,'no')">No certificate yet</span>
     </div>
+    <div class="scheme-q" style="margin-top:10px;">Do you sell food items?</div>
+    <div class="scheme-opts">
+      <span class="scheme-opt" onclick="setFoodVendor(this,true)">Yes, food vendor</span>
+      <span class="scheme-opt" onclick="setFoodVendor(this,false)">No, non-food</span>
+    </div>
     <div class="scheme-result" id="schemeResult"></div>
   </div>
 
@@ -1058,7 +1072,9 @@ p { color: var(--text-muted); }
   <div style="margin-top:24px;">
     <h3 style="font-size:15px;font-weight:800;color:var(--white);margin-bottom:6px;">Nearby Registered Vendors</h3>
     <p style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">See other vendors who have registered on this platform. Different colors show different business types.</p>
-    <div id="vendorMap"></div>
+    <div class="map-wrapper">
+      <div id="vendorMap"></div>
+    </div>
     <div class="map-hint">Map data from OpenStreetMap. Auto-zooms to your location if you allow browser location access.</div>
   </div>
 
@@ -1130,6 +1146,7 @@ const QUICK_QUERIES = {
 /* ═══ State ════════════════════════════════════════════ */
 let currentStep = 1;
 let chosenAction = null;
+let isFoodVendor = null;
 let selectedLang = 'en';
 
 /* ═══ Toast ════════════════════════════════════════════ */
@@ -1162,6 +1179,10 @@ function loadProgress() {
     if (d.location) document.getElementById('fLocation').value = d.location;
     if (d.upiId) document.getElementById('fUpiId').value = d.upiId;
     if (d.lang) { selectedLang = d.lang; document.getElementById('langSelect').value = d.lang; }
+    // Restore wizard step (don't go below step 1 or above step 4)
+    if (d.step && d.step >= 1 && d.step <= 4) {
+      setTimeout(() => goStep(d.step), 300);
+    }
   } catch(e) {}
 }
 
@@ -1232,6 +1253,13 @@ function validateAndNext() {
   if (validateStep2()) goStep(3);
 }
 
+/* ═══ Food Vendor ═══════════════════════════════════════ */
+function setFoodVendor(el, val) {
+  isFoodVendor = val;
+  el.parentElement.querySelectorAll('.scheme-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
 /* ═══ Language ══════════════════════════════════════════ */
 function selectLang(el, code) {
   document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('selected'));
@@ -1264,6 +1292,7 @@ function chooseAction(action) {
     step5Title.textContent = 'Ask the AI Assistant';
     step5Subtitle.textContent = 'Type or speak your question. The AI will give you specific advice based on your business details.';
     updateQuickQueries();
+    if (typeof showConversationHistory === 'function') showConversationHistory();
   } else {
     chatSection.style.display = 'none';
     receiptSection.style.display = 'block';
@@ -1363,7 +1392,13 @@ function appendBubble(role, text, docs) {
       docs.forEach(d => {
         const item = document.createElement('div');
         item.className = 'receipt-source-item';
-        item.innerHTML = `<span class="source-score">${d.score.toFixed(3)}</span><span>${d.title}</span>`;
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'source-score';
+        scoreSpan.textContent = d.score.toFixed(3);
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = d.title;
+        item.appendChild(scoreSpan);
+        item.appendChild(titleSpan);
         panel.appendChild(item);
       });
       content.appendChild(panel);
@@ -1394,11 +1429,11 @@ function appendTyping() {
   const av = document.createElement('div');
   av.className = 'bubble-avatar agent-av';
   av.textContent = 'AI';
-  const dots = document.createElement('div');
-  dots.className = 'typing-dots';
-  dots.innerHTML = '<span></span><span></span><span></span>';
+  const body = document.createElement('div');
+  body.style.cssText = 'padding:10px 14px;background:var(--bg3);border-radius:12px;font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:8px;';
+  body.innerHTML = '<span>AI is thinking</span><span class="typing-dots"><span></span><span></span><span></span></span>';
   wrap.appendChild(av);
-  wrap.appendChild(dots);
+  wrap.appendChild(body);
   chatMessages.appendChild(wrap);
   chatMessages.scrollTop = chatMessages.scrollHeight;
   return wrap;
@@ -1555,10 +1590,11 @@ async function checkHealth() {
     const is = document.getElementById('indexStatus');
     const ci = document.getElementById('chipIbm');
     const cx = document.getElementById('chipIdx');
-    if (ns) ns.textContent = d.ibm_status === 'connected' ? 'IBM Connected' : 'Connecting...';
-    if (is) { is.textContent = d.index_ready ? `${d.doc_count} docs indexed` : 'Index building...'; is.className = 'nav-chip ' + (d.index_ready ? 'ok' : ''); }
-    if (ci) { ci.textContent = 'IBM: ' + (d.ibm_status === 'connected' ? 'Connected' : 'Error'); ci.className = 's-chip ' + (d.ibm_status === 'connected' ? 's-ok' : 's-warn'); }
-    if (cx) { cx.textContent = 'Index: ' + (d.index_ready ? d.doc_count + ' docs' : 'Building...'); cx.className = 's-chip ' + (d.index_ready ? 's-ok' : 's-warn'); }
+    const isDemo = d.ibm_status === 'demo-mode';
+    if (ns) ns.textContent = d.ibm_status === 'connected' ? 'IBM Connected' : isDemo ? 'Demo Mode' : 'Connecting...';
+    if (is) { is.textContent = d.index_ready ? `${d.doc_count} docs indexed` : isDemo ? 'Demo: Ready' : 'Index building...'; is.className = 'nav-chip ' + (d.index_ready ? 'ok' : ''); }
+    if (ci) { ci.textContent = 'IBM: ' + (d.ibm_status === 'connected' ? 'Connected' : isDemo ? 'Demo: OK' : 'Error'); ci.className = 's-chip ' + (d.ibm_status === 'connected' || isDemo ? 's-ok' : 's-warn'); }
+    if (cx) { cx.textContent = 'Index: ' + (d.index_ready ? d.doc_count + ' docs' : isDemo ? 'Demo: Ready' : 'Building...'); cx.className = 's-chip ' + (d.index_ready || isDemo ? 's-ok' : 's-warn'); }
   } catch(e) { const ns = document.getElementById('navStatus'); if (ns) ns.textContent = 'Server starting...'; }
 }
 
@@ -1566,6 +1602,20 @@ async function checkHealth() {
 checkHealth();
 loadProgress();
 updateQuickQueries();
+
+// Auto-fill from URL params
+const urlParams = new URLSearchParams(window.location.search);
+const cityParam = urlParams.get('city');
+if (cityParam) {
+  document.getElementById('fLocation').value = cityParam;
+  // Also go to step 2 if on step 1
+  if (currentStep === 1) setTimeout(() => goStep(2), 500);
+}
+const langParam = urlParams.get('lang');
+if (langParam) {
+  selectedLang = langParam;
+  document.getElementById('langSelect').value = langParam;
+}
 
 /* Navbar scroll effect (matches landing page) */
 const navbar = document.getElementById('navbar');

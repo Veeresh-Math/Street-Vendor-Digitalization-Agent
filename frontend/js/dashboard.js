@@ -1,6 +1,7 @@
 /* dashboard.js — Dashboard analytics and charts */
 
 const apiBase = window.__API_BASE__ || window.location.origin || '';
+let lastVendorCount = 0;
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -15,13 +16,17 @@ async function loadDashboard() {
 
     if (analyticsRes.ok) {
       const stats = await analyticsRes.json();
+      const newVendorCount = stats.total_vendors || 0;
+      const dataChanged = newVendorCount !== lastVendorCount;
+      lastVendorCount = newVendorCount;
+
       document.getElementById('statTotal').textContent = stats.total_vendors;
       document.getElementById('statUpi').textContent = stats.vendors_with_upi;
       document.getElementById('statCities').textContent = Object.keys(stats.city_counts).length;
       document.getElementById('statBiz').textContent = Object.keys(stats.business_counts).length;
 
-      renderCityChart(stats.city_counts);
-      renderBizChart(stats.business_counts);
+      renderCityChart(stats.city_counts, !dataChanged);
+      renderBizChart(stats.business_counts, !dataChanged);
       renderVendorTable(stats.recent_vendors);
     }
 
@@ -29,19 +34,31 @@ async function loadDashboard() {
       const forecast = await forecastRes.json();
       renderForecast(forecast);
     }
+
+    document.querySelectorAll('.skeleton-text').forEach(el => el.classList.remove('skeleton-text'));
   } catch (e) {
     console.error('Dashboard load error:', e);
+    document.querySelectorAll('.stat-val').forEach(el => el.textContent = 'Error');
+    document.querySelectorAll('.skeleton-text').forEach(el => el.classList.remove('skeleton-text'));
   }
 }
 
-function renderCityChart(cityCounts) {
+function renderCityChart(cityCounts, skipUpdate) {
   const ctx = document.getElementById('cityChart');
   if (!ctx) return;
   const labels = Object.keys(cityCounts);
   const data = Object.values(cityCounts);
   const colors = ['#FF6B00', '#F5C518', '#1A7A4A', '#FF5733', '#38bdf8', '#818cf8'];
 
-  new Chart(ctx, {
+  if (skipUpdate && ctx._chart) {
+    ctx._chart.data.labels = labels;
+    ctx._chart.data.datasets[0].data = data;
+    ctx._chart.update();
+    return;
+  }
+
+  if (ctx._chart) ctx._chart.destroy();
+  const chart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels,
@@ -63,16 +80,25 @@ function renderCityChart(cityCounts) {
       },
     },
   });
+  ctx._chart = chart;
 }
 
-function renderBizChart(bizCounts) {
+function renderBizChart(bizCounts, skipUpdate) {
   const ctx = document.getElementById('bizChart');
   if (!ctx) return;
   const labels = Object.keys(bizCounts);
   const data = Object.values(bizCounts);
   const colors = ['#FF6B00', '#F5C518', '#1A7A4A', '#FF5733', '#38bdf8', '#818cf8', '#ec4899'];
 
-  new Chart(ctx, {
+  if (skipUpdate && ctx._chart) {
+    ctx._chart.data.labels = labels;
+    ctx._chart.data.datasets[0].data = data;
+    ctx._chart.update();
+    return;
+  }
+
+  if (ctx._chart) ctx._chart.destroy();
+  const chart = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels,
@@ -94,6 +120,7 @@ function renderBizChart(bizCounts) {
       },
     },
   });
+  ctx._chart = chart;
 }
 
 function renderForecast(forecast) {
@@ -139,3 +166,4 @@ function renderVendorTable(vendors) {
 }
 
 loadDashboard();
+setInterval(loadDashboard, 30000);

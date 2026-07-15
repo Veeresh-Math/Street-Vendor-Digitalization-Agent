@@ -1,4 +1,4 @@
-﻿services:
+services:
   - type: web
     name: street-vendor-agent
     env: docker
@@ -11,5 +11,11 @@
       - key: IBM_PROJECT_ID
         sync: false
       - key: IBM_URL
-        sync: false
+        value: "https://au-syd.ml.cloud.ibm.com"
+      - key: IBM_VECTOR_STORE_ID
+        value: "019f64e9-1223-7565-9cb3-cfeb55dc79e4"
+      - key: RAG_QUERY_CACHE_ENABLED
+        value: "true"
+      - key: DEMO_MODE
+        value: "true"
     autoDeploy: true

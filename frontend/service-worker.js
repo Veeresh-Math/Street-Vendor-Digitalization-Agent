@@ -1,17 +1,21 @@
-﻿const CACHE_NAME = 'street-vendor-v8';
+﻿const CACHE_NAME = 'street-vendor-v10';
 const CORE_ASSETS = [
   '/',
   '/index.html',
   '/agent.html',
   '/dashboard.html',
+  '/manifest.json',
   '/css/theme.css',
   '/css/layout.css',
   '/css/components.css',
+  '/js/chat.js',
+  '/js/kit.js',
   '/js/voice.js',
   '/js/vendor-map.js',
   '/js/scheme-checker.js',
   '/js/offline.js',
   '/js/dashboard.js',
+  '/js/geo.js',
 ];
 
 self.addEventListener('install', (event) => {

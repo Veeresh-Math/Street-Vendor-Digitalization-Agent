@@ -3,7 +3,7 @@ Demand Forecasting Module — Formula-based prediction with seasonal adjustments
 """
 
 import random
-from datetime import datetime, timedelta
+from datetime import date as _date, datetime, timedelta
 
 
 # Simulated product categories and base demands
@@ -60,8 +60,11 @@ def _day_of_week_factor(date: datetime) -> float:
 
 def _festival_factor(date: datetime) -> float:
     """Check if date falls near a festival."""
+    d = date.date() if hasattr(date, 'date') else date
     for (month, day), (name, mult) in FESTIVALS.items():
-        if abs((date.month * 30 + date.day) - (month * 30 + day)) <= 2:
+        fest_date = _date(d.year, month, day)
+        distance = abs((d - fest_date).days)
+        if distance <= 3:
             return mult
     return 1.0
 
@@ -139,10 +142,3 @@ def get_forecast(category: str = "all", days: int = 7) -> dict:
         "trend": trend,
         "summary": summary,
     }
-
-
-def _day_of_week_factor(date: datetime) -> float:
-    """Weekend boost using default category."""
-    if date.weekday() >= 5:
-        return _get_category_params("all").get("weekend_boost", 1.3)
-    return 1.0

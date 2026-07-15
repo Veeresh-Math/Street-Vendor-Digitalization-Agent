@@ -19,6 +19,7 @@ Routes:
 import os
 import sys
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -28,6 +29,10 @@ from fastapi.responses import FileResponse, JSONResponse
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+# Load .env from backend/ directory
+_backend_dir = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_backend_dir, ".env"))
 
 from backend.models import (
     QueryRequest, QueryResponse, RetrievedDoc,
@@ -41,10 +46,12 @@ from backend.models import (
 from backend.rag_pipeline import build_index, answer, is_index_ready, index_doc_count
 from backend.qr_generator import generate_qr, generate_business_card
 from backend.geocoder import geocode
-from backend.ibm_client import health_check
+from backend.ibm_client import health_check, get_token_usage
 from backend.vendor_store import register_vendor, get_all_vendors, get_vendor_stats
 from backend.forecast import get_forecast
 from backend.scheme_checker import check_eligibility
+from backend.knowledge_base import get_all_documents
+from backend.monitoring import request_logger
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR     = os.path.dirname(os.path.dirname(__file__))
@@ -55,23 +62,28 @@ os.makedirs(os.path.join(STATIC_DIR, "generated"), exist_ok=True)
 # ── Startup: auto-build index if empty ────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if not is_index_ready():
-        print("[STARTUP] Building ChromaDB vector index on startup...")
-        try:
-            count = build_index()
-            print(f"[STARTUP] Index ready -- {count} documents embedded.")
-        except Exception as e:
-            print(f"[STARTUP] Index build failed: {e}. Run POST /api/build-index to retry.")
+    # Check if DEMO_MODE is enabled — skip all IBM API calls
+    demo_mode = os.getenv("DEMO_MODE", "false").lower() == "true"
+    if demo_mode:
+        print("[STARTUP] DEMO_MODE enabled — skipping index build and IBM pre-warm (0 tokens).")
     else:
-        print(f"[STARTUP] ChromaDB index already ready ({index_doc_count()} docs).")
-    # Pre-warm IBM connection so first user request is fast
-    try:
-        from backend.ibm_client import _get_gen_model, _get_embed_model
-        _get_gen_model()
-        _get_embed_model()
-        print("[STARTUP] IBM models pre-warmed.")
-    except Exception as e:
-        print(f"[STARTUP] IBM pre-warm skipped: {e}")
+        if not is_index_ready():
+            print("[STARTUP] Building ChromaDB vector index on startup...")
+            try:
+                count = build_index()
+                print(f"[STARTUP] Index ready -- {count} documents embedded.")
+            except Exception as e:
+                print(f"[STARTUP] Index build failed: {e}. Run POST /api/build-index to retry.")
+        else:
+            print(f"[STARTUP] ChromaDB index already ready ({index_doc_count()} docs).")
+        # Pre-warm IBM connection so first user request is fast
+        try:
+            from backend.ibm_client import _get_gen_model, _get_embed_model
+            _get_gen_model()
+            _get_embed_model()
+            print("[STARTUP] IBM models pre-warmed.")
+        except Exception as e:
+            print(f"[STARTUP] IBM pre-warm skipped: {e}")
     yield
 
 
@@ -122,6 +134,52 @@ async def add_security_headers(request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     return response
 
+
+# ── Rate Limiting Middleware ───────────────────────────────────────────────────
+import time as _time
+from collections import defaultdict
+
+_rate_limit_store: dict[str, list[float]] = defaultdict(list)
+RATE_LIMIT_WINDOW = 60  # seconds
+RATE_LIMIT_MAX_REQUESTS = 30  # per window per IP
+
+@app.middleware("http")
+async def rate_limit_middleware(request, call_next):
+    client_ip = request.client.host if request.client else "unknown"
+    now = _time.time()
+    
+    # Clean old entries
+    _rate_limit_store[client_ip] = [
+        t for t in _rate_limit_store[client_ip] if now - t < RATE_LIMIT_WINDOW
+    ]
+    
+    if len(_rate_limit_store[client_ip]) >= RATE_LIMIT_MAX_REQUESTS:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=429,
+            detail="Too many requests. Please try again later."
+        )
+    
+    _rate_limit_store[client_ip].append(now)
+    response = await call_next(request)
+    return response
+
+
+# ── Request Logging Middleware ─────────────────────────────────────────────────
+@app.middleware("http")
+async def log_requests(request, call_next):
+    import time as _time
+    start = _time.time()
+    response = await call_next(request)
+    latency_ms = (_time.time() - start) * 1000
+    request_logger.log_request(
+        method=request.method,
+        path=request.url.path,
+        status_code=response.status_code,
+        latency_ms=latency_ms,
+    )
+    return response
+
 # ── Frontend page routes ───────────────────────────────────────────────────────
 @app.get("/", include_in_schema=False)
 async def landing():
@@ -154,14 +212,22 @@ async def dashboard_html():
 # ── API: Health ────────────────────────────────────────────────────────────────
 @app.get("/api/health", response_model=HealthResponse, tags=["System"])
 async def health():
-    ibm  = health_check()
+    demo_mode = os.getenv("DEMO_MODE", "false").lower() == "true"
+    # In demo mode, skip IBM connection entirely
+    if demo_mode:
+        ibm_status = "demo-mode"
+    else:
+        ibm = health_check()
+        ibm_status = ibm["status"]
+    # In demo mode, report index as ready (we don't need it)
+    index_ready = True if demo_mode else is_index_ready()
     return HealthResponse(
         status      = "ok",
-        ibm_status  = ibm["status"],
-        index_ready = is_index_ready(),
-        doc_count   = index_doc_count(),
-        gen_model   = "ibm/granite-4-h-small",
-        embed_model = "ibm/granite-embedding-278m-multilingual",
+        ibm_status  = ibm_status,
+        index_ready = index_ready,
+        doc_count   = len(get_all_documents()) if demo_mode else index_doc_count(),
+        gen_model   = "demo-cached" if demo_mode else "meta-llama/llama-3-3-70b-instruct",
+        embed_model = "none" if demo_mode else "intfloat/multilingual-e5-large",
         chroma_path = os.path.join(BASE_DIR, "vector_store"),
     )
 
@@ -170,6 +236,25 @@ async def health():
 @app.get("/api/ping", tags=["System"])
 async def ping():
     return {"status": "ok"}
+
+
+# ── API: Monitoring Stats ────────────────────────────────────────────────────
+@app.get("/api/monitoring/stats", tags=["System"])
+async def monitoring_stats():
+    """Return request logging statistics (additive, no response changes)."""
+    return request_logger.get_stats()
+
+
+@app.get("/api/monitoring/recent", tags=["System"])
+async def monitoring_recent(n: int = 20):
+    """Return the last N request log entries."""
+    return request_logger.get_recent(n=n)
+
+
+@app.get("/api/monitoring/tokens", tags=["System"])
+async def monitoring_tokens():
+    """Return IBM token usage statistics."""
+    return get_token_usage()
 
 
 # ── API: Build Index ───────────────────────────────────────────────────────────
@@ -186,8 +271,11 @@ async def api_build_index(background_tasks: BackgroundTasks, force: bool = False
 async def api_query(req: QueryRequest):
     """
     RAG query: embed → retrieve from ChromaDB → generate with granite-4-h-small.
+    In DEMO_MODE, uses pre-cached responses (0 tokens).
     """
-    if not is_index_ready():
+    # In demo mode, skip index check — demo responses don't need the index
+    demo_mode = os.getenv("DEMO_MODE", "false").lower() == "true"
+    if not demo_mode and not is_index_ready():
         raise HTTPException(
             status_code=503,
             detail="Vector index not ready. Call POST /api/build-index first.",
@@ -218,8 +306,11 @@ async def api_query(req: QueryRequest):
 async def api_generate_kit(req: KitRequest):
     """
     Full digital kit: profile + UPI guide + schemes + SEO tips + QR business card.
+    In DEMO_MODE, uses pre-cached responses (0 tokens).
     """
-    if not is_index_ready():
+    # In demo mode, skip index check
+    demo_mode = os.getenv("DEMO_MODE", "false").lower() == "true"
+    if not demo_mode and not is_index_ready():
         raise HTTPException(status_code=503, detail="Vector index not ready.")
 
     # Build a rich query from the structured vendor info
@@ -264,8 +355,8 @@ async def api_generate_kit(req: KitRequest):
         answer         = result["answer"],
         qr_url         = qr_url,
         retrieved_docs = docs,
-        gen_model      = "ibm/granite-4-h-small",
-        embed_model    = "ibm/granite-embedding-278m-multilingual",
+        gen_model      = "demo-cached" if demo_mode else "meta-llama/llama-3-3-70b-instruct",
+        embed_model    = "none" if demo_mode else "intfloat/multilingual-e5-large",
     )
 
 
@@ -284,7 +375,7 @@ async def api_qr(req: QRRequest):
 @app.get("/api/geocode", response_model=GeocodeResponse, tags=["Tools"])
 async def api_geocode(q: str):
     """Geocode a location string using OpenStreetMap Nominatim (free, no key)."""
-    result = geocode(q)
+    result = await geocode(q)
     return GeocodeResponse(**{k: v for k, v in result.items() if k != "error"})
 
 
@@ -305,9 +396,14 @@ async def api_register_vendor(req: VendorRegisterRequest):
 
 
 @app.get("/api/vendors", tags=["Vendors"])
-async def api_list_vendors():
-    """List all registered vendors."""
-    return get_all_vendors()
+async def api_list_vendors(city: str = None, business_type: str = None):
+    """List all registered vendors, with optional city/type filtering."""
+    vendors = get_all_vendors()
+    if city:
+        vendors = [v for v in vendors if (v.get("city") or "").lower() == city.lower()]
+    if business_type:
+        vendors = [v for v in vendors if (v.get("business_type") or "").lower() == business_type.lower()]
+    return vendors
 
 
 # ── API: Dashboard Analytics ──────────────────────────────────────────────────
@@ -338,3 +434,58 @@ async def api_scheme_check(req: SchemeCheckRequest):
         city=req.city,
     )
     return SchemeCheckResponse(**result)
+
+
+# ── API: List Government Schemes ─────────────────────────────────────────────
+@app.get("/api/schemes", response_model=list[dict], tags=["Schemes"])
+async def api_list_schemes():
+    """Return all available government schemes."""
+    return [
+        {"name": "PM SVANidhi", "description": "Working capital loan for street vendors", "amount": "Up to Rs.50,000", "portal": "pmsvanidhi.mohua.gov.in", "helpline": "1800-11-1979"},
+        {"name": "MSME Udyam Registration", "description": "Free MSME registration for priority sector benefits", "amount": "Free forever", "portal": "udyamregistration.gov.in", "helpline": "1800-111-956"},
+        {"name": "Mudra Yojana (Shishu/Kishore)", "description": "Collateral-free business loans", "amount": "Up to Rs.5 lakh", "portal": "mudra.org.in", "helpline": "1800-180-1111"},
+        {"name": "e-Shram Card", "description": "Universal social security for unorganised workers", "amount": "Free + Rs.2 lakh insurance", "portal": "eshram.gov.in", "helpline": "14434"},
+        {"name": "FSSAI License", "description": "Food safety registration for food vendors", "amount": "Rs.100-2000/year", "portal": "foscos.fssai.gov.in", "helpline": "1800-112-100"},
+        {"name": "Digital India", "description": "Government digital literacy and services", "amount": "Various benefits", "portal": "digitalindia.gov.in", "helpline": "1800-111-800"},
+    ]
+
+
+# ── API: List Supported Cities ───────────────────────────────────────────────
+@app.get("/api/cities", response_model=list[dict], tags=["Cities"])
+async def api_list_cities():
+    """Return supported cities with vendor counts."""
+    vendors = get_all_vendors()
+    city_counts = {}
+    for v in vendors:
+        c = v.get("city", "Unknown")
+        city_counts[c] = city_counts.get(c, 0) + 1
+    cities_data = [
+        {"name": "Pune", "state": "Maharashtra", "vendors": city_counts.get("Pune", 0)},
+        {"name": "Mumbai", "state": "Maharashtra", "vendors": city_counts.get("Mumbai", 0)},
+        {"name": "Chennai", "state": "Tamil Nadu", "vendors": city_counts.get("Chennai", 0)},
+        {"name": "Bangalore", "state": "Karnataka", "vendors": city_counts.get("Bangalore", 0)},
+        {"name": "Surat", "state": "Gujarat", "vendors": city_counts.get("Surat", 0)},
+        {"name": "Delhi", "state": "Delhi", "vendors": city_counts.get("Delhi", 0)},
+    ]
+    return cities_data
+
+
+# ── API: Personalized Recommendations ────────────────────────────────────────
+@app.get("/api/recommendations", response_model=list[dict], tags=["Agent"])
+async def api_recommendations():
+    """Return personalized recommendations for vendors."""
+    vendors = get_all_vendors()
+    stats = get_vendor_stats()
+    recs = []
+    if stats.get("total", 0) == 0:
+        recs.append({"title": "Register as a Vendor", "description": "Register on our platform to get started with digital tools.", "priority": "high", "icon": "user-plus"})
+    if stats.get("vendors_with_upi", 0) < stats.get("total", 1):
+        recs.append({"title": "Set Up UPI Payments", "description": "Accept digital payments to grow your business by 30%.", "priority": "high", "icon": "credit-card"})
+    if stats.get("total_cities", 0) < 3:
+        recs.append({"title": "Expand to New Cities", "description": "List your business on Google Maps for wider reach.", "priority": "medium", "icon": "map-pin"})
+    recs.extend([
+        {"title": "Apply for PM SVANidhi", "description": "Get a collateral-free loan of up to Rs.50,000.", "priority": "medium", "icon": "landmark"},
+        {"title": "Create a Google Business Profile", "description": "Show up in local search results and get more customers.", "priority": "medium", "icon": "search"},
+        {"title": "Join WhatsApp Business", "description": "Connect with customers directly through WhatsApp.", "priority": "low", "icon": "message-circle"},
+    ])
+    return recs[:6]

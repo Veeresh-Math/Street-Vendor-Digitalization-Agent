@@ -10,11 +10,11 @@ async function checkScheme(el, answer) {
 
   const hasCov = (answer === 'yes');
   const hasLor = (answer === 'lor');
-  const isFood = (answer === 'food_yes');
+  const isFood = (typeof isFoodVendor !== 'undefined' && isFoodVendor === true);
   const city = document.getElementById('fLocation')?.value || '';
 
   try {
-    const apiBase = window.location.origin || '';
+    const apiBase = window.__API_BASE__ || window.location.origin || '';
     const res = await fetch(`${apiBase}/api/scheme-check`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -26,23 +26,23 @@ async function checkScheme(el, answer) {
     if (data.eligible) {
       data.schemes.forEach(s => {
         const icon = s.eligible ? '✅' : '❌';
-        html += `<strong>${s.name}:</strong> ${s.amount} ${icon}<br/>`;
-        if (s.eligible) html += `<span style="font-size:11px;color:var(--text-light);">${s.benefit}</span><br/>`;
+        html += `<strong>${escHtml(s.name)}:</strong> ${escHtml(s.amount)} ${icon}<br/>`;
+        if (s.eligible) html += `<span style="font-size:11px;color:var(--text-light);">${escHtml(s.benefit)}</span><br/>`;
         html += '<br/>';
       });
       html += '<strong>Documents needed:</strong><br/>';
-      data.documents_needed.forEach(d => { html += `• ${d}<br/>`; });
+      data.documents_needed.forEach(d => { html += `• ${escHtml(d)}<br/>`; });
       html += '<br/><strong>Next steps:</strong><br/>';
-      data.next_steps.forEach(s => { html += `• ${s}<br/>`; });
+      data.next_steps.forEach(s => { html += `• ${escHtml(s)}<br/>`; });
     } else {
       html += '<strong>Not yet eligible for PM SVANidhi.</strong><br/>';
       html += 'You need a Certificate of Vending (CoV) or Letter of Recommendation (LoR).<br/><br/>';
       html += '<strong>What you can do now:</strong><br/>';
-      data.next_steps.forEach(s => { html += `• ${s}<br/>`; });
+      data.next_steps.forEach(s => { html += `• ${escHtml(s)}<br/>`; });
       html += '<br/>You can still register for MSME Udyam (free) and e-Shram card.';
     }
 
-    html += '<div style="margin-top:10px;"><button class="scheme-opt" onclick="resetScheme()" style="background:var(--indigo);color:#fff;">Check Again</button></div>';
+    html += '<div style="margin-top:10px;"><button class="scheme-opt" onclick="resetScheme()" style="background:var(--saffron,#FF6B00);color:#fff;">Check Again</button></div>';
     resultEl.innerHTML = html;
   } catch (e) {
     resultEl.innerHTML = 'Error checking eligibility. Please try again.';
@@ -54,4 +54,8 @@ function resetScheme() {
   resultEl.style.display = 'none';
   resultEl.innerHTML = '';
   document.querySelectorAll('.scheme-opt').forEach(o => o.classList.remove('selected'));
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

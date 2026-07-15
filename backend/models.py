@@ -2,16 +2,40 @@
 Pydantic models — request / response schemas for FastAPI endpoints
 """
 
-from pydantic import BaseModel, Field
+import re
+import html
+
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
+
+
+def _validate_upi(v: str | None) -> str | None:
+    if v is None or v.strip() == '':
+        return None
+    v = v.strip()
+    if not re.match(r'^[\w.\-]+@[\w]+$', v):
+        raise ValueError(f'Invalid UPI ID format: {v}. Expected format: name@bank')
+    return v
+
+
+def _sanitize_input(v: str) -> str:
+    """Strip and escape HTML entities to prevent XSS."""
+    v = v.strip()
+    v = html.escape(v)
+    return v
 
 
 # ── /api/query ────────────────────────────────────────────────────────────────
 
 class QueryRequest(BaseModel):
-    query    : str            = Field(...,  example="I sell fruit in Pune's Camp area")
-    language : Optional[str]  = Field("en", example="en")   # en/hi/mr/ta/te/kn/gu/bn
-    top_k    : Optional[int]  = Field(3,    ge=1, le=5)
+    query    : str            = Field(...,  json_schema_extra={"example": "I sell fruit in Pune's Camp area"})
+    language : Optional[str]  = Field("en", json_schema_extra={"example": "en"})   # en/hi/mr/ta/te/kn/gu/bn
+    top_k    : Optional[int]  = Field(2,    ge=1, le=5)
+
+    @field_validator('query', mode='before')
+    @classmethod
+    def sanitize_query(cls, v):
+        return _sanitize_input(v) if isinstance(v, str) else v
 
 
 class RetrievedDoc(BaseModel):
@@ -33,12 +57,22 @@ class QueryResponse(BaseModel):
 # ── /api/generate-kit ─────────────────────────────────────────────────────────
 
 class KitRequest(BaseModel):
-    vendor_name    : str           = Field(...,  example="Ramesh Fruits")
-    business_type  : str           = Field(...,  example="Fruit & Vegetable Vendor")
-    location       : str           = Field(...,  example="Camp, Pune")
-    upi_id         : Optional[str] = Field(None, example="rameshfruits@upi")
+    vendor_name    : str           = Field(...,  json_schema_extra={"example": "Ramesh Fruits"})
+    business_type  : str           = Field(...,  json_schema_extra={"example": "Fruit & Vegetable Vendor"})
+    location       : str           = Field(...,  json_schema_extra={"example": "Camp, Pune"})
+    upi_id         : Optional[str] = Field(None, json_schema_extra={"example": "rameshfruits@upi"})
     language       : Optional[str] = Field("en")
-    top_k          : Optional[int] = Field(3, ge=1, le=5)
+    top_k          : Optional[int] = Field(2, ge=1, le=5)
+
+    @field_validator('upi_id', mode='before')
+    @classmethod
+    def validate_upi(cls, v):
+        return _validate_upi(v)
+
+    @field_validator('vendor_name', 'business_type', 'location', mode='before')
+    @classmethod
+    def sanitize_fields(cls, v):
+        return _sanitize_input(v) if isinstance(v, str) else v
 
 
 class KitResponse(BaseModel):
@@ -56,9 +90,14 @@ class KitResponse(BaseModel):
 # ── /api/qr ───────────────────────────────────────────────────────────────────
 
 class QRRequest(BaseModel):
-    upi_id      : str            = Field(...,  example="rameshfruits@upi")
-    vendor_name : str            = Field(...,  example="Ramesh Fruits")
-    location    : Optional[str]  = Field(None, example="Camp, Pune")
+    upi_id      : str            = Field(...,  json_schema_extra={"example": "rameshfruits@upi"})
+    vendor_name : str            = Field(...,  json_schema_extra={"example": "Ramesh Fruits"})
+    location    : Optional[str]  = Field(None, json_schema_extra={"example": "Camp, Pune"})
+
+    @field_validator('upi_id', mode='before')
+    @classmethod
+    def validate_upi(cls, v):
+        return _validate_upi(v)
 
 
 class QRResponse(BaseModel):
@@ -95,13 +134,18 @@ class HealthResponse(BaseModel):
 # ── /api/vendors ──────────────────────────────────────────────────────────────
 
 class VendorRegisterRequest(BaseModel):
-    name          : str           = Field(..., example="Ramesh Fruits")
-    business_type : str           = Field(..., example="Fruit & Vegetable Vendor")
-    location      : str           = Field(..., example="Camp, Pune")
-    city          : Optional[str] = Field(None, example="Pune")
+    name          : str           = Field(..., json_schema_extra={"example": "Ramesh Fruits"})
+    business_type : str           = Field(..., json_schema_extra={"example": "Fruit & Vegetable Vendor"})
+    location      : str           = Field(..., json_schema_extra={"example": "Camp, Pune"})
+    city          : Optional[str] = Field(None, json_schema_extra={"example": "Pune"})
     lat           : Optional[float] = Field(None)
     lon           : Optional[float] = Field(None)
     upi_id        : Optional[str] = Field(None)
+
+    @field_validator('name', 'business_type', 'location', 'city', mode='before')
+    @classmethod
+    def sanitize_fields(cls, v):
+        return _sanitize_input(v) if isinstance(v, str) else v
 
 
 class VendorResponse(BaseModel):

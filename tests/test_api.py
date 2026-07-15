@@ -27,8 +27,10 @@ def test_health_endpoint(client):
     assert "ibm_status" in data
     assert "index_ready" in data
     assert "doc_count" in data
-    assert data["gen_model"] == "ibm/granite-4-h-small"
-    assert data["embed_model"] == "ibm/granite-embedding-278m-multilingual"
+    gen_model = data["gen_model"]
+    embed_model = data["embed_model"]
+    assert gen_model in ("meta-llama/llama-3-3-70b-instruct", "demo-cached", "demo-fallback")
+    assert embed_model in ("intfloat/multilingual-e5-large", "none")
 
 
 def test_landing_page(client):

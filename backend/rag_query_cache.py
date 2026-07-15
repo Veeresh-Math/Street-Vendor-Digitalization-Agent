@@ -63,6 +63,13 @@ class TTLLRUCache:
         while len(self._data) > self.maxsize:
             self._data.popitem(last=False)
 
+    def clear(self) -> None:
+        """Clear all cached entries."""
+        self._data.clear()
+
+    def __len__(self) -> int:
+        return len(self._data)
+
 
 # Module-level singleton
 RAG_QUERY_CACHE_ENABLED = _env_bool("RAG_QUERY_CACHE_ENABLED", True)
@@ -85,7 +92,13 @@ def get_query_cache() -> Optional[TTLLRUCache]:
 
 
 def make_cache_key(*parts: Any) -> str:
-    # stable string key without importing hashlib unless needed
-    # (cache correctness > cryptographic properties)
-    return "|".join([str(p) if p is not None else "" for p in parts])
+    """Create normalized cache key. First part (query) is lowercased/stripped."""
+    normalized = []
+    for i, p in enumerate(parts):
+        if i == 0 and isinstance(p, str):
+            # Normalize query: lowercase + strip whitespace
+            normalized.append(p.strip().lower())
+        else:
+            normalized.append(str(p) if p is not None else "")
+    return "|".join(normalized)
 

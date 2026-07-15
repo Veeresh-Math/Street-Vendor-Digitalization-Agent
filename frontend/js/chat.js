@@ -45,7 +45,7 @@ async function sendMessage() {
   const typingEl = appendTyping();
 
   try {
-    const apiBase = window.location.origin || '';
+    const apiBase = window.__API_BASE__ || window.location.origin || '';
     const res = await fetch(`${apiBase}/api/query`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -151,21 +151,21 @@ function buildDocsPanel(docs) {
 // Health check
 async function checkHealth() {
   try {
-    const apiBase = window.location.origin || '';
+    const apiBase = window.__API_BASE__ || window.location.origin || '';
     const r = await fetch(`${apiBase}/api/health`);
     const d = await r.json();
     const navStatus = document.getElementById('navStatus');
     const indexStatus = document.getElementById('indexStatus');
     const chipIbm = document.getElementById('chipIbm');
     const chipIdx = document.getElementById('chipIdx');
-    if (navStatus) navStatus.textContent = d.ibm_status === 'connected' ? 'IBM Connected' : 'Connecting...';
+    if (navStatus) navStatus.textContent = (d.ibm_status === 'connected' || d.ibm_status === 'demo-mode') ? (d.ibm_status === 'demo-mode' ? 'Demo Mode' : 'IBM Connected') : 'Connecting...';
     if (indexStatus) {
       indexStatus.textContent = d.index_ready ? `${d.doc_count} docs` : 'Index building...';
       indexStatus.className = 'ibm-model-chip ' + (d.index_ready ? 'chip-live' : 'chip-gen');
     }
     if (chipIbm) {
-      chipIbm.textContent = d.ibm_status === 'connected' ? 'IBM: OK' : 'IBM: Error';
-      chipIbm.className = 's-chip ' + (d.ibm_status === 'connected' ? 's-ok' : 's-warn');
+      chipIbm.textContent = (d.ibm_status === 'connected' || d.ibm_status === 'demo-mode') ? (d.ibm_status === 'demo-mode' ? 'Demo: OK' : 'IBM: OK') : 'IBM: Error';
+      chipIbm.className = 's-chip ' + ((d.ibm_status === 'connected' || d.ibm_status === 'demo-mode') ? 's-ok' : 's-warn');
     }
     if (chipIdx) {
       chipIdx.textContent = d.index_ready ? `Index: ${d.doc_count} docs` : 'Index: Building';
