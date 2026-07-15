@@ -310,7 +310,7 @@ uvicorn backend.main:app --reload --port 8000
 docker-compose up --build
 ```
 
-Open **http://localhost:8000** 🎉
+Open **https://street-vendor-agent.netlify.app** 🎉
 
 ---
 
