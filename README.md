@@ -2,7 +2,7 @@
 
 > **AICTE-IBM SkillsBuild Internship 2026 — Problem Statement No. 29**
 >
-> An AI-powered RAG (Retrieval-Augmented Generation) agent that transforms India's 5 crore informal street vendors into digitally visible businesses — UPI, MSME credit, Google listing, QR codes & promotional materials in 22+ Indian languages. Powered by IBM watsonx.ai Granite models.
+> An AI-powered RAG (Retrieval-Augmented Generation) agent that transforms India's 5 crore informal street vendors into digitally visible businesses — UPI, MSME credit, Google listing, QR codes & promotional materials in 22+ Indian languages. Powered by IBM watsonx.ai Llama models.
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### Technical
 - **ChromaDB Vector Store** — Persistent cosine similarity search for 21+ knowledge documents
-- **IBM Granite Models** — llama-3-3-70b-instruct (generation) + multilingual-e5-large (embeddings)
+- **IBM Llama Models** — llama-3-3-70b-instruct (generation) + multilingual-e5-large (embeddings)
 - **PWA Support** — Offline caching via Service Worker + IndexedDB
 - **FastAPI Backend** — Async Python with Pydantic validation
 - **Docker Ready** — Dockerfile + docker-compose.yml for one-command deployment
@@ -181,4 +181,4 @@ AICTE-IBM SkillsBuild Internship 2026
 
 ---
 
-*Built with IBM watsonx.ai Granite models + ChromaDB RAG pipeline*
+*Built with IBM watsonx.ai Llama models + ChromaDB RAG pipeline*
