@@ -237,6 +237,30 @@ async def ping():
     return {"status": "ok"}
 
 
+@app.get("/api/debug-env", tags=["System"])
+async def debug_env():
+    """Show which env vars are loaded (keys masked for security)."""
+    from backend.ibm_client import _get_env
+    api_key = _get_env("IBM_API_KEY")
+    project_id = _get_env("IBM_PROJECT_ID")
+    url = _get_env("IBM_URL")
+    vsid = _get_env("IBM_VECTOR_STORE_ID")
+    demo = os.getenv("DEMO_MODE", "NOT SET")
+    embed_limit = os.getenv("DAILY_EMBED_LIMIT", "NOT SET")
+    gen_limit = os.getenv("DAILY_GEN_LIMIT", "NOT SET")
+    return {
+        "DEMO_MODE": demo,
+        "IBM_API_KEY_set": bool(api_key),
+        "IBM_API_KEY_first4": api_key[:4] + "..." if len(api_key) > 4 else "(empty)",
+        "IBM_PROJECT_ID_set": bool(project_id),
+        "IBM_PROJECT_ID_first8": project_id[:8] + "..." if len(project_id) > 8 else "(empty)",
+        "IBM_URL": url or "(empty)",
+        "IBM_VECTOR_STORE_ID_set": bool(vsid),
+        "DAILY_EMBED_LIMIT": embed_limit,
+        "DAILY_GEN_LIMIT": gen_limit,
+    }
+
+
 # ── API: Monitoring Stats ────────────────────────────────────────────────────
 @app.get("/api/monitoring/stats", tags=["System"])
 async def monitoring_stats():

@@ -19,7 +19,8 @@ from backend.knowledge_base import get_all_chunks
 from backend.demo_responses import get_demo_response
 
 _cache = get_query_cache()
-DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
+def _is_demo_mode() -> bool:
+    return os.getenv("DEMO_MODE", "false").lower() == "true"
 
 # ── ChromaDB config ──────────────────────────────────────────────────────────
 CHROMA_PATH     = os.path.join(os.path.dirname(__file__), "..", "vector_store")
@@ -189,7 +190,7 @@ def answer(user_query: str, top_k: int = DEFAULT_TOP_K, language: str = "en",
       3. Cache miss → embed (15 tokens) + generate (30 tokens) = 45 tokens max
     """
     # ── Demo mode: 0 tokens ──────────────────────────────────────────────
-    if DEMO_MODE:
+    if _is_demo_mode():
         demo_resp = get_demo_response(user_query, language)
         if demo_resp:
             return {"answer": demo_resp, "retrieved_docs": [], "query": user_query,

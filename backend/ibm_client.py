@@ -65,11 +65,10 @@ _EMBED_CACHE_MAX = 2000
 _embed_cache: OrderedDict[str, list[float]] = OrderedDict()
 _embed_cache_lock = threading.Lock()
 
-# ── Credentials ───────────────────────────────────────────────────────────────
-IBM_API_KEY        = os.getenv("IBM_API_KEY", "")
-IBM_PROJECT_ID     = os.getenv("IBM_PROJECT_ID", "")
-IBM_URL            = os.getenv("IBM_URL", "https://au-syd.ml.cloud.ibm.com")
-IBM_VECTOR_STORE_ID = os.getenv("IBM_VECTOR_STORE_ID", "")
+# ── Credentials (read at runtime, not import time) ─────────────────────────
+def _get_env(key: str, default: str = "") -> str:
+    """Read env var at runtime (not import-time) so Render env vars are always picked up."""
+    return os.getenv(key, default)
 
 # Model IDs
 GEN_MODEL_ID   = "meta-llama/llama-3-3-70b-instruct"
@@ -81,8 +80,13 @@ _client: APIClient | None = None
 def _get_client() -> APIClient:
     global _client
     if _client is None:
-        creds   = Credentials(url=IBM_URL, api_key=IBM_API_KEY)
-        _client = APIClient(credentials=creds, project_id=IBM_PROJECT_ID)
+        api_key = _get_env("IBM_API_KEY")
+        project_id = _get_env("IBM_PROJECT_ID")
+        url = _get_env("IBM_URL", "https://au-syd.ml.cloud.ibm.com")
+        if not api_key or not project_id:
+            raise ValueError("IBM_API_KEY or IBM_PROJECT_ID not set. Check Render environment variables.")
+        creds   = Credentials(url=url, api_key=api_key)
+        _client = APIClient(credentials=creds, project_id=project_id)
     return _client
 
 
@@ -205,11 +209,11 @@ def health_check() -> dict:
         client = _get_client()
         return {
             "status"      : "connected",
-            "url"         : IBM_URL,
-            "project_id"  : IBM_PROJECT_ID,
+            "url"         : _get_env("IBM_URL", "https://au-syd.ml.cloud.ibm.com"),
+            "project_id"  : _get_env("IBM_PROJECT_ID"),
             "gen_model"   : GEN_MODEL_ID,
             "embed_model" : EMBED_MODEL_ID,
-            "vector_store": IBM_VECTOR_STORE_ID,
+            "vector_store": _get_env("IBM_VECTOR_STORE_ID"),
         }
     except Exception as e:
         return {"status": "error", "detail": str(e)}
