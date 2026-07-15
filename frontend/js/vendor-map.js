@@ -51,10 +51,13 @@ function buildFilterUI() {
     <select id="mapTypeFilter" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.91);font-size:11px;">
       <option value="all">All Types</option>
     </select>
+    <button id="mapLocateBtn" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,107,0,0.15);color:#FF6B00;font-size:11px;cursor:pointer;font-weight:600;">📍 My Location</button>
     <span id="mapVendorCount" style="font-size:10px;color:rgba(255,255,255,0.30);margin-left:auto;"></span>
   `;
 
   container.parentNode.insertBefore(filterBar, container);
+
+  document.getElementById('mapLocateBtn').addEventListener('click', locateUser);
 }
 
 function populateFilters(vendors) {
@@ -87,6 +90,8 @@ function populateFilters(vendors) {
 }
 
 function applyFilters() {
+  if (!vendorMap) return;
+
   const filtered = allVendors.filter(v => {
     if (v.lat == null || v.lon == null) return false;
     const city = v.city || getCityFromLocation(v.location);
@@ -113,8 +118,8 @@ function applyFilters() {
       <div style="font-family:system-ui;min-width:180px;">
         <div style="font-weight:800;font-size:14px;color:#1B2A6B;margin-bottom:4px;">${escHtml(v.name)}</div>
         <div style="font-size:12px;color:#5C5040;margin-bottom:4px;">${escHtml(v.business_type)}</div>
-        <div style="font-size:11px;color:#8B7355;">📍 ${escHtml(v.location)}</div>
-        ${v.upi_id ? `<div style="font-size:11px;color:#2D6A4F;margin-top:4px;">💳 ${escHtml(v.upi_id)}</div>` : ''}
+        <div style="font-size:11px;color:#8B7355;">${escHtml(v.location)}</div>
+        ${v.upi_id ? `<div style="font-size:11px;color:#2D6A4F;margin-top:4px;">${escHtml(v.upi_id)}</div>` : ''}
       </div>
     `;
     marker.bindPopup(popupHtml);
@@ -128,6 +133,33 @@ function applyFilters() {
     const bounds = L.latLngBounds(filtered.map(v => [v.lat, v.lon]));
     vendorMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 12, animate: true });
   }
+}
+
+function locateUser() {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    return;
+  }
+
+  const btn = document.getElementById('mapLocateBtn');
+  if (btn) btn.textContent = '⏳ Locating...';
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      window.userLocation = { lat, lon };
+      if (vendorMap) {
+        vendorMap.setView([lat, lon], 13);
+      }
+      if (btn) btn.textContent = '📍 My Location';
+    },
+    (err) => {
+      alert('Unable to get your location. Please allow location access.');
+      if (btn) btn.textContent = '📍 My Location';
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
 }
 
 function initVendorMap() {
@@ -150,7 +182,7 @@ function initVendorMap() {
   loadVendors();
 
   if (window.userLocation && window.userLocation.lat && window.userLocation.lon) {
-    vendorMap.setView([window.userLocation.lat, window.userLocation.lon], 12);
+    vendorMap.setView([window.userLocation.lat, window.userLocation.lon], 13);
   }
 
   setTimeout(() => vendorMap.invalidateSize(), 300);
