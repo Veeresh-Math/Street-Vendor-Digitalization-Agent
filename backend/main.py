@@ -65,7 +65,7 @@ os.makedirs(os.path.join(STATIC_DIR, "generated"), exist_ok=True)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Check if DEMO_MODE is enabled — skip all IBM API calls
-    demo_mode = os.getenv("DEMO_MODE", "false").lower() == "true"
+    demo_mode = os.getenv("DEMO_MODE", "false").strip().lower() == "true"
     if demo_mode:
         print("[STARTUP] DEMO_MODE enabled — skipping index build and IBM pre-warm (0 tokens).")
     else:
@@ -209,7 +209,7 @@ async def dashboard_html():
 # ── API: Health ────────────────────────────────────────────────────────────────
 @app.get("/api/health", response_model=HealthResponse, tags=["System"])
 async def health():
-    demo_mode = os.getenv("DEMO_MODE", "false").lower() == "true"
+    demo_mode = os.getenv("DEMO_MODE", "false").strip().lower() == "true"
     # In demo mode, skip IBM connection entirely
     if demo_mode:
         ibm_status = "demo-mode"
@@ -297,7 +297,7 @@ async def api_query(req: QueryRequest):
     In DEMO_MODE, uses pre-cached responses (0 tokens).
     """
     # In demo mode, skip index check — demo responses don't need the index
-    demo_mode = os.getenv("DEMO_MODE", "false").lower() == "true"
+    demo_mode = os.getenv("DEMO_MODE", "false").strip().lower() == "true"
     if not demo_mode and not is_index_ready():
         raise HTTPException(
             status_code=503,
@@ -332,7 +332,7 @@ async def api_generate_kit(req: KitRequest):
     In DEMO_MODE, uses pre-cached responses (0 tokens).
     """
     # In demo mode, skip index check
-    demo_mode = os.getenv("DEMO_MODE", "false").lower() == "true"
+    demo_mode = os.getenv("DEMO_MODE", "false").strip().lower() == "true"
     if not demo_mode and not is_index_ready():
         raise HTTPException(status_code=503, detail="Vector index not ready.")
 

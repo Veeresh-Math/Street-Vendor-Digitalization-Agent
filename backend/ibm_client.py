@@ -71,7 +71,7 @@ _embed_cache_lock = threading.Lock()
 # ── Credentials (read at runtime, not import time) ─────────────────────────
 def _get_env(key: str, default: str = "") -> str:
     """Read env var at runtime (not import-time) so Render env vars are always picked up."""
-    return os.getenv(key, default)
+    return os.getenv(key, default).strip()
 
 # Model IDs
 GEN_MODEL_ID   = "meta-llama/llama-3-3-70b-instruct"

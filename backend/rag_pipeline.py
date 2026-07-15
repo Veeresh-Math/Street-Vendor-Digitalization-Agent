@@ -20,7 +20,7 @@ from backend.demo_responses import get_demo_response
 
 _cache = get_query_cache()
 def _is_demo_mode() -> bool:
-    return os.getenv("DEMO_MODE", "false").lower() == "true"
+    return os.getenv("DEMO_MODE", "false").strip().lower() == "true"
 
 # ── ChromaDB config ──────────────────────────────────────────────────────────
 CHROMA_PATH     = os.path.join(os.path.dirname(__file__), "..", "vector_store")
