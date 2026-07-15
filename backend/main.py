@@ -67,23 +67,18 @@ async def lifespan(app: FastAPI):
     if demo_mode:
         print("[STARTUP] DEMO_MODE enabled — skipping index build and IBM pre-warm (0 tokens).")
     else:
-        if not is_index_ready():
-            print("[STARTUP] Building ChromaDB vector index on startup...")
-            try:
-                count = build_index()
-                print(f"[STARTUP] Index ready -- {count} documents embedded.")
-            except Exception as e:
-                print(f"[STARTUP] Index build failed: {e}. Run POST /api/build-index to retry.")
-        else:
-            print(f"[STARTUP] ChromaDB index already ready ({index_doc_count()} docs).")
-        # Pre-warm IBM connection so first user request is fast
-        try:
-            from backend.ibm_client import _get_gen_model, _get_embed_model
-            _get_gen_model()
-            _get_embed_model()
-            print("[STARTUP] IBM models pre-warmed.")
-        except Exception as e:
-            print(f"[STARTUP] IBM pre-warm skipped: {e}")
+        import threading
+        def _build():
+            if not is_index_ready():
+                print("[STARTUP] Building ChromaDB vector index in background...")
+                try:
+                    count = build_index()
+                    print(f"[STARTUP] Index ready -- {count} documents embedded.")
+                except Exception as e:
+                    print(f"[STARTUP] Index build failed: {e}. Run POST /api/build-index to retry.")
+            else:
+                print(f"[STARTUP] ChromaDB index already ready ({index_doc_count()} docs).")
+        threading.Thread(target=_build, daemon=True).start()
     yield
 
 
