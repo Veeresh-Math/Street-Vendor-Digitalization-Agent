@@ -2,12 +2,12 @@
 
 # 🇮🇳 Street Vendor Digitalization Agent
 
-### *Empowering 5 Crore Street Vendors with AI*
+### <span style="color: #FF6B00">Empowering</span> <span style="color: #FFFFFF">5 Crore</span> <span style="color: #1A7A4A">Street Vendors</span> <span style="color: #F5C518">with AI</span>
 
-**AICTE-IBM SkillsBuild Internship 2026 — Problem Statement No. 29**
-*In association with Edunet Foundation*
+**<span style="color: #FF6B00">AICTE</span>-<span style="color: #054ADA">IBM</span> SkillsBuild Internship 2026 — Problem Statement No. 29**
+*In association with <span style="color: #E63312">Edunet Foundation</span>*
 
-An AI-powered multilingual agent that transforms India's street vendors into digitally visible businesses through intelligent consultation, government scheme navigation, and digital tool generation.
+<span style="color: #FF8C35">An AI-powered multilingual agent that transforms India's street vendors into digitally visible businesses through intelligent consultation, government scheme navigation, and digital tool generation.</span>
 
 ---
 
@@ -43,9 +43,9 @@ An AI-powered multilingual agent that transforms India's street vendors into dig
 
 ---
 
-## 🎯 What It Does
+## 🎯 <span style="color: #FF6B00">What It Does</span>
 
-India's **5 crore street vendors** are excluded from the digital economy due to:
+India's <span style="color: #F5C518"><b>5 crore street vendors</b></span> are excluded from the digital economy due to:
 - 🗣️ **Language barriers** — Limited English proficiency
 - 📚 **Fragmented information** — Scattered across multiple sources
 - 🏛️ **Complex government processes** — Difficult scheme navigation
@@ -54,7 +54,7 @@ India's **5 crore street vendors** are excluded from the digital economy due to:
 
 ---
 
-## ✨ Core Features
+## ✨ <span style="color: #1A7A4A">Core Features</span>
 
 <table>
 <tr>
@@ -119,7 +119,7 @@ Rate limiting, XSS protection, input sanitization, CORS configuration, security 
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ <span style="color: #FF6B00">Architecture</span>
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
@@ -160,7 +160,7 @@ Rate limiting, XSS protection, input sanitization, CORS configuration, security 
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ <span style="color: #054ADA">Tech Stack</span>
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
@@ -357,7 +357,7 @@ pytest tests/ -v
 
 ---
 
-## 📊 Impact
+## 📊 <span style="color: #1A7A4A">Impact</span>
 
 <div align="center">
 
@@ -375,7 +375,7 @@ pytest tests/ -v
 
 ---
 
-## 🏆 Key Achievements
+## 🏆 <span style="color: #F5C518">Key Achievements</span>
 
 - ✅ **70-80% token savings** through 3-tier caching strategy
 - ✅ **8 Indian languages** with native script support
@@ -394,7 +394,7 @@ pytest tests/ -v
 
 <div align="center">
 
-### 🙏 Built with ❤️ for India's Street Vendors
+### 🙏 <span style="color: #FF6B00">Built with</span> <span style="color: #E63312">❤️</span> <span style="color: #1A7A4A">for India's Street Vendors</span>
 
 **Powered by:** IBM watsonx.ai Llama 3.3 70B + multilingual-e5-large + ChromaDB RAG pipeline
 
