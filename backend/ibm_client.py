@@ -26,9 +26,12 @@ _dotenv_path = os.path.join(_backend_dir, ".env")
 if os.path.exists(_dotenv_path):
     load_dotenv(_dotenv_path, override=False)
 
-# ── Token Daily Caps ─────────────────────────────────────────────────────────
-DAILY_EMBED_TOKEN_LIMIT = int(os.getenv("DAILY_EMBED_LIMIT", "5000"))
-DAILY_GEN_TOKEN_LIMIT   = int(os.getenv("DAILY_GEN_LIMIT", "10000"))
+# ── Token Daily Caps (read at runtime, not import-time) ──────────────────────
+def _get_daily_embed_limit() -> int:
+    return int(_get_env("DAILY_EMBED_LIMIT", "5000"))
+
+def _get_daily_gen_limit() -> int:
+    return int(_get_env("DAILY_GEN_LIMIT", "10000"))
 
 # ── Thread-safe Token Tracking ───────────────────────────────────────────────
 _TOKEN_FILE = os.path.join(_backend_dir, ".token_usage.json")
@@ -130,8 +133,9 @@ def _get_embed_model() -> Embeddings:
 def generate(prompt: str, max_tokens: int = 30, retries: int = 3) -> str:
     """Generate text with daily token cap."""
     usage = _load_token_usage()
+    daily_gen_limit = _get_daily_gen_limit()
 
-    if usage["gen_tokens"] >= DAILY_GEN_TOKEN_LIMIT:
+    if usage["gen_tokens"] >= daily_gen_limit:
         return "I can help with UPI, PM SVANidhi, Google Maps, FSSAI. Please ask about these topics."
 
     model = _get_gen_model()
@@ -158,15 +162,19 @@ def generate(prompt: str, max_tokens: int = 30, retries: int = 3) -> str:
 
 
 def embed(texts: list[str], retries: int = 3) -> list[list[float]]:
-    """Embed texts with daily token cap."""
+    """Embed texts with daily token cap. Raises on budget exceeded instead of returning zero vectors."""
     usage = _load_token_usage()
+    daily_embed_limit = _get_daily_embed_limit()
 
     # Estimate actual tokens: ~4 chars per token for multilingual-e5-large
     estimated_tokens = sum(max(1, len(t) // 4) for t in texts)
 
-    if usage["embed_tokens"] + estimated_tokens > DAILY_EMBED_TOKEN_LIMIT:
-        print(f"[IBM] Embed budget exceeded ({usage['embed_tokens']}/{DAILY_EMBED_TOKEN_LIMIT}). Skipping.")
-        return [[0.0] * 384 for _ in texts]
+    if usage["embed_tokens"] + estimated_tokens > daily_embed_limit:
+        raise RuntimeError(
+            f"Embed budget exceeded ({usage['embed_tokens']}/{daily_embed_limit}). "
+            f"Need ~{estimated_tokens} tokens for {len(texts)} texts. "
+            f"Run POST /api/build-index after midnight (daily reset) or increase DAILY_EMBED_LIMIT."
+        )
 
     model = _get_embed_model()
     last_err = None
@@ -229,6 +237,6 @@ def get_token_usage() -> dict:
         "gen_tokens_today": usage["gen_tokens"],
         "embed_cache_size": len(_embed_cache),
         "embed_cache_max": _EMBED_CACHE_MAX,
-        "daily_embed_limit": DAILY_EMBED_TOKEN_LIMIT,
-        "daily_gen_limit": DAILY_GEN_TOKEN_LIMIT,
+        "daily_embed_limit": _get_daily_embed_limit(),
+        "daily_gen_limit": _get_daily_gen_limit(),
     }

@@ -17,9 +17,9 @@ services:
       - key: RAG_QUERY_CACHE_ENABLED
         value: "true"
       - key: DEMO_MODE
-        value: "true"
+        value: "false"
       - key: DAILY_EMBED_LIMIT
-        value: "500"
+        value: "5000"
       - key: DAILY_GEN_LIMIT
-        value: "1000"
+        value: "10000"
     autoDeploy: true
