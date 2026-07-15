@@ -18,4 +18,8 @@ services:
         value: "true"
       - key: DEMO_MODE
         value: "true"
+      - key: DAILY_EMBED_LIMIT
+        value: "500"
+      - key: DAILY_GEN_LIMIT
+        value: "1000"
     autoDeploy: true

@@ -112,11 +112,24 @@ def retrieve(query_text: str, top_k: int = DEFAULT_TOP_K) -> list[dict]:
     col      = _get_collection()
     q_vector = embed_query(query_text)
 
-    results = col.query(
-        query_embeddings=[q_vector],
-        n_results=top_k,
-        include=["documents", "metadatas", "distances"],
-    )
+    try:
+        results = col.query(
+            query_embeddings=[q_vector],
+            n_results=top_k,
+            include=["documents", "metadatas", "distances"],
+        )
+    except Exception as e:
+        if "dimension" in str(e).lower() or "embedding" in str(e).lower():
+            print(f"[RAG] Dimension mismatch detected — rebuilding index...")
+            build_index(force_rebuild=True)
+            col = _get_collection()
+            results = col.query(
+                query_embeddings=[q_vector],
+                n_results=top_k,
+                include=["documents", "metadatas", "distances"],
+            )
+        else:
+            raise
 
     hits = []
     for i in range(len(results["ids"][0])):
