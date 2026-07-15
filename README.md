@@ -11,7 +11,7 @@
 
 ---
 
-[![Frontend](https://img.shields.io/badge/Frontend-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://street-vendor-agent.netlify.app)
+[![Frontend](https://img.shields.io/badge/Frontend-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://streetvendordigitalizationagent.netlify.app)
 [![Backend](https://img.shields.io/badge/Backend-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://street-vendor-digitalization-agent-isog.onrender.com)
 [![AI](https://img.shields.io/badge/AI-IBM%20watsonx.ai-054ADA?style=for-the-badge&logo=ibm&logoColor=white)](https://cloud.ibm.com)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
@@ -20,7 +20,7 @@
 
 ---
 
-## 🚀 [Launch Application](https://street-vendor-agent.netlify.app/agent) | 📊 [View Dashboard](https://street-vendor-agent.netlify.app/dashboard)
+## 🚀 [Launch Application](https://streetvendordigitalizationagent.netlify.app/agent) | 📊 [View Dashboard](https://streetvendordigitalizationagent.netlify.app/dashboard)
 
 </div>
 
@@ -310,7 +310,7 @@ uvicorn backend.main:app --reload --port 8000
 docker-compose up --build
 ```
 
-Open **https://street-vendor-agent.netlify.app** 🎉
+Open **https://streetvendordigitalizationagent.netlify.app** 🎉
 
 ---
 
