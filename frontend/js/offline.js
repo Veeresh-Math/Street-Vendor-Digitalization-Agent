@@ -31,8 +31,8 @@ async function saveConversation(query, answer) {
   } catch (e) { /* silent */ }
 }
 
-function showConversationHistory() {
-  const history = getRecentConversations();
+async function showConversationHistory() {
+  const history = await getRecentConversations();
   if (!history || history.length === 0) return;
   
   const panel = document.getElementById('chatHistory');

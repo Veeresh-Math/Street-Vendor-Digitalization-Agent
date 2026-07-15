@@ -12,7 +12,7 @@ def client():
     import os
     os.environ.setdefault("IBM_API_KEY", "test-key")
     os.environ.setdefault("IBM_PROJECT_ID", "test-project")
-    os.environ.setdefault("IBM_URL", "https://us-south.ml.cloud.ibm.com")
+    os.environ.setdefault("IBM_URL", "https://au-syd.ml.cloud.ibm.com")
 
     from backend.main import app
     return TestClient(app)

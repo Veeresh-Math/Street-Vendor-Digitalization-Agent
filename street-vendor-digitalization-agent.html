@@ -258,8 +258,8 @@
         </div>
         <div class="lc-step">
           <div class="step-num2">Step 03 — Run App</div>
-          <div class="step-cmd">streamlit run app.py</div>
-          <p>Launches on localhost:8501 in your browser</p>
+          <div class="step-cmd">python -m uvicorn backend.main:app --reload --port 8000</div>
+          <p>Launches on localhost:8000 in your browser</p>
         </div>
         <div class="lc-step">
           <div class="step-num2">Step 04 — Build Index</div>
@@ -268,7 +268,7 @@
         </div>
       </div>
       <div class="launch-btn-row">
-        <a href="http://localhost:8501" target="_blank" class="btn-ibm" style="font-size:14px;padding:13px 28px">🔵 Open Live App (localhost:8501)</a>
+        <a href="http://localhost:8000" target="_blank" class="btn-ibm" style="font-size:14px;padding:13px 28px">🔵 Open Live App (localhost:8000)</a>
         <a href="#arch" class="btn-o" style="font-size:14px;padding:12px 26px">📐 View Architecture</a>
       </div>
     </div>
@@ -331,7 +331,7 @@
     <div class="arch-card">
       <div class="arch-icon">📚</div>
       <h3>Knowledge Base</h3>
-      <p>18 pre-loaded real-world documents covering PM SVANidhi, MSME Udyam, Mudra Yojana, FSSAI, PhonePe/Paytm UPI setup, Swiggy/Zomato listing, Google My Business, hyperlocal SEO, WhatsApp Business, and city-specific data for Pune, Mumbai, Chennai.</p>
+      <p>21+ pre-loaded real-world documents covering PM SVANidhi, MSME Udyam, Mudra Yojana, FSSAI, PhonePe/Paytm UPI setup, Swiggy/Zomato listing, Google My Business, hyperlocal SEO, WhatsApp Business, and city-specific data for Pune, Mumbai, Chennai.</p>
     </div>
     <div class="arch-card">
       <div class="arch-icon">🔍</div>
@@ -362,11 +362,11 @@
   
   <div class="file-tree">
     <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6c47ff;margin-bottom:16px">📁 Project Structure</div>
-    <div class="ft-row"><span class="ft-icon">🐍</span><span class="ft-name">app.py</span><span class="ft-desc">Streamlit UI — full dark theme, live chat, RAG pipeline display</span><span class="ft-badge fb-new">MAIN APP</span></div>
+    <div class="ft-row"><span class="ft-icon">🐍</span><span class="ft-name">backend/main.py</span><span class="ft-desc">FastAPI server — REST API, RAG pipeline, QR generation</span><span class="ft-badge fb-new">MAIN APP</span></div>
     <div class="ft-row"><span class="ft-icon">🔵</span><span class="ft-name">ibm_client.py</span><span class="ft-desc">IBM IAM token + embedding + generation API wrapper</span><span class="ft-badge fb-ibm">IBM API</span></div>
     <div class="ft-row"><span class="ft-icon">🧠</span><span class="ft-name">rag_pipeline.py</span><span class="ft-desc">Build index → cosine search → augmented prompt → answer</span><span class="ft-badge fb-new">RAG CORE</span></div>
-    <div class="ft-row"><span class="ft-icon">📚</span><span class="ft-name">knowledge_base.py</span><span class="ft-desc">18 real-world docs: govt schemes, UPI, SEO, city data</span><span class="ft-badge fb-new">DATA</span></div>
-    <div class="ft-row"><span class="ft-icon">📋</span><span class="ft-name">requirements.txt</span><span class="ft-desc">streamlit, requests, numpy, python-dotenv</span></div>
+    <div class="ft-row"><span class="ft-icon">📚</span><span class="ft-name">knowledge_base.py</span><span class="ft-desc">21+ real-world docs: govt schemes, UPI, SEO, city data</span><span class="ft-badge fb-new">DATA</span></div>
+    <div class="ft-row"><span class="ft-icon">📋</span><span class="ft-name">requirements.txt</span><span class="ft-desc">fastapi, uvicorn, ibm-watsonx-ai, chromadb, qrcode, pillow</span></div>
     <div class="ft-row"><span class="ft-icon">🌐</span><span class="ft-name">street-vendor-digitalization.html</span><span class="ft-desc">This landing page — links to the live Streamlit app</span></div>
   </div>
 </section>
@@ -490,7 +490,7 @@
   <div class="cta-glow"></div>
   <h2>Your business deserves<br />to be <span style="background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">digitally visible</span>.</h2>
   <p>Launch the app, type your business — IBM watsonx.ai will generate your complete digital kit in seconds.</p>
-  <a href="http://localhost:8501" target="_blank" class="btn-ibm" style="position:relative;z-index:1;font-size:16px;padding:17px 44px">🔵 Launch Live App</a>
+  <a href="http://localhost:8000" target="_blank" class="btn-ibm" style="position:relative;z-index:1;font-size:16px;padding:17px 44px">🔵 Launch Live App</a>
 </section>
 
 
@@ -504,7 +504,7 @@
   </div>
   <div class="fcol">
     <h5>Project Files</h5>
-    <a href="#">app.py — Streamlit UI</a>
+    <a href="#">backend/main.py — FastAPI Server</a>
     <a href="#">ibm_client.py — IBM API</a>
     <a href="#">rag_pipeline.py — RAG Core</a>
     <a href="#">knowledge_base.py — Data</a>
@@ -520,10 +520,10 @@
   </div>
 </footer>
 <div class="fbot">
-  © 2025 Street Vendor Digitalization Agent  |  Powered by <strong style="color:#74b1ff">IBM watsonx.ai</strong>  | 
+  © 2026 Street Vendor Digitalization Agent  |  Powered by <strong style="color:#74b1ff">IBM watsonx.ai</strong>  |
   <a href="#">Privacy Policy</a>  ·  <a href="#">Terms</a>
   <br /><br />
-  <span style="font-size:11px;color:#444">Edunet Internship Project · Made with IBM Bob</span>
+  <span style="font-size:11px;color:#444">Edunet Internship Project · AICTE-IBM SkillsBuild 2026</span>
 </div>
 
 </body>

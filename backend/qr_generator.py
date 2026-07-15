@@ -5,7 +5,6 @@ Returns base64 data URIs so images work on any deployment (no filesystem depende
 """
 
 import os
-import uuid
 import io
 import base64
 import qrcode

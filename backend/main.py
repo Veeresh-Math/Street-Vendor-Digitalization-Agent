@@ -478,11 +478,13 @@ async def api_recommendations():
     vendors = get_all_vendors()
     stats = get_vendor_stats()
     recs = []
-    if stats.get("total", 0) == 0:
+    total = stats.get("total_vendors", 0)
+    if total == 0:
         recs.append({"title": "Register as a Vendor", "description": "Register on our platform to get started with digital tools.", "priority": "high", "icon": "user-plus"})
-    if stats.get("vendors_with_upi", 0) < stats.get("total", 1):
+    if stats.get("vendors_with_upi", 0) < total:
         recs.append({"title": "Set Up UPI Payments", "description": "Accept digital payments to grow your business by 30%.", "priority": "high", "icon": "credit-card"})
-    if stats.get("total_cities", 0) < 3:
+    city_count = len(stats.get("city_counts", {}))
+    if city_count < 3:
         recs.append({"title": "Expand to New Cities", "description": "List your business on Google Maps for wider reach.", "priority": "medium", "icon": "map-pin"})
     recs.extend([
         {"title": "Apply for PM SVANidhi", "description": "Get a collateral-free loan of up to Rs.50,000.", "priority": "medium", "icon": "landmark"},

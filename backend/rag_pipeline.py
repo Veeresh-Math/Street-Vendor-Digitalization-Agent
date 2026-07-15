@@ -15,7 +15,7 @@ import chromadb
 from backend.rag_query_cache import get_query_cache, make_cache_key
 from chromadb.config import Settings
 from backend.ibm_client import embed, embed_query, generate
-from backend.knowledge_base import get_all_chunks, get_all_documents
+from backend.knowledge_base import get_all_chunks
 from backend.demo_responses import get_demo_response
 
 _cache = get_query_cache()
