@@ -58,8 +58,9 @@ function buildFilterUI() {
 }
 
 function populateFilters(vendors) {
-  const cities = [...new Set(vendors.map(v => v.city || getCityFromLocation(v.location)).filter(Boolean))].sort();
-  const types = [...new Set(vendors.map(v => v.business_type).filter(Boolean))].sort();
+  const validVendors = vendors.filter(v => v.lat != null && v.lon != null);
+  const cities = [...new Set(validVendors.map(v => v.city || getCityFromLocation(v.location)).filter(Boolean))].sort();
+  const types = [...new Set(validVendors.map(v => v.business_type).filter(Boolean))].sort();
 
   const citySelect = document.getElementById('mapCityFilter');
   const typeSelect = document.getElementById('mapTypeFilter');
@@ -87,6 +88,7 @@ function populateFilters(vendors) {
 
 function applyFilters() {
   const filtered = allVendors.filter(v => {
+    if (v.lat == null || v.lon == null) return false;
     const city = v.city || getCityFromLocation(v.location);
     const matchCity = activeFilter.city === 'all' || city === activeFilter.city;
     const matchType = activeFilter.type === 'all' || v.business_type === activeFilter.type;
@@ -124,7 +126,7 @@ function applyFilters() {
 
   if (filtered.length > 0) {
     const bounds = L.latLngBounds(filtered.map(v => [v.lat, v.lon]));
-    vendorMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 15, animate: true });
+    vendorMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 12, animate: true });
   }
 }
 
@@ -151,7 +153,7 @@ function initVendorMap() {
     vendorMap.setView([window.userLocation.lat, window.userLocation.lon], 12);
   }
 
-  setTimeout(() => vendorMap.invalidateSize(), 200);
+  setTimeout(() => vendorMap.invalidateSize(), 300);
 }
 
 async function loadVendors() {

@@ -326,7 +326,6 @@ async def api_generate_kit(req: KitRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    # Generate business card if UPI ID provided
     qr_url = None
     if req.upi_id:
         try:
@@ -336,8 +335,10 @@ async def api_generate_kit(req: KitRequest):
                 location      = req.location,
                 upi_id        = req.upi_id,
             )
-        except Exception:
-            qr_url = None   # non-fatal
+        except Exception as e:
+            print(f"[QR] Business card generation failed: {e}")
+            import traceback; traceback.print_exc()
+            qr_url = None
 
     docs = [
         RetrievedDoc(
