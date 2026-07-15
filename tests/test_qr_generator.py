@@ -3,41 +3,37 @@ Tests for the QR code and business card generator.
 """
 
 import pytest
-import os
-from backend.qr_generator import generate_qr, generate_business_card, OUTPUT_DIR
+from backend.qr_generator import generate_qr, generate_business_card
 
 
 def test_generate_qr():
-    """Test QR code generation."""
-    url = generate_qr("test@upi", "Test Vendor")
-    assert url.startswith("/static/generated/")
-    assert url.endswith(".png")
-    # Check file exists
-    filepath = os.path.join(os.path.dirname(__file__), "..", url.lstrip("/"))
-    assert os.path.exists(filepath), f"QR file not found: {filepath}"
+    """Test QR code generation returns a valid data URI."""
+    uri = generate_qr("test@upi", "Test Vendor")
+    assert uri.startswith("data:image/png;base64,")
+    assert len(uri) > 100
 
 
 def test_generate_business_card():
-    """Test business card generation."""
-    url = generate_business_card(
+    """Test business card generation returns a valid data URI."""
+    uri = generate_business_card(
         vendor_name="Test Vendor",
         business_type="Food Stall",
         location="Test City",
         upi_id="test@upi",
     )
-    assert url.startswith("/static/generated/")
-    assert url.endswith(".png")
-    filepath = os.path.join(os.path.dirname(__file__), "..", url.lstrip("/"))
-    assert os.path.exists(filepath), f"Card file not found: {filepath}"
+    assert uri.startswith("data:image/png;base64,")
+    assert len(uri) > 1000
 
 
 def test_generate_qr_unique():
-    """Test each QR generation creates unique files."""
-    url1 = generate_qr("test1@upi", "Vendor 1")
-    url2 = generate_qr("test2@upi", "Vendor 2")
-    assert url1 != url2
+    """Test each QR generation creates unique data URIs."""
+    uri1 = generate_qr("test1@upi", "Vendor 1")
+    uri2 = generate_qr("test2@upi", "Vendor 2")
+    assert uri1 != uri2
 
 
-def test_output_dir_exists():
-    """Test output directory is created."""
-    assert os.path.isdir(OUTPUT_DIR)
+def test_generate_qr_different_vendors():
+    """Test same UPI different vendor names produce different URIs."""
+    uri1 = generate_qr("same@upi", "Vendor A")
+    uri2 = generate_qr("same@upi", "Vendor B")
+    assert uri1 != uri2
