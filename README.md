@@ -8,13 +8,13 @@
 
 ## Live Deployment
 
-| Component | Platform | Status |
-|-----------|----------|--------|
-| Frontend | Netlify | Deployed |
-| Backend API | Render | Deployed |
+| Component | Platform | URL |
+|-----------|----------|-----|
+| Frontend | Netlify | [https://street-vendor-agent.netlify.app](https://street-vendor-agent.netlify.app) |
+| Backend API | Render | [https://street-vendor-digitalization-agent-isog.onrender.com](https://street-vendor-digitalization-agent-isog.onrender.com) |
 | AI Engine | IBM watsonx.ai (Sydney) | Connected |
 
-**[Launch Application →](/agent)** | **[View Dashboard →](/dashboard)**
+**[Launch Application →](https://street-vendor-agent.netlify.app/agent)** | **[View Dashboard →](https://street-vendor-agent.netlify.app/dashboard)**
 
 ---
 
