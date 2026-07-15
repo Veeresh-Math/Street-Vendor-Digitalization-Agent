@@ -25,8 +25,8 @@ _backend_dir = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(_backend_dir, ".env"))
 
 # ── Token Daily Caps ─────────────────────────────────────────────────────────
-DAILY_EMBED_TOKEN_LIMIT = int(os.getenv("DAILY_EMBED_LIMIT", "500"))
-DAILY_GEN_TOKEN_LIMIT   = int(os.getenv("DAILY_GEN_LIMIT", "1000"))
+DAILY_EMBED_TOKEN_LIMIT = int(os.getenv("DAILY_EMBED_LIMIT", "5000"))
+DAILY_GEN_TOKEN_LIMIT   = int(os.getenv("DAILY_GEN_LIMIT", "10000"))
 
 # ── Thread-safe Token Tracking ───────────────────────────────────────────────
 _TOKEN_FILE = os.path.join(_backend_dir, ".token_usage.json")
