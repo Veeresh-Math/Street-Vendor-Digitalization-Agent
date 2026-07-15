@@ -28,7 +28,7 @@
 
 ### Technical
 - **ChromaDB Vector Store** — Persistent cosine similarity search for 21+ knowledge documents
-- **IBM Granite Models** — granite-4-h-small (generation) + granite-embedding-278m-multilingual (embeddings)
+- **IBM Granite Models** — llama-3-3-70b-instruct (generation) + multilingual-e5-large (embeddings)
 - **PWA Support** — Offline caching via Service Worker + IndexedDB
 - **FastAPI Backend** — Async Python with Pydantic validation
 - **Docker Ready** — Dockerfile + docker-compose.yml for one-command deployment
@@ -40,8 +40,8 @@
 | Layer | Technology |
 |-------|-----------|
 | Backend | Python 3.11 + FastAPI |
-| AI Generation | IBM Granite 4 H Small (`ibm/granite-4-h-small`) |
-| AI Embeddings | IBM Granite Embedding 278M Multilingual |
+| AI Generation | IBM Llama 3.3 70B (`meta-llama/llama-3-3-70b-instruct`) |
+| AI Embeddings | IBM Multilingual E5 Large (`intfloat/multilingual-e5-large`) |
 | Vector Store | ChromaDB (HNSW cosine index) |
 | Frontend | HTML5 + CSS3 + Vanilla JavaScript |
 | Maps | Leaflet.js + OpenStreetMap |

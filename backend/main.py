@@ -270,7 +270,7 @@ async def api_build_index(background_tasks: BackgroundTasks, force: bool = False
 @app.post("/api/query", response_model=QueryResponse, tags=["Agent"])
 async def api_query(req: QueryRequest):
     """
-    RAG query: embed → retrieve from ChromaDB → generate with granite-4-h-small.
+    RAG query: embed → retrieve from ChromaDB → generate with llama-3-3-70b-instruct.
     In DEMO_MODE, uses pre-cached responses (0 tokens).
     """
     # In demo mode, skip index check — demo responses don't need the index
