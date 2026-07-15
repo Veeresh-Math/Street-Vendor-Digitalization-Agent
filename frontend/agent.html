@@ -1203,6 +1203,10 @@ function goStep(n) {
   document.querySelectorAll('.wizard-card').forEach(c => c.classList.remove('active'));
   document.getElementById('step' + n).classList.add('active');
 
+  if (n === 5 && typeof vendorMap !== 'undefined' && vendorMap) {
+    setTimeout(() => vendorMap.invalidateSize(), 100);
+  }
+
   for (let i = 1; i <= 5; i++) {
     const dot = document.getElementById('dot' + i);
     const line = document.getElementById('line' + (i - 1));
@@ -1510,7 +1514,7 @@ function renderReceipt(data) {
         <div class="receipt-actions">
           <button class="btn btn-sm btn-outline" onclick="copyReceiptText()">Copy Text</button>
           <button class="btn btn-sm btn-green" onclick="downloadReceipt()">Download Image</button>
-          ${qrUrl ? `<a class="btn btn-sm btn-outline" href="${qrUrl}" download="qr-card.png">Download QR</a>` : ''}
+          ${qrUrl ? `<a class="btn btn-sm btn-outline" href="${qrUrl}" download="qr-card.png" onclick="downloadDataUri(event, '${qrUrl}', 'qr-card.png')">Download QR</a>` : ''}
           <button class="btn btn-sm btn-saffron" onclick="shareWhatsApp()">WhatsApp</button>
         </div>
       </div>
@@ -1540,6 +1544,16 @@ function shareWhatsApp() {
   const name = document.getElementById('receiptContainer')?.querySelector('.receipt-vendor-name');
   const text = `*${name?.textContent || 'Digital Kit'}*\n\n${el?.textContent || ''}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+function downloadDataUri(e, dataUri, filename) {
+  e.preventDefault();
+  const a = document.createElement('a');
+  a.href = dataUri;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 /* ═══ Celebration ══════════════════════════════════════ */
