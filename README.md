@@ -2,7 +2,7 @@
 
 > **AICTE-IBM SkillsBuild Internship 2026 — Problem Statement No. 29**
 >
-> An AI-powered multilingual agent that transforms India's street vendors into digitally visible businesses through intelligent consultation, government scheme navigation, and digital tool generation.
+> An AI-powered multilingual agent that transforms India's 5 crore street vendors into digitally visible businesses through intelligent consultation, government scheme navigation, and digital tool generation.
 
 ---
 
@@ -20,7 +20,7 @@
 
 ## What It Does
 
-The Street Vendor Digitalization Agent solves a critical problem: India's 10 million+ street vendors are excluded from the digital economy due to language barriers, fragmented information, and complex government processes. Our system provides a single integrated platform addressing all digitalization needs through natural language conversation in 8 Indian languages.
+The Street Vendor Digitalization Agent solves a critical problem: India's 5 crore street vendors are excluded from the digital economy due to language barriers, fragmented information, and complex government processes. Our system provides a single integrated platform addressing all digitalization needs through natural language conversation in 8 Indian languages.
 
 ---
 
@@ -264,7 +264,7 @@ pytest tests/ -v
 
 | Metric | Value |
 |--------|-------|
-| Street vendors in India | 10 million+ |
+| Street vendors in India | 5 Crore+ |
 | Languages supported | 8 |
 | Government schemes covered | 6 |
 | Cities with specific data | 6 |
