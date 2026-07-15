@@ -390,7 +390,7 @@ pytest tests/ -v
 
 **AICTE-IBM SkillsBuild Internship 2026**
 
-[📄 Problem Statement (PDF)](Problem_Statement_29_Street_Vendor_Digitalization_Agent.pdf)
+[📊 Problem Statement (PPTX)](Problem_Statement_29.pptx)
 
 ---
 
